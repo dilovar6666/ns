@@ -16,7 +16,7 @@ The GLB uses `KHR_materials_pbrSpecularGlossiness`, which Three.js reports as un
 
 Working: synthetic crew records, stored metric history, crew admin CRUD, self-report check-ins, notifications, timeline, calculated reports/PDF, optional Gemini endpoint, astronaut viewer, responsive navigation.
 
-Incomplete: real identity and per-record authorization; licensed medical anatomy models and Anatomy View; reviewed medical protocols; live sensor ingestion; full English/Russian translation; offline data cache/queue/sync; comprehensive tests; performance optimization of the 46 MB GLB. These gaps are deliberately visible rather than represented as functioning features.
+Incomplete: real identity and per-record authorization; licensed medical anatomy models and Anatomy View; reviewed medical protocols; live sensor ingestion; full English/Russian translation; offline support for mutations other than check-ins and rich conflict resolution; comprehensive tests; performance optimization of the 46 MB GLB. These gaps are deliberately visible rather than represented as functioning features.
 
 ## Sequence for further development
 

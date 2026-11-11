@@ -4,7 +4,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import './style.css'
+import { syncQueue } from './offline'
 
 const client = new QueryClient({ defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } } })
 ReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><QueryClientProvider client={client}><BrowserRouter><App /></BrowserRouter></QueryClientProvider></React.StrictMode>)
-if ('serviceWorker' in navigator && import.meta.env.PROD) navigator.serviceWorker.register('/sw.js')
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js')
+window.addEventListener('online', () => syncQueue().catch(() => {}))
+syncQueue().catch(() => {})
+window.setInterval(() => syncQueue().catch(() => {}), 15000)

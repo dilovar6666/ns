@@ -7,7 +7,7 @@ CosmoHealthX is a **synthetic-data demonstration** of mission health monitoring 
 - React/Vite dashboard, crew management, 12 metric histories, mental check-ins, breathing timer, notification center, timeline, evidence links, reports, and an interactive astronaut GLB viewer.
 - FastAPI with SQLAlchemy, PostgreSQL support, Alembic schema, seeded demo records, calculated report JSON/PDF, and optional server-side Gemini analysis.
 - English and Russian navigation and selected interface labels. Some detailed interface text remains English.
-- Service worker app-shell caching and a manifest icon. Offline data storage, mutation queue, and conflict resolution are not implemented.
+- Service worker app-shell caching, a manifest icon, IndexedDB snapshots for previously loaded API reads, and an idempotent offline queue for mental check-ins. Other mutations and rich conflict resolution remain online-only.
 
 ## Run locally
 

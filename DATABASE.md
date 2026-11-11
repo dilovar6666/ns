@@ -13,4 +13,4 @@ erDiagram
   Astronaut ||--o{ Notification : receives
 ```
 
-Metric uniqueness is `(astronaut_id, key, sampled_at)`. Metrics store value, unit, source, and sample time. Check-ins store five bounded 1–5 scores and an optional comment. Report data is calculated on request and is not AI-generated. `MissionEvent` stores timeline entries.
+Metric uniqueness is `(astronaut_id, key, sampled_at)`. Metrics store value, unit, source, and sample time. Check-ins store five bounded 1–5 scores, an optional comment, and an optional unique client operation ID for safe offline replay. Report data is calculated on request and is not AI-generated. `MissionEvent` stores timeline entries.

@@ -50,6 +50,7 @@ class MentalCheckin(Base):
     isolation: Mapped[int] = mapped_column(Integer)
     sleep: Mapped[int] = mapped_column(Integer)
     comment: Mapped[str] = mapped_column(Text, default="")
+    client_operation_id: Mapped[str | None] = mapped_column(String(80), unique=True, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 

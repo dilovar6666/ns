@@ -17,3 +17,5 @@ FastAPI interactive schema: `/docs`. Paths are prefixed with `/api`.
 | `GET /evidence` | Official research resource links |
 
 Mutations for crew and manual metrics require `X-Demo-Role: admin`. This header is forgeable and is **not authentication**. The service must remain local or otherwise protected until real authorization is implemented.
+
+`POST /astronauts/{id}/checkins` accepts `Idempotency-Key` for offline replay. Repeating the same key returns the original record; using it for a different astronaut returns 409.

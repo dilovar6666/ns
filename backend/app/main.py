@@ -118,9 +118,15 @@ def checkins(person_id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/api/astronauts/{person_id}/checkins")
-def add_checkin(person_id: int, data: CheckinInput, db: Session = Depends(get_db)):
+def add_checkin(person_id: int, data: CheckinInput, idempotency_key: str | None = Header(default=None), db: Session = Depends(get_db)):
     person_or_404(db, person_id)
-    row = MentalCheckin(astronaut_id=person_id, **data.model_dump())
+    if idempotency_key:
+        previous = db.scalar(select(MentalCheckin).where(MentalCheckin.client_operation_id == idempotency_key))
+        if previous:
+            if previous.astronaut_id != person_id:
+                raise HTTPException(409, "Operation belongs to another astronaut")
+            return {"id": previous.id, "created_at": previous.created_at, "replayed": True}
+    row = MentalCheckin(astronaut_id=person_id, client_operation_id=idempotency_key, **data.model_dump())
     db.add(row)
     db.add(MissionEvent(title="Wellness check-in recorded", detail="Self-reported demonstration check-in.", kind="checkin"))
     db.commit()

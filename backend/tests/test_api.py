@@ -21,6 +21,12 @@ def test_demo_flow():
         assert denied.status_code == 403
         checkin = client.post(f"/api/astronauts/{person_id}/checkins", json={"mood": 4, "focus": 3, "stress": 2, "isolation": 4, "sleep": 3})
         assert checkin.status_code == 200
+        payload = {"mood": 4, "focus": 3, "stress": 2, "isolation": 4, "sleep": 3}
+        headers = {"Idempotency-Key": "test-offline-operation"}
+        first = client.post(f"/api/astronauts/{person_id}/checkins", json=payload, headers=headers)
+        replay = client.post(f"/api/astronauts/{person_id}/checkins", json=payload, headers=headers)
+        assert first.status_code == 200 and replay.json()["id"] == first.json()["id"]
+        assert replay.json()["replayed"] is True
         report = client.get(f"/api/reports/{person_id}?days=30")
         assert report.status_code == 200
         assert report.json()["metrics"]["heart_rate"]["count"] > 0
