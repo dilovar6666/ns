@@ -30,6 +30,11 @@ def test_demo_flow():
         report = client.get(f"/api/reports/{person_id}?days=30")
         assert report.status_code == 200
         assert report.json()["metrics"]["heart_rate"]["count"] > 0
+        assert report.json()["metrics"]["heart_rate"]["change_vs_previous"] is None
+        assert report.json()["crew_count"] >= 4
+        weekly = client.get(f"/api/reports/{person_id}?days=7").json()
+        assert weekly["metrics"]["heart_rate"]["change_vs_previous"] is not None
+        assert weekly["series"]
         pdf = client.get(f"/api/reports/{person_id}/pdf?days=30")
         assert pdf.status_code == 200 and pdf.content.startswith(b"%PDF")
         unavailable = client.post("/api/ai/analyze", json={"astronaut_id": person_id, "question": "Trend?"})

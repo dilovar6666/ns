@@ -5,7 +5,7 @@ export type Metric = { id: number; key: string; value: number; unit: string; sou
 export type Checkin = { id: number; mood: number; focus: number; stress: number; isolation: number; sleep: number; comment: string; created_at: string }
 export type Notification = { id: number; level: string; title: string; detail: string; read: boolean; created_at: string }
 export type Event = { id: number; title: string; detail: string; kind: string; occurred_at: string }
-export type Report = { astronaut: string; period_days: number; generated_at: string; provenance: string; metrics: Record<string, { mean: number; min: number; max: number; count: number; unit: string }>; checkins: { count: number; mean_mood: number | null; mean_stress: number | null } }
+export type Report = { astronaut: string; period_days: number; generated_at: string; provenance: string; metrics: Record<string, { mean: number; min: number; max: number; count: number; unit: string; change_vs_previous: number | null }>; series: { key: string; value: number; sampled_at: string }[]; checkins: { count: number; mean_mood: number | null; mean_stress: number | null }; notifications_count: number; crew_count: number }
 export type Evidence = { title: string; organization: string; url: string; description: string; used_for: string }
 export type Protocol = { id: number; title: string; description: string; source_url: string; steps: { id: number; position: number; text: string }[] }
 

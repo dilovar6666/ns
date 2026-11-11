@@ -179,14 +179,35 @@ def save_execution(protocol_id: int, astronaut_id: int, completed_steps: list[in
 def report_data(db: Session, person_id: int, days: int):
     person = person_or_404(db, person_id)
     since = datetime.now(timezone.utc) - timedelta(days=days)
-    rows = db.scalars(select(Metric).where(Metric.astronaut_id == person_id, Metric.sampled_at >= since)).all()
+    previous_since = since - timedelta(days=days)
+    rows = db.scalars(select(Metric).where(Metric.astronaut_id == person_id, Metric.sampled_at >= since).order_by(Metric.sampled_at)).all()
+    previous_rows = db.scalars(select(Metric).where(Metric.astronaut_id == person_id, Metric.sampled_at >= previous_since, Metric.sampled_at < since)).all()
     grouped: dict[str, list[float]] = {}
+    previous: dict[str, list[float]] = {}
     units: dict[str, str] = {}
     for row in rows:
         grouped.setdefault(row.key, []).append(row.value)
         units[row.key] = row.unit
+    for row in previous_rows:
+        previous.setdefault(row.key, []).append(row.value)
     checks = db.scalars(select(MentalCheckin).where(MentalCheckin.astronaut_id == person_id, MentalCheckin.created_at >= since)).all()
-    return {"astronaut": person.name, "period_days": days, "generated_at": datetime.now(timezone.utc), "provenance": "synthetic demo and manual demo entries", "metrics": {key: {"mean": round(mean(values), 2), "min": min(values), "max": max(values), "count": len(values), "unit": units[key]} for key, values in grouped.items()}, "checkins": {"count": len(checks), "mean_mood": round(mean(c.mood for c in checks), 2) if checks else None, "mean_stress": round(mean(c.stress for c in checks), 2) if checks else None}}
+    notifications_count = db.scalar(select(func.count(Notification.id)).where(Notification.created_at >= since, (Notification.astronaut_id == person_id) | (Notification.astronaut_id.is_(None)))) or 0
+    crew_count = db.scalar(select(func.count(Astronaut.id)).where(Astronaut.mission_id == person.mission_id, Astronaut.active)) or 0
+    summary = {}
+    for key, values in grouped.items():
+        old_mean = mean(previous[key]) if previous.get(key) else None
+        summary[key] = {"mean": round(mean(values), 2), "min": min(values), "max": max(values), "count": len(values), "unit": units[key], "change_vs_previous": round(mean(values) - old_mean, 2) if old_mean is not None else None}
+    return {
+        "astronaut": person.name,
+        "period_days": days,
+        "generated_at": datetime.now(timezone.utc),
+        "provenance": "synthetic demo and manual demo entries",
+        "metrics": summary,
+        "series": [{"key": row.key, "value": row.value, "sampled_at": row.sampled_at} for row in rows],
+        "checkins": {"count": len(checks), "mean_mood": round(mean(c.mood for c in checks), 2) if checks else None, "mean_stress": round(mean(c.stress for c in checks), 2) if checks else None},
+        "notifications_count": notifications_count,
+        "crew_count": crew_count,
+    }
 
 
 @app.get("/api/reports/{person_id}")
@@ -207,9 +228,12 @@ def report_pdf(person_id: int, days: int = 7, db: Session = Depends(get_db)):
     pdf.setFont("Helvetica", 11)
     pdf.drawString(48, 765, f"Astronaut: {data['astronaut']} | Period: {days} days")
     pdf.drawString(48, 748, "Synthetic demonstration data. Not for clinical use.")
+    pdf.drawString(48, 731, f"Crew: {data['crew_count']} | Notifications in period: {data['notifications_count']}")
     y = 716
     for key, item in data["metrics"].items():
-        pdf.drawString(48, y, f"{key}: mean {item['mean']} {item['unit']}  |  min {item['min']}  |  max {item['max']}  |  n={item['count']}")
+        delta = item["change_vs_previous"]
+        comparison = f" | change {delta:+g}" if delta is not None else " | no previous period"
+        pdf.drawString(48, y, f"{key}: mean {item['mean']} {item['unit']} | min {item['min']} | max {item['max']} | n={item['count']}{comparison}")
         y -= 22
     pdf.save()
     return Response(buffer.getvalue(), media_type="application/pdf", headers={"Content-Disposition": 'attachment; filename="cosmohealthx-report.pdf"'})
