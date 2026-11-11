@@ -12,12 +12,12 @@ function Model() {
 }
 
 export default function AstronautScene() {
-  return <Canvas camera={{ position: [0, 1.5, 4], fov: 42 }} dpr={[1, 1.5]} gl={{ antialias: true }}>
+  return <Canvas camera={{ position: [0, 1.8, 5.5], fov: 42 }} dpr={[1, 1.5]} gl={{ antialias: true }}>
     <color attach="background" args={['#0b1322']} />
     <ambientLight intensity={1.8} />
     <directionalLight position={[3, 5, 4]} intensity={3} color="#9eeaff" />
     <pointLight position={[-3, 1, -2]} intensity={2} color="#22d3ee" />
     <Suspense fallback={null}><Model /></Suspense>
-    <OrbitControls enablePan minDistance={1.5} maxDistance={8} target={[0, 1, 0]} />
+    <OrbitControls enablePan minDistance={2} maxDistance={10} target={[0, 1.5, 0]} />
   </Canvas>
 }
