@@ -35,3 +35,10 @@ class CheckinInput(BaseModel):
 class AIInput(BaseModel):
     astronaut_id: int
     question: str = Field(min_length=2, max_length=2000)
+
+
+class ProtocolInput(BaseModel):
+    title: str = Field(min_length=3, max_length=160)
+    description: str = Field(min_length=10, max_length=3000)
+    source_url: str = Field(pattern=r"^https://", max_length=500)
+    steps: list[str] = Field(min_length=1, max_length=30)

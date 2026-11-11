@@ -10,8 +10,8 @@ FastAPI interactive schema: `/docs`. Paths are prefixed with `/api`.
 | `GET/POST /astronauts/{id}/metrics` | History and demo admin manual entry |
 | `GET/POST /astronauts/{id}/checkins` | Mental check-in history and entry |
 | `GET/PATCH /notifications` | Notification list and read state |
-| `GET /timeline`, `GET /protocols` | Stored events and reviewed protocol catalog |
-| `POST /protocols/{id}/executions` | Save checklist progress |
+| `GET /timeline`, `GET/POST /protocols` | Stored events and admin-managed source-linked protocol catalog |
+| `GET/POST /protocols/{id}/executions` | Checklist progress and history |
 | `GET /reports/{id}`, `GET /reports/{id}/pdf` | Calculated report and PDF |
 | `POST /ai/analyze` | Optional Gemini interpretation |
 | `GET /evidence` | Official research resource links |

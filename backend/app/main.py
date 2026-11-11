@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from .database import Base, engine, get_db
 from .models import Astronaut, MentalCheckin, Metric, Mission, MissionEvent, Notification, Protocol, ProtocolExecution, ProtocolStep
-from .schemas import AIInput, AstronautInput, AstronautOut, CheckinInput, MetricInput
+from .schemas import AIInput, AstronautInput, AstronautOut, CheckinInput, MetricInput, ProtocolInput
 from .seed import seed
 
 
@@ -160,6 +160,17 @@ def protocols(db: Session = Depends(get_db)):
     return [{"id": p.id, "title": p.title, "description": p.description, "source_url": p.source_url, "updated_at": p.updated_at, "steps": [{"id": s.id, "position": s.position, "text": s.text} for s in p.steps]} for p in db.scalars(select(Protocol)).all()]
 
 
+@app.post("/api/protocols")
+def add_protocol(data: ProtocolInput, db: Session = Depends(get_db), _: None = Depends(lambda x_demo_role=Header(default="astronaut"): role_guard("admin", x_demo_role))):
+    if any(len(step.strip()) < 3 for step in data.steps):
+        raise HTTPException(422, "Each step needs at least three characters")
+    protocol = Protocol(title=data.title, description=data.description, source_url=data.source_url)
+    protocol.steps = [ProtocolStep(position=index + 1, text=step.strip()) for index, step in enumerate(data.steps)]
+    db.add(protocol)
+    db.commit()
+    return {"id": protocol.id}
+
+
 @app.post("/api/protocols/{protocol_id}/executions")
 def save_execution(protocol_id: int, astronaut_id: int, completed_steps: list[int], db: Session = Depends(get_db)):
     person_or_404(db, astronaut_id)
@@ -174,6 +185,15 @@ def save_execution(protocol_id: int, astronaut_id: int, completed_steps: list[in
     db.add(MissionEvent(title=f"Protocol checklist: {protocol.title}", detail=f"{len(completed_steps)} of {len(allowed)} steps completed", kind="protocol"))
     db.commit()
     return {"id": execution.id}
+
+
+@app.get("/api/protocols/{protocol_id}/executions")
+def protocol_executions(protocol_id: int, astronaut_id: int, db: Session = Depends(get_db)):
+    person_or_404(db, astronaut_id)
+    if not db.get(Protocol, protocol_id):
+        raise HTTPException(404, "Protocol not found")
+    rows = db.scalars(select(ProtocolExecution).where(ProtocolExecution.protocol_id == protocol_id, ProtocolExecution.astronaut_id == astronaut_id).order_by(ProtocolExecution.updated_at.desc())).all()
+    return [{"id": row.id, "completed_steps": json.loads(row.completed_steps), "updated_at": row.updated_at} for row in rows]
 
 
 def report_data(db: Session, person_id: int, days: int):

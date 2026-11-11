@@ -35,6 +35,16 @@ def test_demo_flow():
         weekly = client.get(f"/api/reports/{person_id}?days=7").json()
         assert weekly["metrics"]["heart_rate"]["change_vs_previous"] is not None
         assert weekly["series"]
+        protocol_data = {"title": "Demo review checklist", "description": "Non-clinical data review for API testing only.", "source_url": "https://www.nasa.gov/hrp/", "steps": ["Review available observations", "Record data limitations"]}
+        assert client.post("/api/protocols", json=protocol_data).status_code == 403
+        added = client.post("/api/protocols", json=protocol_data, headers={"X-Demo-Role": "admin"})
+        assert added.status_code == 200
+        protocol_id = added.json()["id"]
+        step_id = next(p for p in client.get("/api/protocols").json() if p["id"] == protocol_id)["steps"][0]["id"]
+        execution = client.post(f"/api/protocols/{protocol_id}/executions?astronaut_id={person_id}", json=[step_id])
+        assert execution.status_code == 200
+        history = client.get(f"/api/protocols/{protocol_id}/executions?astronaut_id={person_id}").json()
+        assert history[0]["completed_steps"] == [step_id]
         pdf = client.get(f"/api/reports/{person_id}/pdf?days=30")
         assert pdf.status_code == 200 and pdf.content.startswith(b"%PDF")
         unavailable = client.post("/api/ai/analyze", json={"astronaut_id": person_id, "question": "Trend?"})
