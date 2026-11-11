@@ -1,6 +1,7 @@
 import { cacheResponse, cachedResponse, enqueue, setConnectionStatus, syncQueue } from './offline'
 
 export type Astronaut = { id: number; name: string; callsign: string; specialty: string; mission_id: number; active: boolean }
+export type Mission = { id: number; name: string; started_at: string }
 export type Metric = { id: number; key: string; value: number; unit: string; source: string; sampled_at: string }
 export type Checkin = { id: number; mood: number; focus: number; stress: number; isolation: number; sleep: number; comment: string; created_at: string }
 export type Notification = { id: number; level: string; title: string; detail: string; read: boolean; created_at: string }

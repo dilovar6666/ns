@@ -4,3 +4,4 @@
 @media(prefers-reduced-motion:reduce){.scan-line,.breathing.running span{animation:none}}
 .sync-banner{display:flex;align-items:center;gap:9px;padding:9px 36px;background:#332413;border-bottom:1px solid #7a5522;color:#ffd58b;font-size:12px}.sync-banner button{margin-left:auto;background:transparent;border:1px solid #9f7335;color:#ffd58b;border-radius:5px;padding:4px 8px;font-size:11px}
 .report-grid{grid-template-columns:repeat(4,1fr)}.report-chart{margin-top:17px}@media(max-width:700px){.report-grid{grid-template-columns:repeat(2,1fr)}}
+.notice-popover select{width:100%;background:#0e1624;color:#f8fafc;border:1px solid #354154;border-radius:6px;padding:8px}

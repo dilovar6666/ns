@@ -255,6 +255,26 @@ def report_pdf(person_id: int, days: int = 7, db: Session = Depends(get_db)):
         comparison = f" | change {delta:+g}" if delta is not None else " | no previous period"
         pdf.drawString(48, y, f"{key}: mean {item['mean']} {item['unit']} | min {item['min']} | max {item['max']} | n={item['count']}{comparison}")
         y -= 22
+    pdf.drawString(48, 408, f"Check-ins: {data['checkins']['count']} | Mean mood: {data['checkins']['mean_mood'] or 'n/a'} | Mean stress: {data['checkins']['mean_stress'] or 'n/a'}")
+    values = [point["value"] for point in data["series"] if point["key"] == "heart_rate"]
+    if values:
+        pdf.setFont("Helvetica-Bold", 12)
+        pdf.drawString(48, 370, "Heart rate observations (bpm)")
+        pdf.setStrokeColorRGB(0.15, 0.45, 0.55)
+        pdf.line(48, 170, 548, 170)
+        pdf.line(48, 170, 48, 340)
+        low, high = min(values), max(values)
+        span = high - low or 1
+        pdf.setStrokeColorRGB(0.05, 0.65, 0.78)
+        for index in range(1, len(values)):
+            x1 = 48 + (index - 1) * 500 / max(1, len(values) - 1)
+            x2 = 48 + index * 500 / max(1, len(values) - 1)
+            y1 = 180 + (values[index - 1] - low) * 150 / span
+            y2 = 180 + (values[index] - low) * 150 / span
+            pdf.line(x1, y1, x2, y2)
+        pdf.setFont("Helvetica", 9)
+        pdf.drawString(48, 152, f"Min {low:g} bpm")
+        pdf.drawRightString(548, 152, f"Max {high:g} bpm")
     pdf.save()
     return Response(buffer.getvalue(), media_type="application/pdf", headers={"Content-Disposition": 'attachment; filename="cosmohealthx-report.pdf"'})
 
