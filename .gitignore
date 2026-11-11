@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.venv/
+__pycache__/
+.pytest_cache/
+.env
+*.db
+*.pyc
+astronaut-source/
+animated-floating-astronaut-in-space-suit-loop.zip
+
