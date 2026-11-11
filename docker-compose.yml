@@ -6,7 +6,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local-demo-only}
       POSTGRES_DB: cosmohealthx
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -20,7 +20,7 @@ services:
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       FRONTEND_ORIGIN: http://localhost:5173
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     depends_on:
       db:
         condition: service_healthy
@@ -29,7 +29,7 @@ services:
     environment:
       VITE_API_PROXY_TARGET: http://backend:8000
     ports:
-      - "5173:5173"
+      - "127.0.0.1:5173:5173"
     depends_on:
       - backend
 volumes:

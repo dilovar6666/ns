@@ -17,7 +17,7 @@ CosmoHealthX is a **synthetic-data demonstration** of mission health monitoring 
 docker compose up --build
 ```
 
-Open <http://localhost:5173>. API docs: <http://localhost:8000/docs>.
+Open <http://127.0.0.1:5173>. API docs: <http://127.0.0.1:8000/docs>.
 
 ### Without Docker
 
