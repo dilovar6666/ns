@@ -118,23 +118,14 @@ export default function App() {
       {/* Sidebar Navigation */}
       <aside className="side" aria-label="Главное меню">
         {/* Brand Logo */}
-        <Link className="logo" to="/" title="На главную">
-          <svg className="lgm" width="28" height="28" viewBox="0 0 32 32" aria-hidden="true">
-            <circle cx="16" cy="16" r="15.5" fill="#000" />
-            <path d="M3.6 25.29A25 25 0 0 1 28.4 25.29A15.5 15.5 0 0 1 3.6 25.29Z" fill="#2B57F0" />
-            <path d="M3.6 25.29A25 25 0 0 1 28.4 25.29" fill="none" stroke="#A9C6FF" strokeWidth="1" />
-            <path
-              d="M5.5 14.5H11l2-4.6 3.1 9.6 2.6-12.2 2.2 7.2H26.5"
-              fill="none"
-              stroke="#fff"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <span>
-            CosmoHealth<b>X</b>
-          </span>
+        <Link className="brand" to="/" title="На главную">
+          <div className="brand-mark">
+            <Activity size={20} />
+          </div>
+          <div>
+            <strong>COSMO<span>HEALTH</span>X</strong>
+            <small>MISSION HEALTH SYSTEM</small>
+          </div>
         </Link>
 
         {/* Primary Navigation Items */}
