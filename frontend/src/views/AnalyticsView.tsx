@@ -240,16 +240,7 @@ export function AnalyticsView({
       </header>
 
       {/* Period Selector & Export Actions */}
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "16px",
-          marginTop: "16px",
-        }}
-      >
+      <div className="analytics-toolbar">
         <div className="flt">
           {(["24h", "7d", "30d", "180d"] as const).map((p) => (
             <button
@@ -270,7 +261,7 @@ export function AnalyticsView({
           ))}
         </div>
 
-        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+        <div className="analytics-export-group">
           {loading && (
             <span className="mono" style={{ fontSize: "12px", color: "var(--prt)" }}>
               Синхронизация телеметрии...

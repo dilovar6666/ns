@@ -763,7 +763,7 @@ export function MentalHealthView({
           </div>
 
           {/* Two Column Grid: History and Countermeasures */}
-          <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: "24px" }}>
+          <div className="responsive-split-2col">
             {/* Past Check-ins Log */}
             <div style={{ background: "var(--s1)", border: "1px solid var(--sep)", borderRadius: "20px", padding: "24px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px" }}>

@@ -322,7 +322,7 @@ export function ProtocolsView({ astronaut }: Props) {
       </div>
 
       {/* Main 2-Column Interface: Protocols List (Left) & Active Checklist (Right) */}
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(340px, 440px) 1fr", gap: "24px", alignItems: "start" }}>
+      <div className="protocols-split">
         {/* Left Column: Protocol Cards List */}
         <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
           {isLoading ? (

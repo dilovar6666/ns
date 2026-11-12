@@ -171,7 +171,7 @@ export function AIAssistantView({ astronaut, crew, metrics }: Props) {
       </header>
 
       {/* Main 2-Column Command Station: Left = 3D Hologram, Right = AI Console */}
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(380px, 490px) 1fr", gap: "24px", alignItems: "stretch" }}>
+      <div className="ai-split-layout">
         {/* Left Side: 3D Astronaut Avatar Station */}
         <div
           style={{
@@ -278,7 +278,7 @@ export function AIAssistantView({ astronaut, crew, metrics }: Props) {
           </div>
 
           {/* Live Telemetry Pill Cards below 3D model */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px", marginTop: "14px", zIndex: 10 }}>
+          <div className="ai-status-grid">
             <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid var(--sep)", padding: "8px 10px", borderRadius: "10px" }}>
               <div style={{ fontSize: "10px", color: "var(--t3)", textTransform: "uppercase" }}>Пульс</div>
               <div style={{ fontSize: "16px", fontWeight: 800, color: "var(--hr)" }}>{hr} <span style={{ fontSize: "10px", fontWeight: 400 }}>bpm</span></div>

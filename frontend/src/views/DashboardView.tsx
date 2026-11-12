@@ -279,12 +279,14 @@ export function DashboardView({
     const last = points[points.length - 1];
     const areaD = `${pathD} L ${last.x} ${H - padB} L ${points[0].x} ${H - padB} Z`;
 
-    // Generate 4-5 X-axis label points
-    const step = Math.max(1, Math.floor((points.length - 1) / 4));
+    // Generate 4-5 X-axis label points (or 3 on narrow screens to prevent overlap)
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 520;
+    const maxLabels = isMobile ? 3 : 5;
+    const step = Math.max(1, Math.floor((points.length - 1) / (maxLabels - 1)));
     const xLabels = [];
     for (let i = 0; i < points.length; i += step) {
       xLabels.push(points[i]);
-      if (xLabels.length >= 5) break;
+      if (xLabels.length >= maxLabels) break;
     }
     if (xLabels[xLabels.length - 1] !== last) {
       xLabels[xLabels.length - 1] = last;

@@ -77,15 +77,7 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
       )}
 
       {/* Main Grid: 3D Scene (left) + Telemetry Command Inspector (right) */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1.45fr 1fr",
-          gap: "18px",
-          marginTop: "16px",
-          minHeight: "680px",
-        }}
-      >
+      <div className="scene-3d-split">
         {/* Left: 3D Viewport with Sci-Fi Controls */}
         <div
           className="sc up"

@@ -27,6 +27,11 @@ import {
   Lock,
   Shield,
   Stethoscope,
+  Menu,
+  X,
+  Sun,
+  Moon,
+  Globe,
 } from "lucide-react";
 import { api, latest } from "./api";
 import type { Astronaut, Metric, Notification } from "./api";
@@ -73,6 +78,33 @@ export default function App() {
 
   // Selected astronaut state
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Close mobile drawer on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  // Close mobile drawer on Escape key
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  // Lock body scroll when mobile drawer is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
 
   // Queries
   const { data: crew = [], refetch: refetchCrew } = useQuery<Astronaut[]>({
@@ -556,14 +588,14 @@ export default function App() {
         </Routes>
       </main>
 
-      {/* Mobile Bottom Navigation Bar */}
+      {/* Mobile Bottom Navigation Bar (G-2) */}
       <nav className="mbar" aria-label="Мобильная навигация">
         <NavLink
           to="/dashboard"
           className={({ isActive }) => `mbar-item ${isActive ? "on" : ""}`}
         >
           <LayoutDashboard className="ico" />
-          <span>Обзор</span>
+          <span>{language === "ru" ? "Обзор" : "Overview"}</span>
         </NavLink>
 
         <NavLink
@@ -571,7 +603,7 @@ export default function App() {
           className={({ isActive }) => `mbar-item ${isActive ? "on" : ""}`}
         >
           <Activity className="ico" />
-          <span>Мониторинг</span>
+          <span>{language === "ru" ? "Монитор" : "Monitor"}</span>
         </NavLink>
 
         <NavLink
@@ -579,28 +611,258 @@ export default function App() {
           className={({ isActive }) => `mbar-item ${isActive ? "on" : ""}`}
         >
           <BarChart3 className="ico" />
-          <span>Аналитика</span>
+          <span>{language === "ru" ? "Тренды" : "Trends"}</span>
         </NavLink>
 
         <NavLink
-          to="/alerts"
+          to="/ai"
           className={({ isActive }) => `mbar-item ${isActive ? "on" : ""}`}
         >
-          <Bell className="ico" />
-          <span>Алерты</span>
+          <Bot className="ico" />
+          <span>{language === "ru" ? "ИИ" : "AI"}</span>
         </NavLink>
 
-        <NavLink
-          to="/profile"
-          className={({ isActive }) => `mbar-item ${isActive ? "on" : ""}`}
+        <button
+          type="button"
+          className={`mbar-item btn-more ${mobileMenuOpen ? "on" : ""}`}
+          onClick={() => setMobileMenuOpen(true)}
+          aria-label="Открыть полное меню платформы"
         >
-          <User className="ico" />
-          <span>Профиль</span>
-        </NavLink>
+          <Menu className="ico" />
+          <span>{language === "ru" ? "Меню" : "Menu"}</span>
+        </button>
       </nav>
 
-      {/* Floating AI Assistant Chat Button and Drawer */}
-      <FloatingAIChat astronaut={currentAstronaut} metrics={metrics} />
+      {/* Mobile Navigation Drawer (G-2) */}
+      <div
+        className={`mobile-drawer-overlay ${mobileMenuOpen ? "open" : ""}`}
+        onClick={() => setMobileMenuOpen(false)}
+        aria-hidden={!mobileMenuOpen}
+      />
+      <aside
+        className={`mobile-drawer-panel ${mobileMenuOpen ? "open" : ""}`}
+        aria-label="Мобильное меню платформы"
+      >
+        {/* Header */}
+        <div className="mobile-drawer-header">
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <img src="/cosmo-logo.png" alt="CosmoHealth" style={{ height: "30px", width: "auto" }} />
+          </div>
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(false)}
+            style={{ background: "none", border: "none", color: "var(--t2)", cursor: "pointer", padding: "6px" }}
+            aria-label="Закрыть меню"
+          >
+            <X size={22} />
+          </button>
+        </div>
+
+        {/* User Card */}
+        <div
+          style={{
+            padding: "16px 20px",
+            background: "var(--s2)",
+            borderBottom: "1px solid var(--sep)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "12px",
+          }}
+        >
+          <div
+            onClick={() => {
+              openAuthModal("login");
+              setMobileMenuOpen(false);
+            }}
+            style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer", flex: 1, minWidth: 0 }}
+          >
+            <span className="av" style={{ width: "36px", height: "36px", fontSize: "13px" }}>
+              {user ? user.full_name.slice(0, 2).toUpperCase() : currentAstronaut?.name?.slice(0, 2).toUpperCase() || "MC"}
+            </span>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--t1)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {user ? user.full_name : currentAstronaut?.name || "Dr. Maya Chen"}
+              </div>
+              <div style={{ fontSize: "11px", color: "var(--t3)" }}>
+                {user ? user.role : currentAstronaut?.callsign || "Flight Surgeon"}
+              </div>
+            </div>
+          </div>
+          <span
+            style={{
+              fontSize: "10px",
+              fontWeight: 800,
+              padding: "2px 6px",
+              borderRadius: "6px",
+              background: isFlightSurgeon ? "rgba(16, 185, 129, 0.2)" : isCommander ? "rgba(59, 130, 246, 0.2)" : "rgba(245, 158, 11, 0.2)",
+              color: isFlightSurgeon ? "#10b981" : isCommander ? "var(--pr)" : "#f59e0b",
+            }}
+          >
+            {isFlightSurgeon ? "CMO" : isCommander ? "CDR" : "CREW"}
+          </span>
+        </div>
+
+        {/* All 12 Routes */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "8px 0" }}>
+          <div className="mobile-drawer-section-title">
+            {language === "ru" ? "Терминал экипажа" : "Crew Terminal"}
+          </div>
+          <NavLink to="/dashboard" className={({ isActive }) => `mobile-drawer-link ${isActive ? "on" : ""}`} onClick={() => setMobileMenuOpen(false)}>
+            <LayoutDashboard className="ico" />
+            <span>{t.navDashboard}</span>
+          </NavLink>
+          <NavLink to="/monitoring" className={({ isActive }) => `mobile-drawer-link ${isActive ? "on" : ""}`} onClick={() => setMobileMenuOpen(false)}>
+            <Activity className="ico" />
+            <span>{t.navMonitoring}</span>
+          </NavLink>
+          <NavLink to="/profile" className={({ isActive }) => `mobile-drawer-link ${isActive ? "on" : ""}`} onClick={() => setMobileMenuOpen(false)}>
+            <User className="ico" />
+            <span>{t.navProfile}</span>
+          </NavLink>
+          <NavLink to="/mental" className={({ isActive }) => `mobile-drawer-link ${isActive ? "on" : ""}`} onClick={() => setMobileMenuOpen(false)}>
+            <Brain className="ico" />
+            <span>{t.navMental}</span>
+          </NavLink>
+          <NavLink to="/ai" className={({ isActive }) => `mobile-drawer-link ${isActive ? "on" : ""}`} onClick={() => setMobileMenuOpen(false)}>
+            <Bot className="ico" />
+            <span>{t.navAIAssistant}</span>
+          </NavLink>
+          <NavLink to="/3d" className={({ isActive }) => `mobile-drawer-link ${isActive ? "on" : ""}`} onClick={() => setMobileMenuOpen(false)}>
+            <Box className="ico" />
+            <span>{t.nav3DViewer}</span>
+          </NavLink>
+          <NavLink to="/protocols" className={({ isActive }) => `mobile-drawer-link ${isActive ? "on" : ""}`} onClick={() => setMobileMenuOpen(false)}>
+            <ClipboardList className="ico" />
+            <span>{t.navProtocols}</span>
+          </NavLink>
+          <NavLink to="/timeline" className={({ isActive }) => `mobile-drawer-link ${isActive ? "on" : ""}`} onClick={() => setMobileMenuOpen(false)}>
+            <Calendar className="ico" />
+            <span>{t.navTimeline}</span>
+          </NavLink>
+          <NavLink to="/evidence" className={({ isActive }) => `mobile-drawer-link ${isActive ? "on" : ""}`} onClick={() => setMobileMenuOpen(false)}>
+            <BookOpen className="ico" />
+            <span>{t.navEvidence}</span>
+          </NavLink>
+
+          <div className="mobile-drawer-section-title" style={{ marginTop: "12px" }}>
+            {language === "ru" ? "Контроль ЦУП & Командование" : "Flight Surgeon & Ops"}
+          </div>
+          <NavLink to="/crew" className={({ isActive }) => `mobile-drawer-link ${isActive ? "on" : ""}`} onClick={() => setMobileMenuOpen(false)}>
+            <Users className="ico" />
+            <span>{t.navCrew}</span>
+            {isAstronaut && <Lock size={12} style={{ color: "#f59e0b", marginLeft: "auto" }} />}
+          </NavLink>
+          <NavLink to="/analytics" className={({ isActive }) => `mobile-drawer-link ${isActive ? "on" : ""}`} onClick={() => setMobileMenuOpen(false)}>
+            <BarChart3 className="ico" />
+            <span>{t.navAnalytics}</span>
+          </NavLink>
+          <NavLink to="/alerts" className={({ isActive }) => `mobile-drawer-link ${isActive ? "on" : ""}`} onClick={() => setMobileMenuOpen(false)}>
+            <Bell className="ico" />
+            <span>{t.navAlerts}</span>
+            {unreadCount > 0 && (
+              <span className="mobile-drawer-badge" style={{ background: "var(--cr)", color: "#fff" }}>
+                {unreadCount}
+              </span>
+            )}
+          </NavLink>
+          <NavLink to="/settings" className={({ isActive }) => `mobile-drawer-link ${isActive ? "on" : ""}`} onClick={() => setMobileMenuOpen(false)}>
+            <Settings className="ico" />
+            <span>{t.navSettings}</span>
+          </NavLink>
+        </div>
+
+        {/* Drawer Footer: Language & Theme & Logout */}
+        <div style={{ padding: "16px 20px", borderTop: "1px solid var(--sep)", background: "var(--s2)", display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: "12px", color: "var(--t3)", fontWeight: 600 }}>{language === "ru" ? "Язык интерфейса:" : "Language:"}</span>
+            <div style={{ display: "inline-flex", background: "rgba(0,0,0,0.2)", padding: "2px", borderRadius: "8px" }}>
+              <button
+                type="button"
+                onClick={() => setLanguage("ru")}
+                style={{
+                  background: language === "ru" ? "var(--pr)" : "transparent",
+                  color: language === "ru" ? "#fff" : "var(--t2)",
+                  border: "none",
+                  borderRadius: "6px",
+                  padding: "4px 10px",
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                RU
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage("en")}
+                style={{
+                  background: language === "en" ? "var(--pr)" : "transparent",
+                  color: language === "en" ? "#fff" : "var(--t2)",
+                  border: "none",
+                  borderRadius: "6px",
+                  padding: "4px 10px",
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                EN
+              </button>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <button
+              type="button"
+              onClick={() => handleThemeChange(theme === "dark" ? "light" : "dark")}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                background: "none",
+                border: "none",
+                color: "var(--t2)",
+                cursor: "pointer",
+                fontSize: "13px",
+                fontWeight: 600,
+                padding: "4px 0",
+              }}
+            >
+              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+              <span>{theme === "dark" ? (language === "ru" ? "Светлая тема" : "Light Mode") : (language === "ru" ? "Темная тема" : "Dark Mode")}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                logout();
+                setMobileMenuOpen(false);
+              }}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                background: "none",
+                border: "none",
+                color: "var(--cr)",
+                cursor: "pointer",
+                fontSize: "13px",
+                fontWeight: 600,
+                padding: "4px 0",
+              }}
+            >
+              <LogOut size={16} />
+              <span>{t.signOut}</span>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Floating AI Assistant Chat Button and Drawer (Hidden on /ai to prevent duplicate widget) */}
+      {location.pathname !== "/ai" && (
+        <FloatingAIChat astronaut={currentAstronaut} metrics={metrics} />
+      )}
     </div>
   );
 }

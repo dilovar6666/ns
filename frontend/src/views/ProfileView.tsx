@@ -102,11 +102,8 @@ export function ProfileView({
 
       {/* Seamless Hero Row: Info on Left, 3D Helmet on Right (NO outer card, NO frame/box) */}
       <section
+        className="profile-helmet-grid"
         style={{
-          display: "grid",
-          gridTemplateColumns: "1.2fr 1fr",
-          alignItems: "center",
-          gap: "24px",
           marginBottom: "36px",
           position: "relative",
         }}
@@ -228,6 +225,7 @@ export function ProfileView({
 
         {/* Right: 3D Helmet ONLY - Completely seamless, NO box, NO card border */}
         <div
+          className="profile-canvas-col"
           style={{
             height: "360px",
             position: "relative",
@@ -265,7 +263,7 @@ export function ProfileView({
       )}
 
       {/* Main Two-Column Grid: Mission Info & Monitoring Overview (exactly matching design) */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: "28px" }}>
+      <div className="responsive-split-2col" style={{ marginBottom: "28px" }}>
         {/* Mission Information Card */}
         <div
           style={{
@@ -423,7 +421,7 @@ export function ProfileView({
       </div>
 
       {/* Monitoring Baseline & Personalized Alert Thresholds */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+      <div className="responsive-split-2col">
         {/* Baseline Card */}
         <div
           style={{

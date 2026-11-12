@@ -128,29 +128,15 @@ export function FloatingAIChat({ astronaut, metrics = [] }: Props) {
   };
 
   return (
-    <div style={{ position: "fixed", bottom: "24px", right: "24px", zIndex: 9999 }}>
+    <div className="floating-ai-wrap">
       {/* Floating Toggle Button */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          style={{
-            width: "60px",
-            height: "60px",
-            borderRadius: "50%",
-            background: "linear-gradient(135deg, var(--pr) 0%, #2563eb 100%)",
-            border: "2px solid rgba(255, 255, 255, 0.3)",
-            boxShadow: "0 8px 30px rgba(59, 130, 246, 0.45), 0 0 20px rgba(59, 130, 246, 0.3)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            color: "#fff",
-            position: "relative",
-            transition: "transform 0.2s ease, box-shadow 0.2s ease",
-          }}
+          className="floating-ai-btn"
           title="Спросить бортовой ИИ (Gemini)"
         >
-          <Bot size={28} />
+          <Bot size={26} />
           {/* Pulsing Aura */}
           <span
             style={{
@@ -181,19 +167,9 @@ export function FloatingAIChat({ astronaut, metrics = [] }: Props) {
       {/* Floating Chat Drawer/Window */}
       {isOpen && (
         <div
+          className="floating-ai-window"
           style={{
-            width: isMinimized ? "320px" : "390px",
-            height: isMinimized ? "56px" : "540px",
-            maxHeight: "85vh",
-            background: "var(--s1)",
-            border: "1px solid var(--sep)",
-            borderRadius: "20px",
-            boxShadow: "0 20px 50px rgba(0, 0, 0, 0.45), 0 0 30px rgba(59, 130, 246, 0.15)",
-            backdropFilter: "blur(12px)",
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-            transition: "all 0.25s ease",
+            height: isMinimized ? "56px" : undefined,
           }}
         >
           {/* Header */}

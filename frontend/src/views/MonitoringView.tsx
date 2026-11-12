@@ -182,7 +182,7 @@ export function MonitoringView({
           marginTop: "16px",
         }}
       >
-        <div className="tabs" role="group" aria-label="Показатель">
+        <div className="tabs tabs-scrollable" role="group" aria-label="Показатель">
           {(Object.keys(configs) as MetricTab[]).map((key) => {
             const cfg = configs[key];
             const Icon = cfg.icon;
