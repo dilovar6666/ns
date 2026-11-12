@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 
 from .database import Base, engine, get_db
 from .models import Astronaut, MentalCheckin, Metric, Mission, MissionEvent, Notification, Protocol, ProtocolExecution, ProtocolStep, User
-from .schemas import AIInput, AstronautInput, AstronautOut, AuthResponse, CheckinInput, LoginRequest, MetricInput, ProtocolInput, RegisterRequest, UserOut
+from .schemas import AIInput, AstronautInput, AstronautOut, AuthResponse, CheckinInput, LoginRequest, MetricInput, MissionEventInput, ProtocolInput, RegisterRequest, UserOut
 from .seed import seed
 
 
@@ -42,11 +42,32 @@ app = FastAPI(title="CosmoHealthX demo API", version="0.1.0")
 app.add_middleware(CORSMiddleware, allow_origins=os.getenv("FRONTEND_ORIGIN", "http://localhost:5173").split(","), allow_methods=["*"], allow_headers=["*"])
 
 
+def seed_rich_timeline(db: Session):
+    count = db.scalar(select(func.count(MissionEvent.id)))
+    if count >= 6:
+        return
+    now_dt = datetime.now(timezone.utc)
+    events_data = [
+        ("Routine Telemetry Sync & EVA-2 Pre-Breathing", "Crew completed 100% O2 nitrogen washout protocol ahead of tomorrow's scheduled spacewalk. Biometrics nominal.", "eva", now_dt - timedelta(hours=3)),
+        ("Mid-Mission Psychological & Sleep Review", "Analysis of actigraphy data indicated SWS deep-sleep reduction. Circadian lighting shifted to blue-depleted spectrum.", "medical", now_dt - timedelta(days=4)),
+        ("Solar Particle Event (SPE Class M-4.2) Alert", "Space Radiation Dosimeter alarmed at 4.8 mSv/h. Crew successfully retreated to radiation storm shelter for 7 hours.", "alarm", now_dt - timedelta(days=10)),
+        ("EVA-1: Solar Array Radiator Servicing", "6 hr 38 min spacewalk conducted by Alex Nova and Ibrahim Rahman. PLSS sublimator loop and biometrics remained nominal.", "eva", now_dt - timedelta(days=18)),
+        ("GeneLab Omics Biospecimen Collection", "Venous blood and saliva sampling conducted in Glovebox facility. Centrifuged and stored at -80°C in MELFI freezer.", "science", now_dt - timedelta(days=28)),
+        ("Post-Insertion Orthostatic Tolerance Scan", "Cardiovascular ultrasound assessment conducted. Mild cephalad fluid shift documented with no signs of SANS.", "medical", now_dt - timedelta(days=35)),
+        ("Autonomous Station Docking Complete", "Automated rendezvous and hard-docking with orbital complex. Cabin pressure stabilized at 101.3 kPa.", "orbit", now_dt - timedelta(days=40)),
+        ("Mission Launch & Orbital Insertion", "Falcon Heavy launch from Kennedy Space Center LC-39A. Insertion into 408 km circular orbit at 51.6° inclination.", "mission", now_dt - timedelta(days=42)),
+    ]
+    for title, detail, kind, dt in events_data:
+        db.add(MissionEvent(title=title, detail=detail, kind=kind, occurred_at=dt))
+    db.commit()
+
+
 @app.on_event("startup")
 def startup():
     Base.metadata.create_all(engine)
     with next(get_db()) as db:
         seed(db)
+        seed_rich_timeline(db)
 
 
 def role_guard(required: str, x_demo_role: str = Header(default="astronaut")):
@@ -262,6 +283,20 @@ def read_notification(notification_id: int, db: Session = Depends(get_db)):
 def timeline(db: Session = Depends(get_db)):
     rows = db.scalars(select(MissionEvent).order_by(MissionEvent.occurred_at.desc())).all()
     return [{"id": r.id, "title": r.title, "detail": r.detail, "kind": r.kind, "occurred_at": r.occurred_at} for r in rows]
+
+
+@app.post("/api/timeline")
+def add_timeline_event(body: MissionEventInput, db: Session = Depends(get_db)):
+    ev = MissionEvent(
+        title=body.title.strip(),
+        detail=body.detail.strip(),
+        kind=body.kind.strip().lower(),
+        occurred_at=datetime.now(timezone.utc),
+    )
+    db.add(ev)
+    db.commit()
+    db.refresh(ev)
+    return {"id": ev.id, "title": ev.title, "detail": ev.detail, "kind": ev.kind, "occurred_at": ev.occurred_at}
 
 
 @app.get("/api/protocols")

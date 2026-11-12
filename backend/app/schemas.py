@@ -69,3 +69,9 @@ class UserOut(BaseModel):
 class AuthResponse(BaseModel):
     token: str
     user: UserOut
+
+
+class MissionEventInput(BaseModel):
+    title: str = Field(min_length=2, max_length=160)
+    detail: str = Field(min_length=5, max_length=2000)
+    kind: str = Field(default="medical", max_length=50)
