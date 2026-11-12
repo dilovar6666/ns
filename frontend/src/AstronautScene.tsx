@@ -1,11 +1,13 @@
-import { Suspense, useEffect, useRef } from 'react'
+import { Suspense, useEffect, useRef, useMemo } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, useAnimations, useGLTF } from '@react-three/drei'
+import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js'
 import type { Group } from 'three'
 
 function Model() {
   const group = useRef<Group>(null)
   const { scene, animations } = useGLTF('/models/astronaut.glb')
+  const clone = useMemo(() => SkeletonUtils.clone(scene), [scene])
   const { actions } = useAnimations(animations, group)
 
   useEffect(() => {
@@ -17,8 +19,8 @@ function Model() {
   }, [actions])
 
   return (
-    <group ref={group} position={[0, -1.22, 0]}>
-      <primitive object={scene} scale={0.80} />
+    <group ref={group} position={[0, -1.22, 0]} scale={0.80}>
+      <primitive object={clone} />
     </group>
   )
 }
