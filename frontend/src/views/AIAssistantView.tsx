@@ -121,39 +121,28 @@ export function AIAssistantView({ astronaut, crew, metrics }: Props) {
     <div className="wrapc" style={{ maxWidth: "1320px", margin: "0 auto", paddingBottom: "70px" }}>
       {/* Top Header */}
       <header className="tb" style={{ marginBottom: "20px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
+        <div className="ai-header-content">
           <div className="up">
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-              <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "var(--pr)" }}>
-                Автономный клинический интеллект миссии CHX-01
+            <div className="ai-tag-row">
+              <span className="ai-tag-mission">
+                Автономный клинический интеллект CHX-01
               </span>
-              <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "12px", background: "rgba(16, 185, 129, 0.15)", color: "#10b981", fontWeight: 600 }}>
+              <span className="ai-tag-gemini">
                 ● Google Gemini 3.5 Flash-Lite Active
               </span>
             </div>
-            <h1 className="lt disp" style={{ margin: "0 0 6px" }}>AI Health Assistant & 3D Diagnostics</h1>
+            <h1 className="lt disp" style={{ margin: "4px 0 6px" }}>AI Health Assistant & 3D Diagnostics</h1>
             <p className="sub" style={{ margin: 0, maxWidth: "780px", color: "var(--t2)" }}>
               Мультимодальный анализ телеметрии биосенсоров, виртуальный 3D-аватар астронавта и принятие решений на основе стандартов NASA STD-3001.
             </p>
           </div>
 
-          <div
-            style={{
-              background: "var(--s1)",
-              border: "1px solid var(--sep)",
-              borderRadius: "14px",
-              padding: "10px 16px",
-              display: "flex",
-              alignItems: "center",
-              gap: "14px",
-              fontSize: "12px",
-            }}
-          >
+          <div className="ai-status-card-bar">
             <div>
               <div style={{ color: "var(--t3)", fontSize: "10px", textTransform: "uppercase", fontWeight: 700 }}>
                 Субъект анализа
               </div>
-              <div style={{ fontWeight: 700, color: "var(--tx)" }}>
+              <div style={{ fontWeight: 700, color: "var(--tx)", fontSize: "13px" }}>
                 {astronaut?.name || "Алекс Нова (CMO)"}
               </div>
             </div>
@@ -162,7 +151,7 @@ export function AIAssistantView({ astronaut, crew, metrics }: Props) {
               <div style={{ color: "var(--t3)", fontSize: "10px", textTransform: "uppercase", fontWeight: 700 }}>
                 Задержка ЦУП
               </div>
-              <div style={{ fontWeight: 700, color: "#10b981", display: "flex", alignItems: "center", gap: "4px" }}>
+              <div style={{ fontWeight: 700, color: "#10b981", display: "flex", alignItems: "center", gap: "4px", fontSize: "13px" }}>
                 <Radio size={12} className="pulse" /> 120 мс (Ku-Band)
               </div>
             </div>
@@ -188,7 +177,7 @@ export function AIAssistantView({ astronaut, crew, metrics }: Props) {
           }}
         >
           {/* Top HUD Badges */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 10, marginBottom: "12px" }}>
+          <div className="ai-hud-header">
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--cy)", boxShadow: "0 0 10px var(--cy)" }} />
               <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--cy)", letterSpacing: "0.5px" }}>
@@ -199,23 +188,10 @@ export function AIAssistantView({ astronaut, crew, metrics }: Props) {
             <button
               onClick={handleTriggerScanner}
               disabled={scannerActive}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                background: scannerActive ? "rgba(34, 211, 238, 0.25)" : "rgba(255, 255, 255, 0.08)",
-                border: "1px solid var(--cy)",
-                color: "var(--cy)",
-                padding: "6px 12px",
-                borderRadius: "10px",
-                fontSize: "12px",
-                fontWeight: 600,
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-              }}
+              className="ai-scan-btn"
             >
               <Cpu size={14} className={scannerActive ? "spin" : ""} />
-              <span>{scannerActive ? "Сканирование биометрии..." : "Биометрический скан"}</span>
+              <span>{scannerActive ? "Сканирование..." : "Биометрический скан"}</span>
             </button>
           </div>
 
@@ -237,7 +213,7 @@ export function AIAssistantView({ astronaut, crew, metrics }: Props) {
           )}
 
           {/* 3D Scene Viewport */}
-          <div style={{ flex: 1, position: "relative", minHeight: "360px", borderRadius: "16px", overflow: "hidden" }}>
+          <div style={{ height: "350px", minHeight: "350px", position: "relative", borderRadius: "16px", overflow: "hidden" }}>
             <Suspense
               fallback={
                 <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--t3)" }}>
@@ -247,33 +223,31 @@ export function AIAssistantView({ astronaut, crew, metrics }: Props) {
             >
               <AstronautScene />
             </Suspense>
+          </div>
 
-            {/* Floating speech bubble from AI Avatar */}
-            <div
-              style={{
-                position: "absolute",
-                bottom: "16px",
-                left: "16px",
-                right: "16px",
-                background: "rgba(11, 19, 34, 0.85)",
-                border: "1px solid rgba(34, 211, 238, 0.3)",
-                backdropFilter: "blur(10px)",
-                borderRadius: "14px",
-                padding: "12px 16px",
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                zIndex: 10,
-              }}
-            >
-              <Bot size={20} style={{ color: "var(--cy)", flexShrink: 0 }} />
-              <div style={{ fontSize: "12px", color: "#e2e8f0", lineHeight: "1.4" }}>
-                {loading
-                  ? "«Идет обработка телеметрии и сопоставление со стандартами NASA STD-3001...»"
-                  : result
-                  ? "«Диагностика завершена. Рекомендации сформированы ниже.»"
-                  : "«Все системы жизнеобеспечения PLSS активны. Задайте клинический вопрос о здоровье экипажа.»"}
-              </div>
+          {/* AI Avatar Speech Status Bubble */}
+          <div
+            style={{
+              marginTop: "12px",
+              background: "rgba(11, 19, 34, 0.88)",
+              border: "1px solid rgba(34, 211, 238, 0.3)",
+              backdropFilter: "blur(10px)",
+              WebkitBackdropFilter: "blur(10px)",
+              borderRadius: "14px",
+              padding: "10px 14px",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              zIndex: 10,
+            }}
+          >
+            <Bot size={18} style={{ color: "var(--cy)", flexShrink: 0 }} />
+            <div style={{ fontSize: "11px", color: "#e2e8f0", lineHeight: "1.35" }}>
+              {loading
+                ? "«Идет обработка телеметрии и сопоставление со стандартами NASA STD-3001...»"
+                : result
+                ? "«Диагностика завершена. Рекомендации сформированы ниже.»"
+                : "«Все системы жизнеобеспечения PLSS активны. Задайте клинический вопрос о здоровье экипажа.»"}
             </div>
           </div>
 
