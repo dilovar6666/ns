@@ -42,3 +42,30 @@ class ProtocolInput(BaseModel):
     description: str = Field(min_length=10, max_length=3000)
     source_url: str = Field(pattern=r"^https://", max_length=500)
     steps: list[str] = Field(min_length=1, max_length=30)
+
+
+class RegisterRequest(BaseModel):
+    email: str = Field(min_length=3, max_length=160)
+    password: str = Field(min_length=4, max_length=120)
+    full_name: str = Field(min_length=2, max_length=120)
+    callsign: str = Field(default="", max_length=40)
+    role: str = Field(default="Crew Member", max_length=80)
+
+
+class LoginRequest(BaseModel):
+    email: str = Field(min_length=3, max_length=160)
+    password: str = Field(min_length=1, max_length=120)
+
+
+class UserOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    email: str
+    full_name: str
+    callsign: str
+    role: str
+
+
+class AuthResponse(BaseModel):
+    token: str
+    user: UserOut

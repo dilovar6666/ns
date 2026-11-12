@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import type { Astronaut, Metric, Notification } from "../api";
 import { latest } from "../api";
+import { useLanguage } from "../context/LanguageContext";
 
 type Props = {
   astronaut?: Astronaut;
@@ -34,6 +35,7 @@ export function DashboardView({
   onSelectAstronaut,
   onMarkNotificationRead,
 }: Props) {
+  const { t, language } = useLanguage();
   const [selectedMetricKey, setSelectedMetricKey] = useState<string>("heart_rate");
   const [period, setPeriod] = useState<"24h" | "7d" | "30d">("24h");
 
@@ -67,10 +69,30 @@ export function DashboardView({
   };
 
   const metricInfo: Record<string, { name: string; unit: string; range: string; value: string | number }> = {
-    heart_rate: { name: "Heart Rate", unit: "bpm", range: "Норма: 60-100 bpm", value: Math.round(hr) },
-    spo2: { name: "Oxygen Saturation", unit: "%", range: "Норма: 95-100%", value: Math.round(spo2) },
-    sleep_duration: { name: "Sleep", unit: "ч", range: "Цель: 8.0 ч/сут", value: sleep.toFixed(1) },
-    activity: { name: "Physical Activity", unit: "шагов", range: "Цель: 10 000 шагов", value: Math.round(steps).toLocaleString() },
+    heart_rate: {
+      name: t.heartRate,
+      unit: "bpm",
+      range: language === "ru" ? "Норма: 60-100 bpm" : "Nominal: 60-100 bpm",
+      value: Math.round(hr),
+    },
+    spo2: {
+      name: t.oxygen,
+      unit: "%",
+      range: language === "ru" ? "Норма: 95-100%" : "Nominal: 95-100%",
+      value: Math.round(spo2),
+    },
+    sleep_duration: {
+      name: t.sleep,
+      unit: language === "ru" ? "ч" : "h",
+      range: language === "ru" ? "Цель: 8.0 ч/сут" : "Goal: 8.0 h/day",
+      value: sleep.toFixed(1),
+    },
+    activity: {
+      name: t.activity,
+      unit: language === "ru" ? "шагов" : "steps",
+      range: language === "ru" ? "Цель: 10 000" : "Goal: 10,000",
+      value: Math.round(steps).toLocaleString(),
+    },
   };
 
   const activeInfo = metricInfo[selectedMetricKey] || metricInfo.heart_rate;

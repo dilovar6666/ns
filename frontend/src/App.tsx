@@ -28,6 +28,9 @@ import {
 import { api, latest } from "./api";
 import type { Astronaut, Metric, Notification } from "./api";
 import { connectionStatus, queueStatus, syncQueue } from "./offline";
+import { useAuth } from "./context/AuthContext";
+import { useLanguage } from "./context/LanguageContext";
+import { AuthModal } from "./components/AuthModal";
 
 // Views
 import { LandingPage } from "./LandingPage";
@@ -50,12 +53,16 @@ export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Theme state: light | dark | navy (default navy)
-  const [theme, setTheme] = useState<"light" | "dark" | "navy">(() => {
-    return (localStorage.getItem("cosmo_theme") as "light" | "dark" | "navy") || "navy";
+  const { user, logout, openAuthModal } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
+
+  // Strict 2-theme system: light | dark (default dark)
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    const saved = localStorage.getItem("cosmo_theme");
+    return saved === "light" ? "light" : "dark";
   });
 
-  const handleThemeChange = (newTheme: "light" | "dark" | "navy") => {
+  const handleThemeChange = (newTheme: "light" | "dark") => {
     setTheme(newTheme);
     localStorage.setItem("cosmo_theme", newTheme);
   };
@@ -109,12 +116,14 @@ export default function App() {
     return (
       <div className={`cx L ${theme}`}>
         <LandingPage />
+        <AuthModal />
       </div>
     );
   }
 
   return (
     <div className={`cx app ${theme}`}>
+      <AuthModal />
       {/* Sidebar Navigation */}
       <aside className="side" aria-label="Главное меню">
         {/* Brand Logo */}
@@ -129,8 +138,8 @@ export default function App() {
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
           >
             <LayoutDashboard className="ico" />
-            <span className="nl">Dashboard</span>
-            <span className="ns">Обзор</span>
+            <span className="nl">{t.navDashboard}</span>
+            <span className="ns">{t.navDashboardSub}</span>
           </NavLink>
 
           <NavLink
@@ -138,8 +147,8 @@ export default function App() {
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
           >
             <Activity className="ico" />
-            <span className="nl">Monitoring</span>
-            <span className="ns">Телеметрия</span>
+            <span className="nl">{t.navMonitoring}</span>
+            <span className="ns">{t.navMonitoringSub}</span>
           </NavLink>
 
           <NavLink
@@ -147,8 +156,8 @@ export default function App() {
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
           >
             <BarChart3 className="ico" />
-            <span className="nl">Analytics</span>
-            <span className="ns">Аналитика</span>
+            <span className="nl">{t.navAnalytics}</span>
+            <span className="ns">{t.navAnalyticsSub}</span>
           </NavLink>
 
           <NavLink
@@ -156,8 +165,8 @@ export default function App() {
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
           >
             <Bell className="ico" />
-            <span className="nl">Alerts</span>
-            <span className="ns">Уведомления</span>
+            <span className="nl">{t.navAlerts}</span>
+            <span className="ns">{t.navAlertsSub}</span>
             {unreadCount > 0 && <span className="badge num">{unreadCount}</span>}
           </NavLink>
 
@@ -166,8 +175,8 @@ export default function App() {
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
           >
             <User className="ico" />
-            <span className="nl">Profile</span>
-            <span className="ns">Профиль</span>
+            <span className="nl">{t.navProfile}</span>
+            <span className="ns">{t.navProfileSub}</span>
           </NavLink>
 
           <NavLink
@@ -175,8 +184,8 @@ export default function App() {
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
           >
             <Settings className="ico" />
-            <span className="nl">Settings</span>
-            <span className="ns">Настройки</span>
+            <span className="nl">{t.navSettings}</span>
+            <span className="ns">{t.navSettingsSub}</span>
           </NavLink>
 
           <div
@@ -193,8 +202,8 @@ export default function App() {
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
           >
             <Users className="ico" />
-            <span className="nl">Crew</span>
-            <span className="ns">Экипаж</span>
+            <span className="nl">{t.navCrew}</span>
+            <span className="ns">{t.navCrewSub}</span>
           </NavLink>
 
           <NavLink
@@ -202,8 +211,8 @@ export default function App() {
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
           >
             <Brain className="ico" />
-            <span className="nl">Mental</span>
-            <span className="ns">Психология</span>
+            <span className="nl">{t.navMental}</span>
+            <span className="ns">{t.navMentalSub}</span>
           </NavLink>
 
           <NavLink
@@ -211,8 +220,8 @@ export default function App() {
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
           >
             <Bot className="ico" />
-            <span className="nl">AI Assistant</span>
-            <span className="ns">Клинич. ИИ</span>
+            <span className="nl">{t.navAIAssistant}</span>
+            <span className="ns">{t.navAIAssistantSub}</span>
           </NavLink>
 
           <NavLink
@@ -220,8 +229,8 @@ export default function App() {
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
           >
             <ClipboardList className="ico" />
-            <span className="nl">Protocols</span>
-            <span className="ns">Протоколы</span>
+            <span className="nl">{t.navProtocols}</span>
+            <span className="ns">{t.navProtocolsSub}</span>
           </NavLink>
 
           <NavLink
@@ -229,8 +238,8 @@ export default function App() {
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
           >
             <Calendar className="ico" />
-            <span className="nl">Timeline</span>
-            <span className="ns">Хронология</span>
+            <span className="nl">{t.navTimeline}</span>
+            <span className="ns">{t.navTimelineSub}</span>
           </NavLink>
 
           <NavLink
@@ -238,8 +247,8 @@ export default function App() {
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
           >
             <BookOpen className="ico" />
-            <span className="nl">Evidence</span>
-            <span className="ns">База NASA</span>
+            <span className="nl">{t.navEvidence}</span>
+            <span className="ns">{t.navEvidenceSub}</span>
           </NavLink>
 
           <NavLink
@@ -247,49 +256,99 @@ export default function App() {
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
           >
             <Box className="ico" />
-            <span className="nl">3D Viewer</span>
-            <span className="ns">Скафандр</span>
+            <span className="nl">{t.nav3DViewer}</span>
+            <span className="ns">{t.nav3DViewerSub}</span>
           </NavLink>
         </nav>
 
         {/* Sidebar Footer Widget */}
         <div className="sfoot">
-          <div className="miss">
-            <div className="cap">Демо-миссия CHX-01</div>
-            <div className="num" style={{ marginTop: "6px", fontSize: "18px", fontWeight: 700 }}>
-              День 42 <span className="t3" style={{ fontSize: "14px", fontWeight: 600 }}>из 180</span>
+          {/* Quick Language Toggle */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 4px 10px" }}>
+            <span style={{ fontSize: "11px", color: "var(--t3)", fontWeight: 600 }}>{language === "ru" ? "Язык:" : "Lang:"}</span>
+            <div style={{ display: "inline-flex", background: "rgba(0,0,0,0.25)", padding: "2px", borderRadius: "8px", border: "1px solid var(--sep)" }}>
+              <button
+                type="button"
+                onClick={() => setLanguage("ru")}
+                style={{
+                  background: language === "ru" ? "var(--pr)" : "transparent",
+                  color: language === "ru" ? "#000" : "var(--t2)",
+                  border: "none",
+                  padding: "2px 8px",
+                  borderRadius: "6px",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                RU
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage("en")}
+                style={{
+                  background: language === "en" ? "var(--pr)" : "transparent",
+                  color: language === "en" ? "#000" : "var(--t2)",
+                  border: "none",
+                  padding: "2px 8px",
+                  borderRadius: "6px",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                EN
+              </button>
             </div>
-            <div className="bar" style={{ marginTop: "10px" }}>
+          </div>
+
+          <div className="miss">
+            <div className="cap">CHX-01 · NASA STD-3001</div>
+            <div className="num" style={{ marginTop: "4px", fontSize: "16px", fontWeight: 700 }}>
+              {t.missionDay} 42 <span className="t3" style={{ fontSize: "13px", fontWeight: 600 }}>{t.ofDay} 180</span>
+            </div>
+            <div className="bar" style={{ marginTop: "8px" }}>
               <i style={{ width: "23.3%" }} />
             </div>
           </div>
 
-          <div className="uprof">
-            <Link className="me" to="/profile" aria-label="Профиль">
+          <div className="uprof" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+            <div
+              className="me"
+              onClick={() => openAuthModal("login")}
+              style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: 0 }}
+              title="Нажмите для входа или смены профиля"
+            >
               <span className="av">
-                {currentAstronaut?.name?.slice(0, 2).toUpperCase() || "АН"}
+                {user ? user.full_name.slice(0, 2).toUpperCase() : currentAstronaut?.name?.slice(0, 2).toUpperCase() || "MC"}
               </span>
               <span style={{ minWidth: 0 }}>
                 <span
                   style={{
                     display: "block",
-                    fontSize: "14px",
+                    fontSize: "13px",
                     fontWeight: 600,
                     whiteSpace: "nowrap",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                   }}
                 >
-                  {currentAstronaut?.name || "Алекс Нова"}
+                  {user ? user.full_name : currentAstronaut?.name || "Dr. Maya Chen"}
                 </span>
-                <span className="cap" style={{ display: "block" }}>
-                  {currentAstronaut?.callsign || "Бортинженер"}
+                <span className="cap" style={{ display: "block", fontSize: "10px" }}>
+                  {user ? user.role : currentAstronaut?.callsign || "Flight Surgeon"}
                 </span>
               </span>
-            </Link>
-            <Link className="lo" to="/" title="Выйти на главную" aria-label="Выйти">
-              <LogOut className="ico" />
-            </Link>
+            </div>
+            <button
+              className="lo"
+              onClick={logout}
+              title={t.signOut}
+              aria-label={t.signOut}
+              style={{ background: "transparent", border: "none", cursor: "pointer", padding: "6px", color: "var(--t2)", borderRadius: "6px" }}
+            >
+              <LogOut className="ico" size={17} />
+            </button>
           </div>
         </div>
       </aside>

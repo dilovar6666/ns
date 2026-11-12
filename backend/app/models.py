@@ -10,6 +10,17 @@ def now():
     return datetime.now(timezone.utc)
 
 
+class User(Base):
+    __tablename__ = "users"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(String(160), unique=True, index=True)
+    full_name: Mapped[str] = mapped_column(String(120))
+    callsign: Mapped[str] = mapped_column(String(40), default="")
+    role: Mapped[str] = mapped_column(String(80), default="Crew Member")
+    password_hash: Mapped[str] = mapped_column(String(256))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
 class Mission(Base):
     __tablename__ = "missions"
     id: Mapped[int] = mapped_column(primary_key=True)

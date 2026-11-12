@@ -1,20 +1,24 @@
 import React, { useState } from "react";
 import {
-  Settings,
   Sun,
   Moon,
-  Compass,
   RefreshCw,
   Trash2,
   CheckCircle2,
   Globe,
-  Bell,
   HardDrive,
   Wifi,
+  Activity,
+  Heart,
+  Droplets,
+  MoonStar,
+  Radio,
+  Sliders,
 } from "lucide-react";
 import { syncQueue, queueStatus } from "../offline";
+import { useLanguage, type Language } from "../context/LanguageContext";
 
-type ThemeMode = "light" | "dark" | "navy";
+type ThemeMode = "light" | "dark";
 
 type Props = {
   theme: ThemeMode;
@@ -22,13 +26,63 @@ type Props = {
 };
 
 export function SettingsView({ theme, onThemeChange }: Props) {
+  const { language, setLanguage, t } = useLanguage();
+
   const [syncing, setSyncing] = useState(false);
   const [offlineCount, setOfflineCount] = useState(0);
   const [statusMsg, setStatusMsg] = useState("");
-  const [notifyHr, setNotifyHr] = useState(true);
-  const [notifySpo2, setNotifySpo2] = useState(true);
-  const [notifySleep, setNotifySleep] = useState(true);
-  const [lang, setLang] = useState<"ru" | "en">("ru");
+
+  // Persisted toggles in localStorage
+  const [animations, setAnimations] = useState(() => {
+    return localStorage.getItem("cosmo_anim") !== "false";
+  });
+  const [notifyHr, setNotifyHr] = useState(() => {
+    return localStorage.getItem("cosmo_notify_hr") !== "false";
+  });
+  const [notifySpo2, setNotifySpo2] = useState(() => {
+    return localStorage.getItem("cosmo_notify_spo2") !== "false";
+  });
+  const [notifySleep, setNotifySleep] = useState(() => {
+    return localStorage.getItem("cosmo_notify_sleep") !== "false";
+  });
+  const [notifyRad, setNotifyRad] = useState(() => {
+    return localStorage.getItem("cosmo_notify_rad") !== "false";
+  });
+
+  const showToast = (msg: string) => {
+    setStatusMsg(msg);
+    setTimeout(() => setStatusMsg(""), 3500);
+  };
+
+  const handleToggleAnim = (checked: boolean) => {
+    setAnimations(checked);
+    localStorage.setItem("cosmo_anim", String(checked));
+    showToast(t.settingSaved);
+  };
+
+  const handleToggleHr = (checked: boolean) => {
+    setNotifyHr(checked);
+    localStorage.setItem("cosmo_notify_hr", String(checked));
+    showToast(`${t.alertTachycardia}: ${checked ? "ON" : "OFF"}`);
+  };
+
+  const handleToggleSpo2 = (checked: boolean) => {
+    setNotifySpo2(checked);
+    localStorage.setItem("cosmo_notify_spo2", String(checked));
+    showToast(`${t.alertSpo2}: ${checked ? "ON" : "OFF"}`);
+  };
+
+  const handleToggleSleep = (checked: boolean) => {
+    setNotifySleep(checked);
+    localStorage.setItem("cosmo_notify_sleep", String(checked));
+    showToast(`${t.alertSleepDeficit}: ${checked ? "ON" : "OFF"}`);
+  };
+
+  const handleToggleRad = (checked: boolean) => {
+    setNotifyRad(checked);
+    localStorage.setItem("cosmo_notify_rad", String(checked));
+    showToast(`${t.alertRadiation}: ${checked ? "ON" : "OFF"}`);
+  };
 
   const handleSyncNow = async () => {
     setSyncing(true);
@@ -37,19 +91,17 @@ export function SettingsView({ theme, onThemeChange }: Props) {
       await syncQueue();
       const status = await queueStatus();
       setOfflineCount(status.pending);
-      setStatusMsg("Синхронизация с бортовым сервером завершена успешно.");
-    } catch (e) {
-      setStatusMsg("Ошибка синхронизации: автономный режим.");
+      showToast(language === "ru" ? "Синхронизация с бортовой шиной завершена успешно." : "Telemetry bus synchronization completed successfully.");
+    } catch {
+      showToast(language === "ru" ? "Автономный режим активен: данные сохранены локально." : "Autonomous mode active: data queued locally.");
     } finally {
       setSyncing(false);
-      setTimeout(() => setStatusMsg(""), 3500);
     }
   };
 
   const handleClearCache = () => {
     localStorage.removeItem("cosmo_cache");
-    setStatusMsg("Локальный кэш телеметрии очищен.");
-    setTimeout(() => setStatusMsg(""), 3500);
+    showToast(language === "ru" ? "Локальный кэш телеметрии успешно очищен." : "Local telemetry cache cleared.");
   };
 
   return (
@@ -57,17 +109,15 @@ export function SettingsView({ theme, onThemeChange }: Props) {
       {/* Header */}
       <header className="tb">
         <div className="up">
-          <p className="eyb">Конфигурация бортовой платформы</p>
-          <h1 className="lt disp">Settings</h1>
-          <p className="sub">
-            Визуальная тема оформления, автономная репликация и параметры оповещений
-          </p>
+          <p className="eyb">CosmoHealthX Flight Deck</p>
+          <h1 className="lt disp">{t.settingsTitle}</h1>
+          <p className="sub">{t.settingsSubtitle}</p>
         </div>
       </header>
 
       {statusMsg && (
-        <div className="toast up" style={{ marginTop: "16px" }}>
-          <CheckCircle2 className="ico sm" /> {statusMsg}
+        <div className="toast up" style={{ marginTop: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
+          <CheckCircle2 size={16} /> {statusMsg}
         </div>
       )}
 
@@ -76,22 +126,25 @@ export function SettingsView({ theme, onThemeChange }: Props) {
         {/* Left Column: Theme & Appearance */}
         <div className="sc up">
           <h2 className="h2" style={{ marginBottom: "8px" }}>
-            Отображение и тема
+            {t.appearanceTitle}
           </h2>
           <p className="cap" style={{ marginBottom: "16px" }}>
-            Выберите цветовую гамму интерфейса, оптимизированную под условия освещения
+            {t.appearanceSubtitle}
           </p>
 
-          <div className="theme-pickers">
-            {/* Light Mode */}
+          {/* Theme Pickers: ONLY Light and Dark */}
+          <div className="theme-pickers" style={{ gridTemplateColumns: "1fr 1fr" }}>
+            {/* Apple Light Mode */}
             <div
               className={`theme-card ${theme === "light" ? "active" : ""}`}
               onClick={() => onThemeChange("light")}
             >
               <div className="theme-preview p-light" />
-              <div style={{ fontWeight: 600, fontSize: "14px" }}>Apple Light</div>
+              <div style={{ fontWeight: 600, fontSize: "14px", display: "flex", alignItems: "center", gap: "6px" }}>
+                <Sun size={15} style={{ color: "#f59e0b" }} /> {t.themeLight}
+              </div>
               <div className="cap" style={{ fontSize: "11px", marginTop: "2px" }}>
-                Дневной свет
+                {t.themeLightSub}
               </div>
             </div>
 
@@ -101,49 +154,52 @@ export function SettingsView({ theme, onThemeChange }: Props) {
               onClick={() => onThemeChange("dark")}
             >
               <div className="theme-preview p-dark" />
-              <div style={{ fontWeight: 600, fontSize: "14px" }}>Dark Space</div>
-              <div className="cap" style={{ fontSize: "11px", marginTop: "2px" }}>
-                OLED Энергосбережение
+              <div style={{ fontWeight: 600, fontSize: "14px", display: "flex", alignItems: "center", gap: "6px" }}>
+                <Moon size={15} style={{ color: "#38bdf8" }} /> {t.themeDark}
               </div>
-            </div>
-
-            {/* Deep Navy Mode */}
-            <div
-              className={`theme-card ${theme === "navy" ? "active" : ""}`}
-              onClick={() => onThemeChange("navy")}
-            >
-              <div className="theme-preview p-navy" />
-              <div style={{ fontWeight: 600, fontSize: "14px" }}>Deep Navy</div>
               <div className="cap" style={{ fontSize: "11px", marginTop: "2px" }}>
-                Космический синий
+                {t.themeDarkSub}
               </div>
             </div>
           </div>
 
           <div style={{ marginTop: "24px" }}>
+            {/* Language Selector */}
             <div className="row">
               <div>
-                <div className="lb">Язык интерфейса</div>
-                <div className="sub">Локализация медицинской терминологии</div>
+                <div className="lb" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <Globe size={15} style={{ color: "var(--pr)" }} /> {t.languageLabel}
+                </div>
+                <div className="sub">{t.languageSub}</div>
               </div>
               <select
                 className="inp"
-                value={lang}
-                onChange={(e) => setLang(e.target.value as "ru" | "en")}
-                style={{ fontWeight: 600 }}
+                value={language}
+                onChange={(e) => {
+                  setLanguage(e.target.value as Language);
+                  showToast(e.target.value === "ru" ? "Язык переключён на Русский" : "Language switched to English");
+                }}
+                style={{ fontWeight: 600, minWidth: "140px" }}
               >
                 <option value="ru">Русский (RU)</option>
                 <option value="en">English (US)</option>
               </select>
             </div>
 
+            {/* Chart Animations Toggle */}
             <div className="row">
               <div>
-                <div className="lb">Плавные анимации графиков</div>
-                <div className="sub">Аппаратное ускорение рендеринга 60 FPS</div>
+                <div className="lb" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <Sliders size={15} style={{ color: "var(--pr)" }} /> {t.animationsLabel}
+                </div>
+                <div className="sub">{t.animationsSub}</div>
               </div>
               <label className="sw">
-                <input type="checkbox" defaultChecked />
+                <input
+                  type="checkbox"
+                  checked={animations}
+                  onChange={(e) => handleToggleAnim(e.target.checked)}
+                />
                 <span className="slider" />
               </label>
             </div>
@@ -153,36 +209,36 @@ export function SettingsView({ theme, onThemeChange }: Props) {
         {/* Right Column: Offline Sync & Telemetry Storage */}
         <div className="sc up">
           <h2 className="h2" style={{ marginBottom: "8px" }}>
-            Автономная синхронизация
+            {t.syncTitle}
           </h2>
           <p className="cap" style={{ marginBottom: "16px" }}>
-            Режим работы без постоянного подключения к наземному центру управления (ЦУП)
+            {t.syncSubtitle}
           </p>
 
           <div className="kv">
             <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <Wifi className="ico sm" /> Статус связи:
+              <Wifi size={16} /> {t.linkStatus}
             </span>
             <span className="st ok">
-              <i></i>Бортовая шина активна
+              <i></i>{t.busActive}
             </span>
           </div>
 
           <div className="kv">
             <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <HardDrive className="ico sm" /> Очередь оффлайн-запросов:
+              <HardDrive size={16} /> {t.offlineQueue}
             </span>
             <span className="num" style={{ fontWeight: 600 }}>
-              {offlineCount} пакетов
+              {offlineCount} {t.packets}
             </span>
           </div>
 
           <div className="kv">
             <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <RefreshCw className="ico sm" /> Частота опроса биосенсоров:
+              <RefreshCw size={16} /> {t.sampleRate}
             </span>
             <span className="num" style={{ fontWeight: 600 }}>
-              1.0 Гц (1000 мс)
+              1.0 Hz (1000 ms)
             </span>
           </div>
 
@@ -193,15 +249,15 @@ export function SettingsView({ theme, onThemeChange }: Props) {
               disabled={syncing}
               style={{ flex: 1, minWidth: "160px" }}
             >
-              <RefreshCw className={`ico sm ${syncing ? "spin" : ""}`} />{" "}
-              {syncing ? "Синхронизация..." : "Синхронизировать сейчас"}
+              <RefreshCw size={16} className={syncing ? "spin" : ""} />{" "}
+              {syncing ? t.syncing : t.syncNow}
             </button>
             <button
               className="btn-secondary"
               onClick={handleClearCache}
               style={{ flex: 1, minWidth: "140px" }}
             >
-              <Trash2 className="ico sm" /> Очистить кэш
+              <Trash2 size={16} /> {t.clearCache}
             </button>
           </div>
         </div>
@@ -209,24 +265,26 @@ export function SettingsView({ theme, onThemeChange }: Props) {
         {/* Notification Settings */}
         <div className="sc up" style={{ gridColumn: "1 / -1", marginTop: "10px" }}>
           <h2 className="h2" style={{ marginBottom: "8px" }}>
-            Уведомления и алерты биометрии
+            {t.alertsSectionTitle}
           </h2>
           <p className="cap" style={{ marginBottom: "16px" }}>
-            Автоматические триггеры звукового и визуального оповещения в жилом модуле
+            {t.alertsSectionSubtitle}
           </p>
 
           <div className="pref">
             <div>
               <div className="row">
                 <div>
-                  <div className="lb">Превышение ЧСС (Тахикардия)</div>
-                  <div className="sub">Звуковой сигнал при пульсе свыше порога в покое</div>
+                  <div className="lb" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <Heart size={15} style={{ color: "var(--hr)" }} /> {t.alertTachycardia}
+                  </div>
+                  <div className="sub">{t.alertTachycardiaSub}</div>
                 </div>
                 <label className="sw">
                   <input
                     type="checkbox"
                     checked={notifyHr}
-                    onChange={(e) => setNotifyHr(e.target.checked)}
+                    onChange={(e) => handleToggleHr(e.target.checked)}
                   />
                   <span className="slider" />
                 </label>
@@ -234,14 +292,16 @@ export function SettingsView({ theme, onThemeChange }: Props) {
 
               <div className="row">
                 <div>
-                  <div className="lb">Критическая десатурация SpO₂</div>
-                  <div className="sub">Активация при падении кислорода ниже 94%</div>
+                  <div className="lb" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <Droplets size={15} style={{ color: "var(--o2)" }} /> {t.alertSpo2}
+                  </div>
+                  <div className="sub">{t.alertSpo2Sub}</div>
                 </div>
                 <label className="sw">
                   <input
                     type="checkbox"
                     checked={notifySpo2}
-                    onChange={(e) => setNotifySpo2(e.target.checked)}
+                    onChange={(e) => handleToggleSpo2(e.target.checked)}
                   />
                   <span className="slider" />
                 </label>
@@ -251,14 +311,16 @@ export function SettingsView({ theme, onThemeChange }: Props) {
             <div>
               <div className="row">
                 <div>
-                  <div className="lb">Дефицит фазы глубокого сна</div>
-                  <div className="sub">Оповещение врача экипажа при сокращении SWS</div>
+                  <div className="lb" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <MoonStar size={15} style={{ color: "var(--sl)" }} /> {t.alertSleepDeficit}
+                  </div>
+                  <div className="sub">{t.alertSleepDeficitSub}</div>
                 </div>
                 <label className="sw">
                   <input
                     type="checkbox"
                     checked={notifySleep}
-                    onChange={(e) => setNotifySleep(e.target.checked)}
+                    onChange={(e) => handleToggleSleep(e.target.checked)}
                   />
                   <span className="slider" />
                 </label>
@@ -266,11 +328,17 @@ export function SettingsView({ theme, onThemeChange }: Props) {
 
               <div className="row">
                 <div>
-                  <div className="lb">Радиационный шторм (SPE Warning)</div>
-                  <div className="sub">Автоматический приказ занять радиационное убежище</div>
+                  <div className="lb" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <Radio size={15} style={{ color: "var(--cr)" }} /> {t.alertRadiation}
+                  </div>
+                  <div className="sub">{t.alertRadiationSub}</div>
                 </div>
                 <label className="sw">
-                  <input type="checkbox" defaultChecked />
+                  <input
+                    type="checkbox"
+                    checked={notifyRad}
+                    onChange={(e) => handleToggleRad(e.target.checked)}
+                  />
                   <span className="slider" />
                 </label>
               </div>

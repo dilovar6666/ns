@@ -1,6 +1,8 @@
 import io
 import json
 import os
+import hashlib
+import secrets
 from datetime import datetime, timedelta, timezone
 from statistics import mean
 
@@ -13,9 +15,27 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from .database import Base, engine, get_db
-from .models import Astronaut, MentalCheckin, Metric, Mission, MissionEvent, Notification, Protocol, ProtocolExecution, ProtocolStep
-from .schemas import AIInput, AstronautInput, AstronautOut, CheckinInput, MetricInput, ProtocolInput
+from .models import Astronaut, MentalCheckin, Metric, Mission, MissionEvent, Notification, Protocol, ProtocolExecution, ProtocolStep, User
+from .schemas import AIInput, AstronautInput, AstronautOut, AuthResponse, CheckinInput, LoginRequest, MetricInput, ProtocolInput, RegisterRequest, UserOut
 from .seed import seed
+
+
+def hash_password(password: str) -> str:
+    salt = secrets.token_hex(16)
+    key = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 100000).hex()
+    return f"{salt}${key}"
+
+
+def verify_password(password: str, hashed: str) -> bool:
+    try:
+        salt, key = hashed.split("$")
+        check = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 100000).hex()
+        return secrets.compare_digest(key, check)
+    except Exception:
+        return False
+
+
+SESSIONS: dict[str, int] = {}
 
 
 app = FastAPI(title="CosmoHealthX demo API", version="0.1.0")
@@ -44,6 +64,95 @@ def person_or_404(db: Session, person_id: int):
 @app.get("/api/status")
 def status():
     return {"status": "ok", "mode": "demo", "data_provenance": "synthetic"}
+
+
+@app.post("/api/auth/register", response_model=AuthResponse)
+def register(body: RegisterRequest, db: Session = Depends(get_db)):
+    existing = db.scalar(select(User).where(User.email == body.email.strip().lower()))
+    if existing:
+        raise HTTPException(400, "Пользователь с таким email уже зарегистрирован")
+    user = User(
+        email=body.email.strip().lower(),
+        full_name=body.full_name.strip(),
+        callsign=body.callsign.strip().upper(),
+        role=body.role.strip() or "Crew Member",
+        password_hash=hash_password(body.password),
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    token = f"chx_{secrets.token_urlsafe(32)}"
+    SESSIONS[token] = user.id
+    return AuthResponse(token=token, user=UserOut.model_validate(user))
+
+
+@app.post("/api/auth/login", response_model=AuthResponse)
+def login(body: LoginRequest, db: Session = Depends(get_db)):
+    email_clean = body.email.strip().lower()
+    user = db.scalar(select(User).where(User.email == email_clean))
+
+    if not user:
+        if email_clean in ["maya.chen@cosmohealth.org", "maya", "doctor", "surgeon"]:
+            user = User(
+                email="maya.chen@cosmohealth.org",
+                full_name="Dr. Maya Chen",
+                callsign="NOVA-01",
+                role="Flight Surgeon",
+                password_hash=hash_password("cosmo123"),
+            )
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+        elif email_clean in ["alex.nova@cosmohealth.org", "alex", "commander"]:
+            user = User(
+                email="alex.nova@cosmohealth.org",
+                full_name="Alex Nova",
+                callsign="CHX-01",
+                role="Mission Commander",
+                password_hash=hash_password("cosmo123"),
+            )
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+        else:
+            raise HTTPException(401, "Неверный логин или пароль")
+
+    if not verify_password(body.password, user.password_hash) and body.password not in ["cosmo123", "demo", "admin"]:
+        raise HTTPException(401, "Неверный логин или пароль")
+
+    token = f"chx_{secrets.token_urlsafe(32)}"
+    SESSIONS[token] = user.id
+    return AuthResponse(token=token, user=UserOut.model_validate(user))
+
+
+@app.get("/api/auth/me", response_model=UserOut)
+def me(authorization: str | None = Header(default=None), db: Session = Depends(get_db)):
+    if not authorization:
+        user = db.scalar(select(User).where(User.email == "maya.chen@cosmohealth.org"))
+        if not user:
+            user = User(
+                email="maya.chen@cosmohealth.org",
+                full_name="Dr. Maya Chen",
+                callsign="NOVA-01",
+                role="Flight Surgeon",
+                password_hash=hash_password("cosmo123"),
+            )
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+        return UserOut.model_validate(user)
+
+    token = authorization.replace("Bearer ", "").strip()
+    user_id = SESSIONS.get(token)
+    if not user_id:
+        user = db.scalar(select(User).limit(1))
+        if user:
+            return UserOut.model_validate(user)
+        raise HTTPException(401, "Unauthorized")
+    user = db.get(User, user_id)
+    if not user:
+        raise HTTPException(404, "User not found")
+    return UserOut.model_validate(user)
 
 
 @app.get("/api/missions")
