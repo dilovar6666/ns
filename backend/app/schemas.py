@@ -34,8 +34,10 @@ class CheckinInput(BaseModel):
 
 
 class AIInput(BaseModel):
-    astronaut_id: int
-    question: str = Field(min_length=2, max_length=2000)
+    astronaut_id: Optional[int] = 1
+    question: Optional[str] = None
+    query: Optional[str] = None
+    metrics_snapshot: Optional[list] = None
 
 
 class ProtocolInput(BaseModel):

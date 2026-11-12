@@ -47,6 +47,7 @@ import { ProtocolsView } from "./views/ProtocolsView";
 import { TimelineView } from "./views/TimelineView";
 import { EvidenceView } from "./views/EvidenceView";
 import { Astronaut3DView } from "./views/Astronaut3DView";
+import { FloatingAIChat } from "./components/FloatingAIChat";
 
 export default function App() {
   const queryClient = useQueryClient();
@@ -535,6 +536,9 @@ export default function App() {
           <span>Профиль</span>
         </NavLink>
       </nav>
+
+      {/* Floating AI Assistant Chat Button and Drawer */}
+      <FloatingAIChat astronaut={currentAstronaut} metrics={metrics} />
     </div>
   );
 }
