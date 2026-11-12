@@ -1,25 +1,17 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  User,
   Heart,
   Droplets,
   Moon,
   Footprints,
-  Shield,
-  Activity,
-  Award,
   Calendar,
   Save,
   CheckCircle,
-  ExternalLink,
   Settings,
   LayoutDashboard,
-  Brain,
-  Radio,
-  Flame,
-  Clock,
-  Sparkles,
+  Award,
+  Activity,
 } from "lucide-react";
 import type { Astronaut, Metric } from "../api";
 import { latest } from "../api";
@@ -64,22 +56,19 @@ export function ProfileView({
     .toUpperCase();
 
   return (
-    <div className="wrapc" style={{ maxWidth: "1280px", margin: "0 auto", paddingBottom: "70px" }}>
-      {/* Top Header */}
-      <header className="tb" style={{ marginBottom: "20px" }}>
+    <div className="wrapc" style={{ maxWidth: "1240px", margin: "0 auto", paddingBottom: "70px" }}>
+      {/* Top Breadcrumb & Page Header */}
+      <header style={{ marginBottom: "24px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
-          <div className="up">
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-              <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "var(--pr)" }}>
-                СРЕДА, 11 НОЯБРЯ · ЛИЧНОЕ ДЕЛО АСТРОНАВТА
-              </span>
-              <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "12px", background: "rgba(16, 185, 129, 0.15)", color: "#10b981", fontWeight: 600 }}>
-                ● Активная медицинская карта
-              </span>
+          <div>
+            <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "1.2px", textTransform: "uppercase", color: "var(--t3)", marginBottom: "4px" }}>
+              СРЕДА, 11 НОЯБРЯ
             </div>
-            <h1 className="lt disp" style={{ margin: "0 0 6px" }}>Astronaut Profile</h1>
-            <p className="sub" style={{ margin: 0, maxWidth: "780px", color: "var(--t2)" }}>
-              Профиль, миссия, биометрические базовые уровни и персонализированные пороги оповещения NASA STD-3001.
+            <h1 className="disp" style={{ fontSize: "34px", fontWeight: 700, margin: "0 0 6px", letterSpacing: "-0.03em" }}>
+              Astronaut Profile
+            </h1>
+            <p style={{ margin: 0, fontSize: "13px", color: "var(--t2)" }}>
+              • Профиль, миссия и предпочтения. Демо-данные
             </p>
           </div>
 
@@ -111,148 +100,108 @@ export function ProfileView({
         </div>
       </header>
 
-      {/* Hero Header Card with 3D Interactive Astronaut Model */}
-      <div
+      {/* Seamless Hero Row: Info on Left, 3D Helmet on Right (NO outer card, NO frame/box) */}
+      <section
         style={{
-          background: "radial-gradient(circle at 75% 40%, rgba(20, 35, 60, 0.8) 0%, rgba(5, 10, 18, 0.95) 100%)",
-          border: "1px solid var(--sep)",
-          borderRadius: "24px",
-          padding: "28px 32px",
-          marginBottom: "28px",
           display: "grid",
           gridTemplateColumns: "1.2fr 1fr",
           alignItems: "center",
           gap: "24px",
-          boxShadow: "0 12px 40px rgba(0, 0, 0, 0.35)",
+          marginBottom: "36px",
           position: "relative",
-          overflow: "hidden",
         }}
       >
-        {/* Left Info Column */}
-        <div style={{ zIndex: 10 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px" }}>
-            {/* Initials Avatar */}
+        {/* Left: Astronaut Profile Information */}
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "20px" }}>
+            {/* Round Initials Avatar Badge */}
             <div
               style={{
-                width: "68px",
-                height: "68px",
-                borderRadius: "20px",
-                background: "linear-gradient(135deg, var(--pr) 0%, #1e40af 100%)",
+                width: "72px",
+                height: "72px",
+                borderRadius: "50%",
+                background: "rgba(255, 255, 255, 0.12)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: "24px",
-                fontWeight: 900,
-                color: "#fff",
-                boxShadow: "0 8px 24px rgba(59, 130, 246, 0.4)",
-                border: "2px solid rgba(255, 255, 255, 0.2)",
+                fontSize: "22px",
+                fontWeight: 700,
+                color: "#FFFFFF",
+                border: "1px solid rgba(255, 255, 255, 0.18)",
+                flexShrink: 0,
               }}
             >
               {initials}
             </div>
 
             <div>
-              <div style={{ fontSize: "11px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1.2px", color: "var(--pr)" }}>
+              <div style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.2px", color: "var(--t3)", marginBottom: "4px" }}>
                 ASTRONAUT PROFILE
               </div>
-              <h1 style={{ margin: "2px 0 4px", fontSize: "32px", fontWeight: 800, color: "#fff", lineHeight: "1.2" }}>
+              <h2 style={{ margin: 0, fontSize: "34px", fontWeight: 800, color: "#FFFFFF", letterSpacing: "-0.02em" }}>
                 {astronautName}
-              </h1>
-              <div style={{ fontSize: "14px", color: "rgba(255, 255, 255, 0.75)" }}>
+              </h2>
+              <div style={{ fontSize: "14px", color: "var(--t2)", marginTop: "4px" }}>
                 {astronaut?.specialty || "Бортинженер, экипаж демо-миссии CHX-01"}
               </div>
             </div>
           </div>
 
-          {/* Badges Row */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "24px" }}>
+          {/* Status Badges */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "26px" }}>
             <span
               style={{
-                background: "rgba(255, 255, 255, 0.1)",
-                border: "1px solid rgba(255, 255, 255, 0.18)",
-                padding: "5px 12px",
-                borderRadius: "10px",
+                background: "rgba(255, 255, 255, 0.08)",
+                border: "1px solid rgba(255, 255, 255, 0.14)",
+                padding: "6px 14px",
+                borderRadius: "999px",
                 fontSize: "12px",
-                fontWeight: 700,
-                color: "#fff",
+                fontWeight: 600,
+                color: "rgba(255, 255, 255, 0.85)",
               }}
             >
-              ID: CHX-01-AN-0{astronaut?.id || 1}
+              ID: CHX-01-AN-0{astronaut?.id || 7}
             </span>
 
             <span
               style={{
-                background: "rgba(16, 185, 129, 0.2)",
-                border: "1px solid rgba(16, 185, 129, 0.4)",
-                padding: "5px 12px",
-                borderRadius: "10px",
+                background: "rgba(16, 185, 129, 0.15)",
+                border: "1px solid rgba(16, 185, 129, 0.35)",
+                padding: "6px 14px",
+                borderRadius: "999px",
                 fontSize: "12px",
-                fontWeight: 700,
-                color: "#10b981",
-                display: "flex",
+                fontWeight: 600,
+                color: "#34D399",
+                display: "inline-flex",
                 alignItems: "center",
-                gap: "5px",
+                gap: "6px",
               }}
             >
-              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#10b981", boxShadow: "0 0 6px #10b981" }} />
-              Миссия активна · Class I Flight
-            </span>
-
-            <span
-              style={{
-                background: "rgba(59, 130, 246, 0.2)",
-                border: "1px solid rgba(59, 130, 246, 0.4)",
-                padding: "5px 12px",
-                borderRadius: "10px",
-                fontSize: "12px",
-                fontWeight: 700,
-                color: "var(--cy)",
-              }}
-            >
-              Позывной: "{astronaut?.callsign || "NOVA-01"}"
+              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#34D399" }} />
+              Миссия активна
             </span>
           </div>
 
-          {/* Quick Action Navigation Buttons */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+          {/* Action Buttons */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
             <Link
               to="/dashboard"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "8px",
-                padding: "10px 18px",
-                borderRadius: "12px",
-                background: "var(--pr)",
-                color: "#fff",
-                fontSize: "13px",
+                padding: "11px 24px",
+                borderRadius: "999px",
+                background: "#FFFFFF",
+                color: "#000000",
+                fontSize: "14px",
                 fontWeight: 700,
                 textDecoration: "none",
-                boxShadow: "0 4px 14px rgba(59, 130, 246, 0.35)",
+                boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
               }}
             >
               <LayoutDashboard size={16} />
               <span>Открыть Dashboard</span>
-            </Link>
-
-            <Link
-              to="/mental"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "10px 18px",
-                borderRadius: "12px",
-                background: "rgba(255, 255, 255, 0.1)",
-                border: "1px solid rgba(255, 255, 255, 0.2)",
-                color: "#fff",
-                fontSize: "13px",
-                fontWeight: 600,
-                textDecoration: "none",
-              }}
-            >
-              <Brain size={16} />
-              <span>Тестирование</span>
             </Link>
 
             <Link
@@ -261,12 +210,12 @@ export function ProfileView({
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "8px",
-                padding: "10px 18px",
-                borderRadius: "12px",
-                background: "rgba(255, 255, 255, 0.1)",
-                border: "1px solid rgba(255, 255, 255, 0.2)",
-                color: "#fff",
-                fontSize: "13px",
+                padding: "11px 22px",
+                borderRadius: "999px",
+                background: "rgba(255, 255, 255, 0.08)",
+                border: "1px solid rgba(255, 255, 255, 0.18)",
+                color: "#FFFFFF",
+                fontSize: "14px",
                 fontWeight: 600,
                 textDecoration: "none",
               }}
@@ -277,20 +226,21 @@ export function ProfileView({
           </div>
         </div>
 
-        {/* Right Side: Interactive 3D Astronaut Model Viewport */}
+        {/* Right: 3D Helmet ONLY - Completely seamless, NO box, NO card border */}
         <div
           style={{
-            height: "320px",
+            height: "360px",
             position: "relative",
-            borderRadius: "20px",
-            background: "radial-gradient(circle at center, rgba(34, 211, 238, 0.1) 0%, transparent 70%)",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
-            overflow: "hidden",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "transparent",
+            overflow: "visible",
           }}
         >
           <AstronautProfileCanvas />
         </div>
-      </div>
+      </section>
 
       {savedToast && (
         <div
@@ -314,7 +264,7 @@ export function ProfileView({
         </div>
       )}
 
-      {/* Main Two-Column Grid: Mission Info & Monitoring Overview */}
+      {/* Main Two-Column Grid: Mission Info & Monitoring Overview (exactly matching design) */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: "28px" }}>
         {/* Mission Information Card */}
         <div
@@ -331,7 +281,7 @@ export function ProfileView({
               <Calendar size={18} style={{ color: "var(--pr)" }} />
               <span>Mission Information</span>
             </h2>
-            <span style={{ fontSize: "11px", color: "var(--t3)" }}>Обновлено: сегодня, 14:32</span>
+            <span style={{ fontSize: "11px", color: "var(--t3)" }}>Обновлено сегодня, 14:32</span>
           </div>
 
           {/* Big Progress */}
@@ -341,7 +291,7 @@ export function ProfileView({
                 День 42 <span style={{ fontSize: "15px", fontWeight: 500, color: "var(--t3)" }}>из 180</span>
               </span>
               <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--pr)" }}>
-                23.3% выполнено
+                23%
               </span>
             </div>
             <div style={{ width: "100%", height: "6px", background: "var(--s1)", borderRadius: "6px", overflow: "hidden", marginTop: "10px" }}>
@@ -349,30 +299,25 @@ export function ProfileView({
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "13px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid var(--sep)" }}>
-              <span style={{ color: "var(--t3)" }}>Название миссии:</span>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px", fontSize: "13px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: "10px", borderBottom: "1px solid var(--sep)" }}>
+              <span style={{ color: "var(--t3)" }}>Название миссии</span>
               <span style={{ fontWeight: 600 }}>CHX-01, демонстрационная</span>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid var(--sep)" }}>
-              <span style={{ color: "var(--t3)" }}>Продолжительность:</span>
+            <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: "10px", borderBottom: "1px solid var(--sep)" }}>
+              <span style={{ color: "var(--t3)" }}>Продолжительность</span>
               <span style={{ fontWeight: 600 }}>180 дней</span>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid var(--sep)" }}>
-              <span style={{ color: "var(--t3)" }}>Начало и окончание:</span>
+            <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: "10px", borderBottom: "1px solid var(--sep)" }}>
+              <span style={{ color: "var(--t3)" }}>Начало и окончание</span>
               <span style={{ fontWeight: 600 }}>1 окт 2026 — 29 мар 2027</span>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid var(--sep)" }}>
-              <span style={{ color: "var(--t3)" }}>Выходы в открытый космос (EVA):</span>
-              <span style={{ fontWeight: 600 }}>2 выхода (13ч 40м суммарно)</span>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid var(--sep)" }}>
-              <span style={{ color: "var(--t3)" }}>Накопленная радиационная доза:</span>
-              <span style={{ fontWeight: 700, color: "#10b981" }}>26.04 мЗв (в пределах лимита)</span>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 0" }}>
-              <span style={{ color: "var(--t3)" }}>Статус готовности:</span>
-              <span style={{ fontWeight: 700, color: "#10b981" }}>● Активна (Годен к полету)</span>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span style={{ color: "var(--t3)" }}>Статус</span>
+              <span style={{ fontWeight: 700, color: "#10b981", display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#10b981" }} />
+                Активна
+              </span>
             </div>
           </div>
         </div>
@@ -396,14 +341,14 @@ export function ProfileView({
                 <Activity size={18} style={{ color: "var(--cy)" }} />
                 <span>Monitoring Overview</span>
               </h2>
-              <Link to="/monitoring" style={{ fontSize: "12px", color: "var(--pr)", textDecoration: "none", fontWeight: 600 }}>
-                Телеметрия →
+              <Link to="/analytics" style={{ fontSize: "12px", color: "var(--pr)", textDecoration: "none", fontWeight: 600 }}>
+                Analytics &gt;
               </Link>
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               {/* Heart Rate */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 14px", background: "var(--s2)", borderRadius: "12px", border: "1px solid var(--sep)" }}>
+              <Link to="/monitoring" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 14px", background: "var(--s2)", borderRadius: "12px", border: "1px solid var(--sep)", textDecoration: "none", color: "inherit" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                   <Heart size={16} color="var(--hr)" />
                   <div>
@@ -411,11 +356,11 @@ export function ProfileView({
                     <div style={{ fontSize: "11px", color: "var(--t3)" }}>{currentHr} bpm</div>
                   </div>
                 </div>
-                <span style={{ fontSize: "11px", fontWeight: 700, color: "#10b981" }}>● В диапазоне</span>
-              </div>
+                <span style={{ fontSize: "11px", fontWeight: 700, color: "#10b981" }}>● В диапазоне &gt;</span>
+              </Link>
 
               {/* SpO2 */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 14px", background: "var(--s2)", borderRadius: "12px", border: "1px solid var(--sep)" }}>
+              <Link to="/monitoring" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 14px", background: "var(--s2)", borderRadius: "12px", border: "1px solid var(--sep)", textDecoration: "none", color: "inherit" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                   <Droplets size={16} color="var(--cy)" />
                   <div>
@@ -423,11 +368,11 @@ export function ProfileView({
                     <div style={{ fontSize: "11px", color: "var(--t3)" }}>{currentSpo2}%</div>
                   </div>
                 </div>
-                <span style={{ fontSize: "11px", fontWeight: 700, color: "#10b981" }}>● В диапазоне</span>
-              </div>
+                <span style={{ fontSize: "11px", fontWeight: 700, color: "#10b981" }}>● В диапазоне &gt;</span>
+              </Link>
 
               {/* Sleep */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 14px", background: "var(--s2)", borderRadius: "12px", border: "1px solid var(--sep)" }}>
+              <Link to="/monitoring" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 14px", background: "var(--s2)", borderRadius: "12px", border: "1px solid var(--sep)", textDecoration: "none", color: "inherit" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                   <Moon size={16} color="#8b5cf6" />
                   <div>
@@ -435,20 +380,20 @@ export function ProfileView({
                     <div style={{ fontSize: "11px", color: "var(--t3)" }}>7 ч 30 мин</div>
                   </div>
                 </div>
-                <span style={{ fontSize: "11px", fontWeight: 700, color: "#f59e0b" }}>Требует внимания</span>
-              </div>
+                <span style={{ fontSize: "11px", fontWeight: 700, color: "#f59e0b" }}>Требует внимания &gt;</span>
+              </Link>
 
               {/* Physical Activity */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 14px", background: "var(--s2)", borderRadius: "12px", border: "1px solid var(--sep)" }}>
+              <Link to="/monitoring" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 14px", background: "var(--s2)", borderRadius: "12px", border: "1px solid var(--sep)", textDecoration: "none", color: "inherit" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                   <Footprints size={16} color="var(--pr)" />
                   <div>
                     <div style={{ fontSize: "13px", fontWeight: 600 }}>Physical Activity</div>
-                    <div style={{ fontSize: "11px", color: "var(--t3)" }}>8 230 шагов (ARED + T2)</div>
+                    <div style={{ fontSize: "11px", color: "var(--t3)" }}>8 230 шагов</div>
                   </div>
                 </div>
-                <span style={{ fontSize: "11px", fontWeight: 700, color: "#10b981" }}>● В диапазоне</span>
-              </div>
+                <span style={{ fontSize: "11px", fontWeight: 700, color: "#10b981" }}>● В диапазоне &gt;</span>
+              </Link>
             </div>
           </div>
 
@@ -469,9 +414,9 @@ export function ProfileView({
               fontWeight: 600,
             }}
           >
-            <span>Уведомления и алерты</span>
+            <span>Уведомления</span>
             <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "10px", background: "rgba(239, 68, 68, 0.2)", color: "#ef4444", fontWeight: 700 }}>
-              2 активных
+              2
             </span>
           </Link>
         </div>
@@ -490,7 +435,7 @@ export function ProfileView({
         >
           <h2 style={{ margin: "0 0 16px", fontSize: "17px", fontWeight: 700, display: "flex", alignItems: "center", gap: "8px" }}>
             <Award size={18} style={{ color: "var(--pr)" }} />
-            <span>Monitoring Baseline (ЦПК им. Гагарина)</span>
+            <span>Monitoring Baseline (ЦПК)</span>
           </h2>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -521,7 +466,7 @@ export function ProfileView({
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "var(--s2)", borderRadius: "12px", border: "1px solid var(--sep)" }}>
               <div>
                 <div style={{ fontSize: "13px", fontWeight: 600 }}>Переносимость перегрузок +Gz</div>
-                <div style={{ fontSize: "11px", color: "var(--t3)" }}>Центрифуга ЦФ-18 (Вращающееся плечо 18м)</div>
+                <div style={{ fontSize: "11px", color: "var(--t3)" }}>Центрифуга ЦФ-18</div>
               </div>
               <span style={{ fontSize: "15px", fontWeight: 700, color: "#10b981" }}>+7.5 Gz (30 сек)</span>
             </div>
