@@ -1,9 +1,60 @@
-import React, { useRef, useMemo, useEffect } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import React, { useRef, useMemo, useState, useEffect } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 
 interface EarthProps {
   onLoaded?: () => void;
+}
+
+const FLY_DURATION = 3.6;
+
+function CameraFlyAndOrbit() {
+  const { camera } = useThree();
+  const [flyComplete, setFlyComplete] = useState(false);
+  const startTimeRef = useRef<number | null>(null);
+
+  useFrame((state) => {
+    if (startTimeRef.current === null) {
+      startTimeRef.current = state.clock.getElapsedTime();
+    }
+    const elapsed = state.clock.getElapsedTime() - startTimeRef.current;
+
+    if (elapsed < FLY_DURATION) {
+      const p = Math.min(elapsed / FLY_DURATION, 1.0);
+      // Quintic ease-out for dramatic deceleration as we reach Earth orbit
+      const ease = 1.0 - Math.pow(1.0 - p, 3.8);
+
+      // Start far in deep space at z = 18.0 and fly into orbital observation distance z = 4.6
+      const startZ = 18.0;
+      const targetZ = 4.6;
+      camera.position.z = startZ + (targetZ - startZ) * ease;
+
+      const startY = 1.4;
+      const targetY = 0.0;
+      camera.position.y = startY + (targetY - startY) * ease;
+
+      const startX = 0.35;
+      const targetX = 0.0;
+      camera.position.x = startX + (targetX - startX) * ease;
+
+      camera.lookAt(0, 0, 0);
+    } else if (!flyComplete) {
+      camera.position.set(0, 0, 4.6);
+      camera.lookAt(0, 0, 0);
+      setFlyComplete(true);
+    }
+  });
+
+  return flyComplete ? (
+    <OrbitControls
+      enableZoom={false}
+      enablePan={false}
+      rotateSpeed={0.6}
+      minPolarAngle={Math.PI * 0.2}
+      maxPolarAngle={Math.PI * 0.8}
+    />
+  ) : null;
 }
 
 function EarthGlobe({ onLoaded }: EarthProps) {
@@ -11,6 +62,7 @@ function EarthGlobe({ onLoaded }: EarthProps) {
   const cloudsRef = useRef<THREE.Mesh>(null);
   const atmosphereRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null);
+  const startTimeRef = useRef<number | null>(null);
 
   // Load 8k textures
   const textureLoader = useMemo(() => new THREE.TextureLoader(), []);
@@ -34,11 +86,11 @@ function EarthGlobe({ onLoaded }: EarthProps) {
     onLoaded?.();
   }, [onLoaded]);
 
-  // Sun direction: pointing from top-right-front towards earth
-  // This lights up the eastern hemisphere rim while leaving camera-facing side as night
-  const sunDir = useMemo(() => new THREE.Vector3(2.4, 0.8, -1.2).normalize(), []);
+  // Sun direction: lights up the right-front side (visible blue oceans, clouds & specular reflection)
+  // while the left-back side displays golden city night lights across the terminator.
+  const sunDir = useMemo(() => new THREE.Vector3(1.8, 0.6, 1.0).normalize(), []);
 
-  // Earth shader material
+  // Earth shader material with smooth day-night terminator, specular oceans, and Rayleigh rim glow
   const earthMaterial = useMemo(() => {
     return new THREE.ShaderMaterial({
       uniforms: {
@@ -80,19 +132,19 @@ function EarthGlobe({ onLoaded }: EarthProps) {
           vec4 specMap = texture2D(specularTexture, vUv);
 
           // Terminator smoothing
-          float dayFactor = smoothstep(-0.12, 0.22, nDotL);
+          float dayFactor = smoothstep(-0.15, 0.25, nDotL);
 
           // Specular highlight on water
           vec3 viewDir = normalize(-vPosition);
           vec3 halfVec = normalize(sun + viewDir);
-          float spec = pow(max(dot(normal, halfVec), 0.0), 28.0) * specMap.r * 1.6;
+          float spec = pow(max(dot(normal, halfVec), 0.0), 32.0) * specMap.r * 1.8;
 
           // Atmospheric Fresnel rim glow
           float fresnel = pow(1.0 - max(dot(viewDir, normal), 0.0), 2.2);
-          vec3 atmoGlow = vec3(0.15, 0.72, 1.0) * fresnel * max(nDotL + 0.35, 0.0) * 1.2;
+          vec3 atmoGlow = vec3(0.18, 0.74, 1.0) * fresnel * max(nDotL + 0.35, 0.0) * 1.35;
 
           // Golden night city lights
-          vec3 nightLights = nightColor.rgb * vec3(1.35, 1.2, 0.95) * 2.2;
+          vec3 nightLights = nightColor.rgb * vec3(1.35, 1.2, 0.95) * 2.4;
 
           vec3 finalColor = mix(nightLights, dayColor.rgb + vec3(spec), dayFactor) + atmoGlow;
           gl_FragColor = vec4(finalColor, 1.0);
@@ -131,8 +183,8 @@ function EarthGlobe({ onLoaded }: EarthProps) {
         void main() {
           vec4 cloud = texture2D(cloudTexture, vUv);
           float nDotL = max(dot(normalize(vNormal), normalize(sunDirection)), 0.0);
-          float light = clamp(nDotL * 1.1 + 0.1, 0.1, 1.0);
-          gl_FragColor = vec4(cloud.rgb * light, cloud.r * 0.7);
+          float light = clamp(nDotL * 1.15 + 0.1, 0.1, 1.0);
+          gl_FragColor = vec4(cloud.rgb * light, cloud.r * 0.75);
         }
       `,
     });
@@ -161,45 +213,62 @@ function EarthGlobe({ onLoaded }: EarthProps) {
 
         void main() {
           vec3 viewDir = normalize(-vPosition);
-          float intensity = pow(0.68 - dot(normalize(vNormal), viewDir), 2.2);
-          gl_FragColor = vec4(0.2, 0.78, 1.0, 1.0) * intensity * 1.5;
+          float intensity = pow(0.72 - dot(normalize(vNormal), viewDir), 2.2);
+          gl_FragColor = vec4(0.22, 0.8, 1.0, 1.0) * intensity * 1.6;
         }
       `,
     });
   }, []);
 
-  // Animation frame loop: Earth spins slowly, clouds drift
+  // Animation frame loop:
+  // Starts fast spinning when camera is far away, smoothly decelerates as camera approaches,
+  // then keeps spinning continuously at cruising orbital speed.
   useFrame((state, delta) => {
+    if (startTimeRef.current === null) {
+      startTimeRef.current = state.clock.getElapsedTime();
+    }
+    const elapsed = state.clock.getElapsedTime() - startTimeRef.current;
+
+    let spinSpeed = 0.045; // standard steady orbital rotation
+    if (elapsed < FLY_DURATION) {
+      const p = Math.min(elapsed / FLY_DURATION, 1.0);
+      const fastInitialSpeed = 4.2; // fast spin in deep space
+      const cruisingSpeed = 0.045;
+      const decel = Math.pow(1.0 - p, 2.5);
+      spinSpeed = cruisingSpeed + (fastInitialSpeed - cruisingSpeed) * decel;
+    }
+
     if (earthRef.current) {
-      earthRef.current.rotation.y += delta * 0.035;
+      earthRef.current.rotation.y += delta * spinSpeed;
     }
     if (cloudsRef.current) {
-      cloudsRef.current.rotation.y += delta * 0.045;
+      cloudsRef.current.rotation.y += delta * (spinSpeed * 1.15);
     }
-    // Subtle mouse tilt for depth parallax
-    if (groupRef.current) {
-      const mouseX = state.pointer.x * 0.15;
-      const mouseY = state.pointer.y * 0.12;
-      groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, -mouseY, 0.05);
-      groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, mouseX, 0.05);
+
+    // Subtle pointer parallax tilt once settled
+    if (groupRef.current && elapsed >= FLY_DURATION) {
+      const mouseX = state.pointer.x * 0.12;
+      const mouseY = state.pointer.y * 0.10;
+      groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, -mouseY, 0.04);
+      groupRef.current.rotation.z = THREE.MathUtils.lerp(groupRef.current.rotation.z, mouseX * 0.35, 0.04);
     }
   });
 
   return (
-    <group ref={groupRef} position={[-0.35, 0, 0]} rotation={[0.2, 3.8, 0.15]}>
-      {/* Base Earth Sphere */}
+    <group ref={groupRef} position={[-0.08, 0, 0]} rotation={[0.2, 3.6, 0.15]}>
+      {/* Base Earth Sphere - perfectly sized to fit inside viewport */}
       <mesh ref={earthRef} material={earthMaterial}>
-        <sphereGeometry args={[2.0, 64, 64]} />
+        <sphereGeometry args={[1.20, 64, 64]} />
       </mesh>
 
       {/* Cloud Sphere */}
       <mesh ref={cloudsRef} material={cloudMaterial}>
-        <sphereGeometry args={[2.016, 64, 64]} />
+        <sphereGeometry args={[1.212, 64, 64]} />
       </mesh>
 
       {/* Atmosphere Outer Glow */}
       <mesh ref={atmosphereRef} material={atmosphereMaterial}>
-        <sphereGeometry args={[2.14, 64, 64]} />
+        <sphereGeometry args={[1.285, 64, 64]} />
       </mesh>
     </group>
   );
@@ -220,12 +289,13 @@ export function EarthCanvas() {
       }}
     >
       <Canvas
-        camera={{ position: [0, 0, 4.4], fov: 45 }}
+        camera={{ position: [0.35, 1.4, 18.0], fov: 40 }}
         dpr={[1, 1.5]}
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         style={{ width: "100%", height: "100%", background: "transparent" }}
       >
         <ambientLight intensity={0.4} />
+        <CameraFlyAndOrbit />
         <EarthGlobe />
       </Canvas>
     </div>
