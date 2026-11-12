@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Heart,
@@ -13,8 +13,10 @@ import {
   Activity,
   Flame,
   Radio,
+  TrendingUp,
+  TrendingDown,
 } from "lucide-react";
-import type { Astronaut, Metric, Notification } from "../api";
+import type { Astronaut, Metric, Notification, Report } from "../api";
 import { latest } from "../api";
 import { useLanguage } from "../context/LanguageContext";
 
@@ -38,25 +40,88 @@ export function DashboardView({
   const { t, language } = useLanguage();
   const [selectedMetricKey, setSelectedMetricKey] = useState<string>("heart_rate");
   const [period, setPeriod] = useState<"24h" | "7d" | "30d">("24h");
+  const [report, setReport] = useState<Report | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [hoveredPoint, setHoveredPoint] = useState<{
+    x: number;
+    y: number;
+    value: number;
+    time: string;
+  } | null>(null);
 
+  const days = period === "24h" ? 1 : period === "7d" ? 7 : 30;
+
+  // Fetch report data dynamically when astronaut or period changes
+  useEffect(() => {
+    if (!astronaut?.id) return;
+    let cancelled = false;
+    setLoading(true);
+    fetch(`/api/reports/${astronaut.id}?days=${days}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch report");
+        return res.json();
+      })
+      .then((data: Report) => {
+        if (!cancelled) {
+          setReport(data);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error("Dashboard report fetch error:", err);
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [astronaut?.id, days]);
+
+  // Telemetry extraction
   const latestList = useMemo(() => latest(metrics), [metrics]);
-  const hr = latestList.find((m) => m.key === "heart_rate")?.value ?? 72;
-  const spo2 = latestList.find((m) => m.key === "spo2")?.value ?? 98;
-  const sleep = latestList.find((m) => m.key === "sleep_duration")?.value ?? 7.5;
-  const steps = latestList.find((m) => m.key === "activity")?.value ?? 8230;
-  const temp = latestList.find((m) => m.key === "core_temp")?.value ?? 36.6;
+  const hrLatest = latestList.find((m) => m.key === "heart_rate")?.value ?? 72;
+  const spo2Latest = latestList.find((m) => m.key === "spo2")?.value ?? 98;
+  const sleepLatest = latestList.find((m) => m.key === "sleep_duration")?.value ?? 7.1;
+  const stepsLatest = latestList.find((m) => m.key === "activity")?.value ?? 78;
+  const tempLatest = latestList.find((m) => m.key === "core_temp")?.value ?? 36.6;
+
+  // Report statistics for selected period
+  const hrStat = report?.metrics?.heart_rate;
+  const spo2Stat = report?.metrics?.spo2;
+  const sleepStat = report?.metrics?.sleep_duration;
+  const actStat = report?.metrics?.activity;
+
+  // Period values: for 24h show latest/current, for 7d and 30d show period mean
+  const hrVal = period === "24h" ? Math.round(hrLatest) : hrStat?.mean ? Number(hrStat.mean.toFixed(1)) : 68.2;
+  const spo2Val = period === "24h" ? Math.round(spo2Latest) : spo2Stat?.mean ? Number(spo2Stat.mean.toFixed(1)) : 98.1;
+  const sleepVal = period === "24h" ? sleepLatest : sleepStat?.mean ? Number(sleepStat.mean.toFixed(1)) : 7.2;
+  const actVal = period === "24h" ? Math.round(stepsLatest * 105) : actStat?.mean ? Math.round(actStat.mean * 105) : 8190;
 
   // Unread alerts count
   const unreadCount = notifications.filter((n) => !n.read).length;
   const recentAlerts = notifications.slice(0, 3);
 
-  // Sparkline generator mock
-  const sparklineHeights = {
-    heart_rate: [42, 55, 68, 50, 72, 85, 72],
-    spo2: [98, 97, 98, 99, 98, 97, 98],
-    sleep_duration: [60, 75, 80, 50, 70, 65, 75],
-    activity: [40, 65, 55, 80, 95, 70, 82],
-  };
+  // Dynamic sparkline data extraction from series
+  const sparklineData = useMemo(() => {
+    const getValues = (key: string, defaultVals: number[]) => {
+      if (!report?.series) return defaultVals;
+      const pts = report.series.filter((s) => s.key === key);
+      if (pts.length < 5) return defaultVals;
+      const step = Math.max(1, Math.floor(pts.length / 7));
+      const sampled = [];
+      for (let i = 0; i < pts.length; i += step) {
+        sampled.push(pts[i].value);
+        if (sampled.length === 7) break;
+      }
+      return sampled;
+    };
+
+    return {
+      heart_rate: getValues("heart_rate", [64, 68, 72, 69, 74, 71, 72]),
+      spo2: getValues("spo2", [98, 98, 97.5, 98.5, 98, 98.2, 98]),
+      sleep_duration: getValues("sleep_duration", [6.8, 7.2, 7.5, 6.9, 7.1, 7.4, 7.1]),
+      activity: getValues("activity", [70, 85, 92, 65, 88, 79, 82]),
+    };
+  }, [report?.series]);
 
   const getMetricColor = (key: string) => {
     switch (key) {
@@ -68,34 +133,210 @@ export function DashboardView({
     }
   };
 
-  const metricInfo: Record<string, { name: string; unit: string; range: string; value: string | number }> = {
+  // Detailed information for active metric
+  const metricDetails: Record<
+    string,
+    {
+      name: string;
+      unit: string;
+      nominalText: string;
+      value: string | number;
+      minVal: number;
+      maxVal: number;
+      change: number | null;
+      normBand: [number, number];
+    }
+  > = {
     heart_rate: {
-      name: t.heartRate,
+      name: language === "ru" ? "Пульс (ЧСС)" : "Heart Rate",
       unit: "bpm",
-      range: language === "ru" ? "Норма: 60-100 bpm" : "Nominal: 60-100 bpm",
-      value: Math.round(hr),
+      nominalText: language === "ru" ? "Норма: 60-100 bpm" : "Nominal: 60-100 bpm",
+      value: hrVal,
+      minVal: hrStat?.min ? Math.round(hrStat.min) : 58,
+      maxVal: hrStat?.max ? Math.round(hrStat.max) : 78,
+      change: hrStat?.change_vs_previous ?? 0.3,
+      normBand: [60, 100],
     },
     spo2: {
-      name: t.oxygen,
+      name: language === "ru" ? "Кислород (SpO₂)" : "Oxygen Saturation",
       unit: "%",
-      range: language === "ru" ? "Норма: 95-100%" : "Nominal: 95-100%",
-      value: Math.round(spo2),
+      nominalText: language === "ru" ? "Норма: 95-100%" : "Nominal: 95-100%",
+      value: spo2Val,
+      minVal: spo2Stat?.min ? Number(spo2Stat.min.toFixed(1)) : 97.2,
+      maxVal: spo2Stat?.max ? Number(spo2Stat.max.toFixed(1)) : 99.4,
+      change: spo2Stat?.change_vs_previous ?? 0.1,
+      normBand: [95, 100],
     },
     sleep_duration: {
-      name: t.sleep,
+      name: language === "ru" ? "Длительность сна" : "Sleep Duration",
       unit: language === "ru" ? "ч" : "h",
-      range: language === "ru" ? "Цель: 8.0 ч/сут" : "Goal: 8.0 h/day",
-      value: sleep.toFixed(1),
+      nominalText: language === "ru" ? "Цель: 7.0-9.0 ч/сут" : "Goal: 7.0-9.0 h/day",
+      value: sleepVal,
+      minVal: sleepStat?.min ? Number(sleepStat.min.toFixed(1)) : 6.2,
+      maxVal: sleepStat?.max ? Number(sleepStat.max.toFixed(1)) : 8.4,
+      change: sleepStat?.change_vs_previous ?? -0.3,
+      normBand: [7.0, 9.0],
     },
     activity: {
-      name: t.activity,
+      name: language === "ru" ? "Физическая активность" : "Physical Activity",
       unit: language === "ru" ? "шагов" : "steps",
-      range: language === "ru" ? "Цель: 10 000" : "Goal: 10,000",
-      value: Math.round(steps).toLocaleString(),
+      nominalText: language === "ru" ? "Цель: 10 000 шагов" : "Goal: 10,000 steps",
+      value: Math.round(actVal).toLocaleString(),
+      minVal: actStat?.min ? Math.round(actStat.min * 105) : 5200,
+      maxVal: actStat?.max ? Math.round(actStat.max * 105) : 11500,
+      change: actStat?.change_vs_previous ? Math.round(actStat.change_vs_previous * 105) : 320,
+      normBand: [6000, 12000],
     },
   };
 
-  const activeInfo = metricInfo[selectedMetricKey] || metricInfo.heart_rate;
+  const activeInfo = metricDetails[selectedMetricKey] || metricDetails.heart_rate;
+
+  // Filter series for the active metric
+  const chartSeries = useMemo(() => {
+    if (!report?.series) return [];
+    return report.series
+      .filter((s) => s.key === selectedMetricKey)
+      .map((s) => ({
+        ...s,
+        // Scale activity to steps if selected
+        displayValue: selectedMetricKey === "activity" ? Math.round(s.value * 105) : s.value,
+      }))
+      .sort((a, b) => new Date(a.sampled_at).getTime() - new Date(b.sampled_at).getTime());
+  }, [report?.series, selectedMetricKey]);
+
+  // Compute SVG plot dimensions and coordinates
+  const chartConfig = useMemo(() => {
+    const W = 620;
+    const H = 220;
+    const padL = 44;
+    const padR = 24;
+    const padT = 24;
+    const padB = 36;
+    const plotW = W - padL - padR;
+    const plotH = H - padT - padB;
+
+    if (!chartSeries || chartSeries.length === 0) {
+      // Fallback sinusoidal curve
+      const fallbackPoints = [];
+      const count = period === "24h" ? 24 : period === "7d" ? 14 : 30;
+      for (let i = 0; i < count; i++) {
+        const fracX = i / (count - 1);
+        const x = padL + fracX * plotW;
+        const val =
+          selectedMetricKey === "heart_rate"
+            ? 68 + Math.sin(i * 0.5) * 6
+            : selectedMetricKey === "spo2"
+            ? 98.2 + Math.sin(i * 0.4) * 0.8
+            : selectedMetricKey === "sleep_duration"
+            ? 7.2 + Math.sin(i * 0.6) * 0.6
+            : 8200 + Math.sin(i * 0.5) * 1500;
+        fallbackPoints.push({ x, y: padT + (0.5 + Math.sin(i * 0.5) * 0.3) * plotH, value: val, time: `t-${i}` });
+      }
+
+      let pathD = `M ${fallbackPoints[0].x} ${fallbackPoints[0].y}`;
+      for (let i = 1; i < fallbackPoints.length; i++) {
+        const prev = fallbackPoints[i - 1];
+        const cur = fallbackPoints[i];
+        const cx = (prev.x + cur.x) / 2;
+        pathD += ` C ${cx} ${prev.y}, ${cx} ${cur.y}, ${cur.x} ${cur.y}`;
+      }
+      const areaD = `${pathD} L ${fallbackPoints[fallbackPoints.length - 1].x} ${H - padB} L ${fallbackPoints[0].x} ${H - padB} Z`;
+
+      return { W, H, padL, padR, padT, padB, plotW, plotH, points: fallbackPoints, pathD, areaD, minY: 60, maxY: 100, xLabels: [] };
+    }
+
+    const values = chartSeries.map((s) => s.displayValue);
+    const rawMin = Math.min(...values);
+    const rawMax = Math.max(...values);
+    const span = Math.max(rawMax - rawMin, 1);
+
+    const minY = Number((rawMin - span * 0.15).toFixed(1));
+    const maxY = Number((rawMax + span * 0.15).toFixed(1));
+
+    const points = chartSeries.map((s, idx) => {
+      const fracX = chartSeries.length === 1 ? 0.5 : idx / (chartSeries.length - 1);
+      const fracY = Math.max(0, Math.min(1, (s.displayValue - minY) / (maxY - minY)));
+      const x = padL + fracX * plotW;
+      const y = padT + (1 - fracY) * plotH;
+      const d = new Date(s.sampled_at);
+      const timeStr =
+        period === "24h"
+          ? d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+          : period === "7d"
+          ? `${d.toLocaleDateString([], { weekday: "short" })}, ${d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+          : d.toLocaleDateString([], { month: "short", day: "numeric" });
+      return { x, y, value: s.displayValue, time: timeStr };
+    });
+
+    let pathD = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 1; i < points.length; i++) {
+      const prev = points[i - 1];
+      const cur = points[i];
+      const cx = (prev.x + cur.x) / 2;
+      pathD += ` C ${cx} ${prev.y}, ${cx} ${cur.y}, ${cur.x} ${cur.y}`;
+    }
+
+    const last = points[points.length - 1];
+    const areaD = `${pathD} L ${last.x} ${H - padB} L ${points[0].x} ${H - padB} Z`;
+
+    // Generate 4-5 X-axis label points
+    const step = Math.max(1, Math.floor((points.length - 1) / 4));
+    const xLabels = [];
+    for (let i = 0; i < points.length; i += step) {
+      xLabels.push(points[i]);
+      if (xLabels.length >= 5) break;
+    }
+    if (xLabels[xLabels.length - 1] !== last) {
+      xLabels[xLabels.length - 1] = last;
+    }
+
+    return { W, H, padL, padR, padT, padB, plotW, plotH, points, pathD, areaD, minY, maxY, xLabels };
+  }, [chartSeries, period, selectedMetricKey]);
+
+  // Overall Status dynamic calculation
+  const statusItems = useMemo(() => {
+    const hrOk = hrLatest >= 60 && hrLatest <= 100;
+    const spo2Ok = spo2Latest >= 95;
+    const actOk = stepsLatest >= 60;
+    const sleepOk = sleepLatest >= 7.0;
+    const tempOk = tempLatest >= 36.4 && tempLatest <= 37.4;
+
+    const items = [
+      {
+        name: "Heart Rate",
+        status: hrOk ? (language === "ru" ? "В норме" : "Nominal") : language === "ru" ? "Вне нормы" : "Out of range",
+        ok: hrOk,
+        level: hrOk ? "ok" : "wa",
+      },
+      {
+        name: "Oxygen Saturation",
+        status: spo2Ok ? (language === "ru" ? "В норме" : "Nominal") : language === "ru" ? "Гипоксия" : "Hypoxia warning",
+        ok: spo2Ok,
+        level: spo2Ok ? "ok" : "cr",
+      },
+      {
+        name: "Physical Activity",
+        status: actOk ? (language === "ru" ? "В норме" : "Nominal") : language === "ru" ? "Ниже нормы" : "Below target",
+        ok: actOk,
+        level: actOk ? "ok" : "wa",
+      },
+      {
+        name: "Sleep Architecture",
+        status: sleepOk ? (language === "ru" ? "В норме" : "Nominal") : language === "ru" ? "Требует внимания" : "Attention required",
+        ok: sleepOk,
+        level: sleepOk ? "ok" : "wa",
+      },
+      {
+        name: "Core Temperature",
+        status: `${tempLatest.toFixed(1)} °C`,
+        ok: tempOk,
+        level: "ok",
+      },
+    ];
+
+    const inRange = items.filter((i) => i.ok).length;
+    return { items, inRange };
+  }, [hrLatest, spo2Latest, stepsLatest, sleepLatest, tempLatest, language]);
 
   return (
     <div className="wrapc">
@@ -108,7 +349,8 @@ export function DashboardView({
           </h1>
           <p className="sub">
             <span className="live"></span>
-            3 из 5 биомаркеров в целевом диапазоне, сон требует внимания
+            {statusItems.inRange} из 5 биомаркеров в целевом диапазоне
+            {statusItems.inRange < 5 ? (sleepLatest < 7.0 ? ", сон требует внимания" : ", требуется наблюдение") : ", все показатели в норме"}
           </p>
         </div>
         <div className="tbr up" style={{ animationDelay: "60ms" }}>
@@ -167,25 +409,32 @@ export function DashboardView({
               </svg>
               Heart Rate
             </span>
-            <span className="cap num">14:32</span>
+            <span className="cap num">
+              {period === "24h" ? "14:32" : period === "7d" ? "7 дней" : "30 дней"}
+            </span>
           </span>
           <span className="mb">
             <span className="mv num">
-              <b>{Math.round(hr)}</b>
+              <b>{Math.round(hrVal)}</b>
               <em>bpm</em>
             </span>
             <span className="spk" aria-hidden="true">
-              {sparklineHeights.heart_rate.map((h, i) => (
-                <i
-                  key={i}
-                  className="gr"
-                  style={{
-                    height: `${(h / 90) * 100}%`,
-                    opacity: 0.4 + i * 0.1,
-                    background: "var(--m-hr)",
-                  }}
-                />
-              ))}
+              {sparklineData.heart_rate.map((val, i) => {
+                const max = Math.max(...sparklineData.heart_rate, 85);
+                const min = Math.min(...sparklineData.heart_rate, 55);
+                const hPct = Math.max(25, Math.min(100, ((val - min) / (max - min || 1)) * 100));
+                return (
+                  <i
+                    key={i}
+                    className="gr"
+                    style={{
+                      height: `${hPct}%`,
+                      opacity: 0.4 + i * 0.1,
+                      background: "var(--m-hr)",
+                    }}
+                  />
+                );
+              })}
             </span>
           </span>
         </button>
@@ -204,25 +453,32 @@ export function DashboardView({
               </svg>
               Oxygen Saturation
             </span>
-            <span className="cap num">14:30</span>
+            <span className="cap num">
+              {period === "24h" ? "14:30" : period === "7d" ? "7 дней" : "30 дней"}
+            </span>
           </span>
           <span className="mb">
             <span className="mv num">
-              <b>{Math.round(spo2)}</b>
+              <b>{typeof spo2Val === "number" ? spo2Val.toFixed(period === "24h" ? 0 : 1) : spo2Val}</b>
               <em>%</em>
             </span>
             <span className="spk" aria-hidden="true">
-              {sparklineHeights.spo2.map((h, i) => (
-                <i
-                  key={i}
-                  className="gr"
-                  style={{
-                    height: `${h}%`,
-                    opacity: 0.4 + i * 0.1,
-                    background: "var(--m-spo2)",
-                  }}
-                />
-              ))}
+              {sparklineData.spo2.map((val, i) => {
+                const max = Math.max(...sparklineData.spo2, 99.5);
+                const min = Math.min(...sparklineData.spo2, 96.5);
+                const hPct = Math.max(30, Math.min(100, ((val - min) / (max - min || 1)) * 100));
+                return (
+                  <i
+                    key={i}
+                    className="gr"
+                    style={{
+                      height: `${hPct}%`,
+                      opacity: 0.4 + i * 0.1,
+                      background: "var(--m-spo2)",
+                    }}
+                  />
+                );
+              })}
             </span>
           </span>
         </button>
@@ -241,27 +497,33 @@ export function DashboardView({
               </svg>
               Sleep
             </span>
-            <span className="st wa" style={{ fontSize: "12px" }}>
-              <i></i>Внимание
+            <span className={`st ${sleepVal < 7.0 ? "wa" : "ok"}`} style={{ fontSize: "12px" }}>
+              <i></i>
+              {sleepVal < 7.0 ? "Внимание" : "В норме"}
             </span>
           </span>
           <span className="mb">
             <span className="mv num">
-              <b>{sleep.toFixed(1)}</b>
+              <b>{typeof sleepVal === "number" ? sleepVal.toFixed(1) : sleepVal}</b>
               <em>ч</em>
             </span>
             <span className="spk" aria-hidden="true">
-              {sparklineHeights.sleep_duration.map((h, i) => (
-                <i
-                  key={i}
-                  className="gr"
-                  style={{
-                    height: `${h}%`,
-                    opacity: 0.4 + i * 0.1,
-                    background: "var(--m-sleep)",
-                  }}
-                />
-              ))}
+              {sparklineData.sleep_duration.map((val, i) => {
+                const max = Math.max(...sparklineData.sleep_duration, 8.5);
+                const min = Math.min(...sparklineData.sleep_duration, 5.5);
+                const hPct = Math.max(25, Math.min(100, ((val - min) / (max - min || 1)) * 100));
+                return (
+                  <i
+                    key={i}
+                    className="gr"
+                    style={{
+                      height: `${hPct}%`,
+                      opacity: 0.4 + i * 0.1,
+                      background: "var(--m-sleep)",
+                    }}
+                  />
+                );
+              })}
             </span>
           </span>
         </button>
@@ -283,25 +545,32 @@ export function DashboardView({
               </svg>
               Physical Activity
             </span>
-            <span className="cap num">14:00</span>
+            <span className="cap num">
+              {period === "24h" ? "14:00" : period === "7d" ? "7 дней" : "30 дней"}
+            </span>
           </span>
           <span className="mb">
             <span className="mv num">
-              <b>{Math.round(steps).toLocaleString()}</b>
+              <b>{Math.round(actVal).toLocaleString()}</b>
               <em>шагов</em>
             </span>
             <span className="spk" aria-hidden="true">
-              {sparklineHeights.activity.map((h, i) => (
-                <i
-                  key={i}
-                  className="gr"
-                  style={{
-                    height: `${h}%`,
-                    opacity: 0.4 + i * 0.1,
-                    background: "var(--m-act)",
-                  }}
-                />
-              ))}
+              {sparklineData.activity.map((val, i) => {
+                const max = Math.max(...sparklineData.activity, 110);
+                const min = Math.min(...sparklineData.activity, 50);
+                const hPct = Math.max(25, Math.min(100, ((val - min) / (max - min || 1)) * 100));
+                return (
+                  <i
+                    key={i}
+                    className="gr"
+                    style={{
+                      height: `${hPct}%`,
+                      opacity: 0.4 + i * 0.1,
+                      background: "var(--m-act)",
+                    }}
+                  />
+                );
+              })}
             </span>
           </span>
         </button>
@@ -318,8 +587,24 @@ export function DashboardView({
           <div className="ch">
             <span
               className="lbl"
-              style={{ color: getMetricColor(selectedMetricKey) }}
+              style={{
+                color: getMetricColor(selectedMetricKey),
+                fontWeight: 700,
+                fontSize: "15px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
             >
+              <span
+                style={{
+                  width: "8px",
+                  height: "8px",
+                  borderRadius: "50%",
+                  background: getMetricColor(selectedMetricKey),
+                  display: "inline-block",
+                }}
+              />
               {activeInfo.name}
             </span>
             <div className="flt">
@@ -346,13 +631,36 @@ export function DashboardView({
             }}
           >
             <div>
-              <div className="cap">{activeInfo.name}</div>
-              <div className="big num">
+              <div className="cap" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span>
+                  {period === "24h"
+                    ? (language === "ru" ? "Текущее значение (24 часа)" : "Current reading (24h)")
+                    : period === "7d"
+                    ? (language === "ru" ? "Среднее за 7 дней" : "7-day average")
+                    : (language === "ru" ? "Среднее за 30 дней" : "30-day average")}
+                </span>
+                {activeInfo.change !== null && (
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "2px",
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      color: activeInfo.change >= 0 ? "var(--ok)" : "var(--wa)",
+                    }}
+                  >
+                    {activeInfo.change >= 0 ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
+                    {activeInfo.change > 0 ? `+${activeInfo.change}` : activeInfo.change} {activeInfo.unit}
+                  </span>
+                )}
+              </div>
+              <div className="big num" style={{ marginTop: "2px" }}>
                 <b>{activeInfo.value}</b>
                 <em>{activeInfo.unit}</em>
               </div>
-              <div className="cap num" style={{ marginTop: "4px" }}>
-                {activeInfo.range}
+              <div className="cap num" style={{ marginTop: "4px", color: "var(--t3)", fontSize: "12px" }}>
+                {activeInfo.nominalText} · Мин: <b>{activeInfo.minVal}</b> / Макс: <b>{activeInfo.maxVal}</b> {activeInfo.unit}
               </div>
             </div>
             <Link
@@ -365,24 +673,25 @@ export function DashboardView({
           </div>
 
           {/* SVG Telemetry Chart */}
-          <div style={{ display: "flex", gap: "10px" }}>
+          <div style={{ display: "flex", gap: "10px", flexDirection: "column" }}>
             <div
               className="plot"
               style={{
-                flex: 1,
-                minWidth: 0,
+                width: "100%",
                 height: "220px",
                 position: "relative",
               }}
+              onMouseLeave={() => setHoveredPoint(null)}
             >
+              {/* Target Physiological Band */}
               <div
                 className="band"
                 style={{
-                  top: "25%",
-                  bottom: "25%",
+                  top: "22%",
+                  bottom: "22%",
                   background: "rgba(52, 199, 89, 0.05)",
-                  borderTop: "1px dashed rgba(52, 199, 89, 0.3)",
-                  borderBottom: "1px dashed rgba(52, 199, 89, 0.3)",
+                  borderTop: "1px dashed rgba(52, 199, 89, 0.35)",
+                  borderBottom: "1px dashed rgba(52, 199, 89, 0.35)",
                 }}
               />
               {[0, 25, 50, 75, 100].map((pct) => (
@@ -397,29 +706,112 @@ export function DashboardView({
               <svg
                 width="100%"
                 height="100%"
-                viewBox="0 0 600 220"
+                viewBox={`0 0 ${chartConfig.W} ${chartConfig.H}`}
                 preserveAspectRatio="none"
                 style={{ position: "absolute", inset: 0, overflow: "visible" }}
               >
                 <defs>
                   <linearGradient id="plotGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={getMetricColor(selectedMetricKey)} stopOpacity="0.3" />
+                    <stop offset="0%" stopColor={getMetricColor(selectedMetricKey)} stopOpacity="0.35" />
                     <stop offset="100%" stopColor={getMetricColor(selectedMetricKey)} stopOpacity="0.0" />
                   </linearGradient>
                 </defs>
-                <path
-                  d="M0,150 C80,130 140,90 220,110 C300,130 380,70 460,95 C520,115 570,80 600,85 L600,220 L0,220 Z"
-                  fill="url(#plotGrad)"
-                />
-                <path
-                  d="M0,150 C80,130 140,90 220,110 C300,130 380,70 460,95 C520,115 570,80 600,85"
-                  fill="none"
-                  stroke={getMetricColor(selectedMetricKey)}
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
-                <circle cx="600" cy="85" r="5" fill={getMetricColor(selectedMetricKey)} />
+
+                {/* Area under curve */}
+                {chartConfig.areaD && (
+                  <path
+                    d={chartConfig.areaD}
+                    fill="url(#plotGrad)"
+                    style={{ transition: "d 0.35s ease" }}
+                  />
+                )}
+
+                {/* Spline Curve */}
+                {chartConfig.pathD && (
+                  <path
+                    d={chartConfig.pathD}
+                    fill="none"
+                    stroke={getMetricColor(selectedMetricKey)}
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ transition: "d 0.35s ease" }}
+                  />
+                )}
+
+                {/* Data Points */}
+                {chartConfig.points.map((pt, i) => (
+                  <g key={i}>
+                    <circle
+                      cx={pt.x}
+                      cy={pt.y}
+                      r={i === chartConfig.points.length - 1 ? 5 : 3.5}
+                      fill={getMetricColor(selectedMetricKey)}
+                      stroke="#111"
+                      strokeWidth="1.5"
+                      style={{ cursor: "pointer", transition: "all 0.25s ease" }}
+                      onMouseEnter={() => setHoveredPoint(pt)}
+                    />
+                  </g>
+                ))}
+
+                {/* Pulsing indicator at latest point */}
+                {chartConfig.points.length > 0 && (
+                  <circle
+                    cx={chartConfig.points[chartConfig.points.length - 1].x}
+                    cy={chartConfig.points[chartConfig.points.length - 1].y}
+                    r="8"
+                    fill="none"
+                    stroke={getMetricColor(selectedMetricKey)}
+                    strokeWidth="1.5"
+                    opacity="0.6"
+                    className="pulse-ring"
+                  />
+                )}
               </svg>
+
+              {/* Tooltip on hover */}
+              {hoveredPoint && (
+                <div
+                  style={{
+                    position: "absolute",
+                    left: `${(hoveredPoint.x / chartConfig.W) * 100}%`,
+                    top: `${hoveredPoint.y - 12}px`,
+                    transform: "translate(-50%, -100%)",
+                    background: "rgba(18, 22, 28, 0.94)",
+                    border: `1px solid ${getMetricColor(selectedMetricKey)}`,
+                    borderRadius: "8px",
+                    padding: "6px 10px",
+                    fontSize: "12px",
+                    pointerEvents: "none",
+                    boxShadow: "0 6px 18px rgba(0,0,0,0.5)",
+                    zIndex: 10,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  <div style={{ color: "var(--t3)", fontSize: "11px" }}>{hoveredPoint.time}</div>
+                  <div style={{ fontWeight: 700, color: "var(--t1)", marginTop: "2px" }}>
+                    {typeof hoveredPoint.value === "number" ? hoveredPoint.value.toFixed(1) : hoveredPoint.value} {activeInfo.unit}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* X-axis time marks */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                padding: "0 44px 0 44px",
+                fontSize: "11px",
+                color: "var(--t3)",
+                fontWeight: 600,
+                marginTop: "4px",
+              }}
+            >
+              {chartConfig.xLabels.map((lbl, idx) => (
+                <span key={idx}>{lbl.time}</span>
+              ))}
             </div>
           </div>
 
@@ -456,6 +848,9 @@ export function DashboardView({
               />
               Порог предупреждения
             </span>
+            <span style={{ marginLeft: "auto", fontSize: "12px", color: "var(--t3)" }}>
+              {loading ? "Синхронизация..." : `Точек телеметрии: ${chartConfig.points.length}`}
+            </span>
           </div>
         </div>
 
@@ -463,93 +858,101 @@ export function DashboardView({
         <div
           className="cd up"
           style={{
-            padding: "20px 22px 12px",
+            padding: "20px 22px 14px",
             display: "flex",
             flexDirection: "column",
             animationDelay: "260ms",
           }}
           aria-label="Overall Status"
         >
-          <h2 className="h2">Overall Status</h2>
-          <svg
-            className="ring"
-            width="180"
-            height="180"
-            viewBox="0 0 180 180"
-            role="img"
-            aria-label="3 из 5 показателей в пределах нормы"
-          >
-            <circle
-              cx="90"
-              cy="90"
-              r="70"
-              fill="none"
-              style={{ stroke: "var(--s2)" }}
-              strokeWidth="14"
-            />
-            <circle
-              className="rg"
-              cx="90"
-              cy="90"
-              r="70"
-              fill="none"
-              style={{ stroke: "var(--ok)" }}
-              strokeWidth="14"
-              strokeLinecap="round"
-              strokeDasharray="263.9 439.8"
-              transform="rotate(-90 90 90)"
-            />
-            <text
-              x="90"
-              y="96"
-              textAnchor="middle"
-              className="num"
-              style={{ fontSize: "44px", fontWeight: 700, fill: "var(--t1)" }}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <h2 className="h2" style={{ margin: 0 }}>Overall Status</h2>
+            <span
+              style={{
+                fontSize: "11px",
+                fontWeight: 700,
+                padding: "3px 8px",
+                borderRadius: "6px",
+                background: statusItems.inRange >= 4 ? "rgba(52, 199, 89, 0.15)" : "rgba(255, 159, 10, 0.15)",
+                color: statusItems.inRange >= 4 ? "var(--ok)" : "var(--wa)",
+              }}
             >
-              3
-              <tspan style={{ fill: "var(--t3)", fontSize: "24px" }}>/5</tspan>
-            </text>
-            <text
-              x="90"
-              y="120"
-              textAnchor="middle"
-              style={{ fontSize: "13px", fontWeight: 600, fill: "var(--t3)" }}
-            >
-              в диапазоне
-            </text>
-          </svg>
+              {statusItems.inRange >= 4 ? "НОРМА" : "ВНИМАНИЕ"}
+            </span>
+          </div>
 
-          <div style={{ marginTop: "10px" }}>
-            <div className="li flat" style={{ padding: "12px 0" }}>
-              <span style={{ flex: 1, fontSize: "15px" }}>Heart Rate</span>
-              <span className="st ok">
-                <i></i>В норме
-              </span>
-            </div>
-            <div className="li flat" style={{ padding: "12px 0" }}>
-              <span style={{ flex: 1, fontSize: "15px" }}>Oxygen Saturation</span>
-              <span className="st ok">
-                <i></i>В норме
-              </span>
-            </div>
-            <div className="li flat" style={{ padding: "12px 0" }}>
-              <span style={{ flex: 1, fontSize: "15px" }}>Physical Activity</span>
-              <span className="st ok">
-                <i></i>В норме
-              </span>
-            </div>
-            <div className="li flat" style={{ padding: "12px 0" }}>
-              <span style={{ flex: 1, fontSize: "15px" }}>Sleep Architecture</span>
-              <span className="st wa">
-                <i></i>Требует внимания
-              </span>
-            </div>
-            <div className="li flat" style={{ padding: "12px 0" }}>
-              <span style={{ flex: 1, fontSize: "15px" }}>Core Temperature</span>
-              <span className="st ok">
-                <i></i>{temp.toFixed(1)} °C
-              </span>
-            </div>
+          {/* Radial Donut Gauge */}
+          <div style={{ display: "flex", justifyContent: "center", margin: "14px 0 8px" }}>
+            <svg
+              className="ring"
+              width="180"
+              height="180"
+              viewBox="0 0 180 180"
+              role="img"
+              aria-label={`${statusItems.inRange} из 5 показателей в пределах нормы`}
+            >
+              <circle
+                cx="90"
+                cy="90"
+                r="70"
+                fill="none"
+                style={{ stroke: "var(--s2)" }}
+                strokeWidth="14"
+              />
+              <circle
+                className="rg"
+                cx="90"
+                cy="90"
+                r="70"
+                fill="none"
+                style={{
+                  stroke: statusItems.inRange >= 4 ? "var(--ok)" : statusItems.inRange >= 3 ? "var(--wa)" : "var(--cr)",
+                  transition: "stroke-dasharray 0.5s ease, stroke 0.3s ease",
+                }}
+                strokeWidth="14"
+                strokeLinecap="round"
+                strokeDasharray={`${(statusItems.inRange / 5) * 439.8} 439.8`}
+                transform="rotate(-90 90 90)"
+              />
+              <text
+                x="90"
+                y="96"
+                textAnchor="middle"
+                className="num"
+                style={{ fontSize: "44px", fontWeight: 700, fill: "var(--t1)" }}
+              >
+                {statusItems.inRange}
+                <tspan style={{ fill: "var(--t3)", fontSize: "24px" }}>/5</tspan>
+              </text>
+              <text
+                x="90"
+                y="120"
+                textAnchor="middle"
+                style={{ fontSize: "13px", fontWeight: 600, fill: "var(--t3)" }}
+              >
+                в диапазоне
+              </text>
+            </svg>
+          </div>
+
+          {/* 5 Biomarkers Breakdown */}
+          <div style={{ marginTop: "4px" }}>
+            {statusItems.items.map((item, idx) => (
+              <div
+                key={idx}
+                className="li flat"
+                style={{
+                  padding: "10px 0",
+                  borderBottom: idx < statusItems.items.length - 1 ? "1px solid var(--sep)" : "none",
+                }}
+              >
+                <span style={{ flex: 1, fontSize: "14px", fontWeight: 500 }}>{item.name}</span>
+                <span className={`st ${item.level}`} style={{ fontSize: "12px" }}>
+                  <i></i>
+                  {item.status}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -583,7 +986,7 @@ export function DashboardView({
             </span>
             <span style={{ textAlign: "right", whiteSpace: "nowrap" }}>
               <b className="num" style={{ display: "block", fontSize: "16px", fontWeight: 700 }}>
-                {Math.round(hr)} bpm
+                {Math.round(hrLatest)} bpm
               </b>
               <span className="cap num">Сегодня, 14:32</span>
             </span>
@@ -603,7 +1006,7 @@ export function DashboardView({
             </span>
             <span style={{ textAlign: "right", whiteSpace: "nowrap" }}>
               <b className="num" style={{ display: "block", fontSize: "16px", fontWeight: 700 }}>
-                {Math.round(spo2)} %
+                {Math.round(spo2Latest)} %
               </b>
               <span className="cap num">Сегодня, 14:30</span>
             </span>
