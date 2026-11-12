@@ -1333,3 +1333,61 @@ input:checked + .slider:before{transform:translateX(20px)}
     grid-column: span 1;
   }
 }
+
+/* =========================================================
+   Mobile Fixes: Clean Stacking for Standard Headers (.tb) & Hide Floating AI
+   ========================================================= */
+@media (max-width: 768px) {
+  /* Hide floating AI chat launcher on mobile to avoid overlapping graphs & duplicating bottom nav tab */
+  .floating-ai-wrap {
+    display: none !important;
+  }
+
+  /* Full-width responsive header stacking for all pages */
+  .tb {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 16px 0 14px !important;
+    gap: 12px !important;
+  }
+  .tb > div:first-child,
+  .tb .up {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+  }
+  .tb .lt {
+    font-size: 26px !important;
+    line-height: 1.18 !important;
+    word-break: normal !important;
+    white-space: normal !important;
+    margin: 2px 0 4px !important;
+  }
+  .tb .eyb {
+    font-size: 11px !important;
+    letter-spacing: 0.08em !important;
+    margin-bottom: 2px !important;
+    white-space: normal !important;
+  }
+  .tb .sub {
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+    margin-top: 4px !important;
+    white-space: normal !important;
+  }
+  .tb .tbr {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin-top: 4px !important;
+  }
+  .tb .tbr select.inp {
+    flex: 1 !important;
+    min-width: 140px !important;
+    max-width: calc(100% - 94px) !important;
+    font-size: 13px !important;
+  }
+}
