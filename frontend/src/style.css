@@ -198,9 +198,9 @@ section[id]{scroll-margin-top:52px}
 
 /* hero */
 .hero{position:relative;height:920px;margin-top:-52px;overflow:hidden;background:#000;isolation:isolate}
-.hero::before{content:"";position:absolute;z-index:-1;left:calc(var(--vw) * .58);top:-160px;width:900px;height:620px;margin-left:-450px;background:radial-gradient(closest-side,rgba(70,130,255,.30),rgba(40,80,200,.10) 55%,transparent);pointer-events:none}
-.hero{--vw:min(760px,52vw)}
-.hv{position:absolute;z-index:0;left:0;top:0;height:100%;width:var(--vw);overflow:hidden;animation:hvin 2.2s var(--ease) backwards;-webkit-mask-image:linear-gradient(90deg,#000 82%,transparent 100%),linear-gradient(180deg,transparent 0%,#000 3%,#000 97%,transparent 100%);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,#000 82%,transparent 100%),linear-gradient(180deg,transparent 0%,#000 3%,#000 97%,transparent 100%);mask-composite:intersect}
+.hero::before{content:"";position:absolute;z-index:-1;left:calc(var(--vw) * .5);top:-160px;width:900px;height:620px;margin-left:-450px;background:radial-gradient(closest-side,rgba(25,50,110,.14),rgba(15,30,80,.05) 55%,transparent);pointer-events:none}
+.hero{--vw:min(840px,58vw)}
+.hv{position:absolute;z-index:0;left:0;top:0;height:100%;width:var(--vw);overflow:hidden;animation:hvin 2.2s var(--ease) backwards;-webkit-mask-image:linear-gradient(90deg,#000 74%,transparent 100%),linear-gradient(180deg,transparent 0%,#000 3%,#000 97%,transparent 100%);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,#000 74%,transparent 100%),linear-gradient(180deg,transparent 0%,#000 3%,#000 97%,transparent 100%);mask-composite:intersect}
 .hv video{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 40%;background:#000 url("/cosmo-assets/208b3c2d-afa7-4c68-923d-eab64f784c93.jpg") 50% 40%/cover no-repeat}
 @keyframes hvin{from{opacity:0;transform:scale(1.06)}to{opacity:1;transform:none}}
 .hc{position:relative;display:flex;justify-content:flex-end;padding-top:150px;pointer-events:none;z-index:2}
