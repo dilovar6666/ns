@@ -1493,3 +1493,117 @@ input:checked + .slider:before{transform:translateX(20px)}
     font-size: 11px !important;
   }
 }
+
+/* Mental Health View Responsive Header & Controls */
+.mental-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  width: 100%;
+}
+.mental-tag-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.mental-tag-mission {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--pr);
+}
+.mental-tag-badge {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.mental-nav-pills {
+  display: flex;
+  gap: 6px;
+  background: var(--s1);
+  padding: 4px;
+  border-radius: 14px;
+  border: 1px solid var(--sep);
+  flex-shrink: 0;
+}
+.mental-nav-btn {
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+.mental-btn-text-full {
+  display: inline;
+}
+.mental-btn-text-mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mental-header-content {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 14px !important;
+  }
+  .mental-tag-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 6px !important;
+    margin-bottom: 8px !important;
+  }
+  .mental-tag-mission {
+    font-size: 11px !important;
+    letter-spacing: 0.5px !important;
+    line-height: 1.35 !important;
+  }
+  .mental-tag-badge {
+    font-size: 10px !important;
+    padding: 2px 8px !important;
+  }
+  .mental-nav-pills {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    width: 100% !important;
+    gap: 4px !important;
+    padding: 4px !important;
+    box-sizing: border-box !important;
+  }
+  .mental-nav-btn {
+    width: 100% !important;
+    padding: 10px 6px !important;
+    font-size: 12px !important;
+    text-align: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+  }
+  .mental-btn-text-full {
+    display: none !important;
+  }
+  .mental-btn-text-mobile {
+    display: inline !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .mental-nav-btn {
+    padding: 8px 2px !important;
+    font-size: 11px !important;
+    letter-spacing: -0.3px !important;
+  }
+}

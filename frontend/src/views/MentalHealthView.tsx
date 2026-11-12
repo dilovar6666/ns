@@ -581,13 +581,13 @@ export function MentalHealthView({
     <div className="wrapc" style={{ maxWidth: "1280px", margin: "0 auto", paddingBottom: "70px" }}>
       {/* Top Header */}
       <header className="tb" style={{ marginBottom: "20px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
+        <div className="mental-header-content">
           <div className="up">
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-              <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "var(--pr)" }}>
+            <div className="mental-tag-row">
+              <span className="mental-tag-mission">
                 NASA Behavioral Health and Performance (BHP) Protocol
               </span>
-              <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "12px", background: "rgba(16, 185, 129, 0.15)", color: "#10b981", fontWeight: 600 }}>
+              <span className="mental-tag-badge">
                 ● Психологическая стабилизация
               </span>
             </div>
@@ -598,42 +598,30 @@ export function MentalHealthView({
           </div>
 
           {/* Navigation Pill Switcher */}
-          <div style={{ display: "flex", gap: "8px", background: "var(--s1)", padding: "4px", borderRadius: "14px", border: "1px solid var(--sep)" }}>
+          <div className="mental-nav-pills">
             <button
               onClick={() => { setActiveTab("overview"); setTestStage("select"); }}
+              className="mental-nav-btn"
               style={{
-                padding: "8px 16px",
-                borderRadius: "10px",
-                fontSize: "13px",
                 fontWeight: activeTab === "overview" ? 700 : 500,
                 background: activeTab === "overview" ? "var(--pr)" : "transparent",
                 color: activeTab === "overview" ? "#fff" : "var(--t2)",
-                border: "none",
-                cursor: "pointer",
-                transition: "all 0.15s ease",
               }}
             >
-              Обзор и статистика
+              <span>Обзор и статистика</span>
             </button>
             <button
               onClick={() => { setActiveTab("test"); setTestStage("select"); }}
+              className="mental-nav-btn"
               style={{
-                padding: "8px 16px",
-                borderRadius: "10px",
-                fontSize: "13px",
                 fontWeight: activeTab === "test" ? 700 : 500,
                 background: activeTab === "test" ? "var(--pr)" : "transparent",
                 color: activeTab === "test" ? "#fff" : "var(--t2)",
-                border: "none",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                transition: "all 0.15s ease",
               }}
             >
-              <Sparkles size={14} />
-              <span>Центр тестирования (4 теста)</span>
+              <Sparkles size={14} style={{ flexShrink: 0 }} />
+              <span className="mental-btn-text-full">Центр тестирования (4 теста)</span>
+              <span className="mental-btn-text-mobile">Тестирование (4)</span>
             </button>
           </div>
         </div>
