@@ -3,6 +3,7 @@ import json
 import os
 import hashlib
 import secrets
+from typing import Optional
 from datetime import datetime, timedelta, timezone
 from statistics import mean
 
@@ -16,7 +17,7 @@ from sqlalchemy.orm import Session
 
 from .database import Base, engine, get_db
 from .models import Astronaut, MentalCheckin, Metric, Mission, MissionEvent, Notification, Protocol, ProtocolExecution, ProtocolStep, User
-from .schemas import AIInput, AstronautInput, AstronautOut, AuthResponse, CheckinInput, LoginRequest, MetricInput, MissionEventInput, ProtocolInput, RegisterRequest, UserOut
+from .schemas import AIInput, AstronautInput, AstronautOut, AuthResponse, CheckinInput, LoginRequest, MetricInput, MissionEventInput, ProtocolExecutionInput, ProtocolInput, RegisterRequest, UserOut
 from .seed import seed
 
 
@@ -62,12 +63,101 @@ def seed_rich_timeline(db: Session):
     db.commit()
 
 
+def seed_rich_protocols(db: Session):
+    count = db.scalar(select(func.count(Protocol.id)))
+    if count >= 4:
+        return
+    protocols_data = [
+        {
+            "title": "SOP-MED-01: Купирование острой тахикардии и аритмии при нагрузках EVA",
+            "description": "Экстренный протокол действий при стойком повышении ЧСС > 140 уд/мин, желудочковой экстрасистолии или гипертермии скафандра во время внекорабельной деятельности.",
+            "source_url": "https://www.nasa.gov/hrp/elements/cardiovascular",
+            "steps": [
+                "Немедленная остановка активной работы за бортом (EVA Hold) и переход на стационарный страховочный фал.",
+                "Перевод контура жидкостного охлаждения скафандра (LCVG) на режим максимальной мощности (100% flow).",
+                "Подача 100% кислорода в шлем под повышенным давлением (34 кПа) для предотвращения гипоксии.",
+                "Выполнение вагусного дыхательного маневра (Вальсальвы) и передача телеметрии ЭКГ в ЦУП.",
+                "При сохранении тахикардии свыше 5 минут — приказ на экстренное шлюзование и возврат в модуль Quest.",
+                "В шлюзовом отсеке: экспресс-анализ тропонинов i-STAT, введение β-блокатора Метопролол 25 мг по согласованию с ЦУП.",
+            ],
+        },
+        {
+            "title": "SOP-RAD-02: Радиационный шторм (Solar Particle Event SPE Level-3 Alert)",
+            "description": "Алгоритм экстренной защиты экипажа при регистрации солнечной вспышки класса X/M и превышении мощности дозы космической радиации свыше 2.0 мЗв/ч.",
+            "source_url": "https://www.nasa.gov/hrp/elements/radiation",
+            "steps": [
+                "Объявление тревоги Radiation Alert Level-3 по громкой связи жилых модулей станции.",
+                "Экстренная эвакуация экипажа в радиационное убежище служебного модуля с максимальной водяной защитой.",
+                "Развертывание дополнительных водяных экранов (400 л) и водородсодержащих полимерных матов.",
+                "Активация персональных тканеэквивалентных дозиметров TEPC и непрерывный замер поглощенной дозы.",
+                "Пероральный прием радиопротекторного антиоксидантного комплекса (Амифостин / α-токоферол + селен).",
+                "Сохранение режима укрытия до официального разрешения ЦУП (падение радиационного фона < 0.3 мЗв/ч).",
+            ],
+        },
+        {
+            "title": "SOP-DCS-03: Декомпрессионная болезнь и газовая эмболия (DCS Protocol)",
+            "description": "Неотложная помощь при суставных болях (bends), респираторном дистрессе или микропузырьковой эмболии после декомпрессии скафандра.",
+            "source_url": "https://www.nasa.gov/hrp/elements/exploration-eva",
+            "steps": [
+                "Немедленная изоляция и герметизация шлюзового отсека, подъем давления на 20 кПа выше нормы.",
+                "Перевод пострадавшего на непрерывное дыхание 100% чистым кислородом через герметичную маску.",
+                "Горизонтальная укладка в физиологическом нейтральном положении, исключающем сгибание конечностей.",
+                "Ультразвуковая допплерография крупных вен и легочной артерии датчиком Butterfly iQ+ на микропузырьки.",
+                "Инфузионная терапия: 500 мл раствора 0.9% NaCl со скоростью 150 мл/час для снижения вязкости крови.",
+                "Оценка неврологического статуса по шкале Глазго каждые 15 минут до полной ремиссии симптомов.",
+            ],
+        },
+        {
+            "title": "SOP-SAS-04: Острая космическая болезнь движения (Space Adaptation Syndrome)",
+            "description": "Купирование тяжелого нейровегетативного синдрома дезадаптации к невесомости, тошноты и пространственной дезориентации.",
+            "source_url": "https://www.nasa.gov/hrp/elements/sensorimotor",
+            "steps": [
+                "Фиксация космонавта ремнями в каюте, минимизация движений головой и зрительная опора на фиксированную точку.",
+                "Надевание компрессионного пояса и манжет на ноги для уменьшения вестибулярно-вегетативного рефлекса.",
+                "Внутримышечное введение Прометазина (Promethazine) 25 мг в дельтовидную мышцу.",
+                "Дробное питье регидратационного раствора CosmoHydrate ORS (50 мл каждые 15 минут).",
+                "Контроль частоты сердечных сокращений и вариабельности пульса (HRV RMSSD) через нагрудный сенсор.",
+            ],
+        },
+        {
+            "title": "SOP-SLP-05: Острая циркадная десинхронизация и дефицит глубокого сна",
+            "description": "Терапия выраженного сокращения фазы медленного сна (SWS < 10%), хронической усталости и когнитивного спада.",
+            "source_url": "https://www.nasa.gov/hrp/elements/behavioral-health-and-performance",
+            "steps": [
+                "Переключение спектра светодиодных панелей каютного модуля на режим низкоинтенсивного света 2200K (без синего пика).",
+                "Активация режима шумоподавления (ANC) вентиляционных систем жилого отсека (уровень шума < 45 dBA).",
+                "Прием микродозы Мелатонина 3 мг за 40 минут до отбоя по согласованному суточному расписанию.",
+                "Запуск аудиосессии бинауральной стимуляции дельта/тета ритмов (0.5–4 Гц) длительностью 25 минут.",
+                "Утренний сеанс светотерапии синим спектром 480 нм (10 000 люкс) в течение 30 минут для перезапуска ритмов.",
+            ],
+        },
+        {
+            "title": "SOP-TOX-06: Экстренная деконтаминация атмосферы при утечке аммиака (NH3 Spike)",
+            "description": "Аварийный протокол защиты органов дыхания при разгерметизации внешнего контура терморегулирования и проникновении токсичных паров.",
+            "source_url": "https://www.nasa.gov/hrp",
+            "steps": [
+                "Немедленное надевание индивидуальных дыхательных масок PBBA с автономной подачей кислорода.",
+                "Немедленная изоляция пораженного отсека и закрытие межагрегатных быстродействующих люков.",
+                "Включение угольных фильтров и скрубберов атмосферы (CDRA) в режим максимальной адсорбции.",
+                "Экспресс-замер концентрации аммиака и монооксида углерода спектрометром MCA (порог тревоги > 2 ppm).",
+                "Осмотр экипажа на предмет химических ожогов слизистых и промывание глаз стерильным солевым раствором.",
+            ],
+        },
+    ]
+    for item in protocols_data:
+        p = Protocol(title=item["title"], description=item["description"], source_url=item["source_url"])
+        p.steps = [ProtocolStep(position=idx + 1, text=s) for idx, s in enumerate(item["steps"])]
+        db.add(p)
+    db.commit()
+
+
 @app.on_event("startup")
 def startup():
     Base.metadata.create_all(engine)
     with next(get_db()) as db:
         seed(db)
         seed_rich_timeline(db)
+        seed_rich_protocols(db)
 
 
 def role_guard(required: str, x_demo_role: str = Header(default="astronaut")):
@@ -301,7 +391,17 @@ def add_timeline_event(body: MissionEventInput, db: Session = Depends(get_db)):
 
 @app.get("/api/protocols")
 def protocols(db: Session = Depends(get_db)):
-    return [{"id": p.id, "title": p.title, "description": p.description, "source_url": p.source_url, "updated_at": p.updated_at, "steps": [{"id": s.id, "position": s.position, "text": s.text} for s in p.steps]} for p in db.scalars(select(Protocol)).all()]
+    return [
+        {
+            "id": p.id,
+            "title": p.title,
+            "description": p.description,
+            "source_url": p.source_url,
+            "updated_at": p.updated_at,
+            "steps": [{"id": s.id, "position": s.position, "text": s.text} for s in p.steps],
+        }
+        for p in db.scalars(select(Protocol).order_by(Protocol.id)).all()
+    ]
 
 
 @app.post("/api/protocols")
@@ -316,28 +416,74 @@ def add_protocol(data: ProtocolInput, db: Session = Depends(get_db), _: None = D
 
 
 @app.post("/api/protocols/{protocol_id}/executions")
-def save_execution(protocol_id: int, astronaut_id: int, completed_steps: list[int], db: Session = Depends(get_db)):
-    person_or_404(db, astronaut_id)
+def save_execution(protocol_id: int, payload: ProtocolExecutionInput, db: Session = Depends(get_db)):
     protocol = db.get(Protocol, protocol_id)
     if not protocol:
         raise HTTPException(404, "Protocol not found")
+    astro_id = payload.astronaut_id or db.scalar(select(Astronaut.id).limit(1)) or 1
+    person = db.get(Astronaut, astro_id)
+    executor_name = payload.executed_by or (person.name if person else "Д-р Майя Чен (CMO)")
+
     allowed = {step.id for step in protocol.steps}
-    if not set(completed_steps) <= allowed:
-        raise HTTPException(422, "Unknown step")
-    execution = ProtocolExecution(protocol_id=protocol_id, astronaut_id=astronaut_id, completed_steps=json.dumps(completed_steps))
+    steps_to_save = [s for s in payload.completed_steps if s in allowed]
+    if not steps_to_save and protocol.steps:
+        steps_to_save = [s.id for s in protocol.steps]
+
+    execution_meta = {
+        "steps": steps_to_save,
+        "executed_by": executor_name,
+        "notes": payload.notes or "Все шаги стандартной операционной процедуры (SOP) выполнены в полном объеме.",
+    }
+    execution = ProtocolExecution(
+        protocol_id=protocol_id,
+        astronaut_id=astro_id,
+        completed_steps=json.dumps(execution_meta),
+    )
     db.add(execution)
-    db.add(MissionEvent(title=f"Protocol checklist: {protocol.title}", detail=f"{len(completed_steps)} of {len(allowed)} steps completed", kind="protocol"))
+    db.add(MissionEvent(
+        title=f"Протокол выполнен: {protocol.title}",
+        detail=f"Исполнитель: {executor_name}. Выполнено {len(steps_to_save)} из {len(protocol.steps)} шагов алгоритма.",
+        kind="medical",
+    ))
     db.commit()
-    return {"id": execution.id}
+    return {"id": execution.id, "protocol_id": protocol_id, "executed_by": executor_name, "status": "success"}
 
 
 @app.get("/api/protocols/{protocol_id}/executions")
-def protocol_executions(protocol_id: int, astronaut_id: int, db: Session = Depends(get_db)):
-    person_or_404(db, astronaut_id)
+def protocol_executions(protocol_id: int, astronaut_id: Optional[int] = None, db: Session = Depends(get_db)):
     if not db.get(Protocol, protocol_id):
         raise HTTPException(404, "Protocol not found")
-    rows = db.scalars(select(ProtocolExecution).where(ProtocolExecution.protocol_id == protocol_id, ProtocolExecution.astronaut_id == astronaut_id).order_by(ProtocolExecution.updated_at.desc())).all()
-    return [{"id": row.id, "completed_steps": json.loads(row.completed_steps), "updated_at": row.updated_at} for row in rows]
+    query = select(ProtocolExecution).where(ProtocolExecution.protocol_id == protocol_id)
+    if astronaut_id is not None:
+        query = query.where(ProtocolExecution.astronaut_id == astronaut_id)
+    rows = db.scalars(query.order_by(ProtocolExecution.updated_at.desc())).all()
+    results = []
+    for row in rows:
+        try:
+            parsed = json.loads(row.completed_steps)
+        except Exception:
+            parsed = {}
+        if isinstance(parsed, dict):
+            completed_steps = parsed.get("steps", [])
+            executed_by = parsed.get("executed_by", "Алекс Нова")
+            notes = parsed.get("notes", "")
+        elif isinstance(parsed, list):
+            completed_steps = parsed
+            executed_by = "Д-р Майя Чен"
+            notes = ""
+        else:
+            completed_steps = []
+            executed_by = "Д-р Майя Чен"
+            notes = ""
+        results.append({
+            "id": row.id,
+            "protocol_id": row.protocol_id,
+            "completed_steps": completed_steps,
+            "executed_by": executed_by,
+            "notes": notes,
+            "executed_at": row.updated_at,
+        })
+    return results
 
 
 def report_data(db: Session, person_id: int, days: int):

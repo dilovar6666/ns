@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -42,6 +43,13 @@ class ProtocolInput(BaseModel):
     description: str = Field(min_length=10, max_length=3000)
     source_url: str = Field(pattern=r"^https://", max_length=500)
     steps: list[str] = Field(min_length=1, max_length=30)
+
+
+class ProtocolExecutionInput(BaseModel):
+    astronaut_id: Optional[int] = None
+    completed_steps: list[int] = []
+    executed_by: Optional[str] = None
+    notes: Optional[str] = None
 
 
 class RegisterRequest(BaseModel):
