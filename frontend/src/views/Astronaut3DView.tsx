@@ -27,7 +27,7 @@ type Props = {
   metrics: Metric[];
 };
 
-type SensorZone = "chest" | "helmet" | "wrist" | "plss" | "lcvg";
+type SensorZone = "chest" | "helmet" | "wrist" | "plss" | "lcvg" | "full";
 
 export function Astronaut3DView({ astronaut, metrics }: Props) {
   const { t } = useLanguage();
@@ -35,7 +35,7 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
   const hr = latestList.find((m) => m.key === "heart_rate")?.value ?? 72;
   const spo2 = latestList.find((m) => m.key === "spo2")?.value ?? 98;
 
-  const [activeZone, setActiveZone] = useState<SensorZone>("chest");
+  const [activeZone, setActiveZone] = useState<SensorZone>("full");
   const [viewMode, setViewMode] = useState<"standard" | "xray" | "thermal">("standard");
   const [coolingLevel, setCoolingLevel] = useState<"min" | "opt" | "max">("opt");
   const [calibrating, setCalibrating] = useState(false);
@@ -94,6 +94,7 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
         >
           {/* Top Floating Controls Bar */}
           <div
+            className="scene-3d-top-bar"
             style={{
               position: "absolute",
               top: "14px",
@@ -110,14 +111,16 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
           >
             {/* View Mode Pills */}
             <div
+              className="scene-3d-mode-pills"
               style={{
                 display: "inline-flex",
-                background: "rgba(0, 0, 0, 0.65)",
-                backdropFilter: "blur(8px)",
-                padding: "3px",
-                borderRadius: "10px",
-                border: "1px solid rgba(255, 255, 255, 0.12)",
+                background: "rgba(0, 0, 0, 0.75)",
+                backdropFilter: "blur(10px)",
+                padding: "4px",
+                borderRadius: "12px",
+                border: "1px solid rgba(255, 255, 255, 0.14)",
                 pointerEvents: "auto",
+                gap: "4px",
               }}
             >
               <button
@@ -125,13 +128,14 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
                 onClick={() => setViewMode("standard")}
                 style={{
                   background: viewMode === "standard" ? "var(--pr, #22d3ee)" : "transparent",
-                  color: viewMode === "standard" ? "#000" : "#94a3b8",
+                  color: viewMode === "standard" ? "#fff" : "#94a3b8",
                   border: "none",
-                  padding: "5px 10px",
-                  borderRadius: "7px",
+                  padding: "6px 12px",
+                  borderRadius: "8px",
                   fontSize: "11px",
                   fontWeight: 700,
                   cursor: "pointer",
+                  transition: "all 0.15s ease",
                 }}
               >
                 {t.modeStandard}
@@ -140,14 +144,15 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
                 type="button"
                 onClick={() => setViewMode("xray")}
                 style={{
-                  background: viewMode === "xray" ? "var(--pr, #22d3ee)" : "transparent",
+                  background: viewMode === "xray" ? "#00e5ff" : "transparent",
                   color: viewMode === "xray" ? "#000" : "#94a3b8",
                   border: "none",
-                  padding: "5px 10px",
-                  borderRadius: "7px",
+                  padding: "6px 12px",
+                  borderRadius: "8px",
                   fontSize: "11px",
                   fontWeight: 700,
                   cursor: "pointer",
+                  transition: "all 0.15s ease",
                 }}
               >
                 {t.modeXray}
@@ -157,13 +162,14 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
                 onClick={() => setViewMode("thermal")}
                 style={{
                   background: viewMode === "thermal" ? "#f97316" : "transparent",
-                  color: viewMode === "thermal" ? "#000" : "#94a3b8",
+                  color: viewMode === "thermal" ? "#fff" : "#94a3b8",
                   border: "none",
-                  padding: "5px 10px",
-                  borderRadius: "7px",
+                  padding: "6px 12px",
+                  borderRadius: "8px",
                   fontSize: "11px",
                   fontWeight: 700,
                   cursor: "pointer",
+                  transition: "all 0.15s ease",
                 }}
               >
                 {t.modeThermal}
@@ -172,27 +178,38 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
 
             {/* Astronaut Tag */}
             <div
+              className="scene-3d-astro-tag"
               style={{
-                background: "rgba(0, 0, 0, 0.65)",
-                backdropFilter: "blur(8px)",
-                padding: "4px 12px",
-                borderRadius: "10px",
-                border: "1px solid rgba(255, 255, 255, 0.12)",
+                background: "rgba(0, 0, 0, 0.75)",
+                backdropFilter: "blur(10px)",
+                padding: "6px 14px",
+                borderRadius: "12px",
+                border: "1px solid rgba(255, 255, 255, 0.14)",
                 fontSize: "11px",
                 color: "#22d3ee",
                 fontWeight: 600,
                 display: "flex",
                 alignItems: "center",
                 gap: "6px",
+                pointerEvents: "auto",
               }}
             >
-              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#22c55e" }} />
+              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px #22c55e" }} />
               {astronaut?.name || "Alex Nova"} (EVA #1 · Active)
             </div>
           </div>
 
-          {/* 3D Canvas Mount */}
-          <div style={{ flex: 1, width: "100%", height: "100%", minHeight: "440px" }}>
+          {/* 3D Canvas Mount with Explicit Pixel Height */}
+          <div
+            className="scene-3d-canvas-box"
+            style={{
+              width: "100%",
+              height: "480px",
+              minHeight: "440px",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
             <Suspense
               fallback={
                 <div
@@ -209,15 +226,21 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
                 </div>
               }
             >
-              <AstronautScene />
+              <AstronautScene
+                viewMode={viewMode}
+                activeZone={activeZone}
+                onSelectZone={setActiveZone}
+                interactive={true}
+              />
             </Suspense>
           </div>
 
           {/* Interactive Sensor Target Hotspots Strip (Bottom of 3D Canvas) */}
           <div
+            className="scene-3d-hotspots-bar"
             style={{
               padding: "12px 14px",
-              background: "rgba(0, 0, 0, 0.55)",
+              background: "rgba(0, 0, 0, 0.65)",
               borderTop: "1px solid rgba(255, 255, 255, 0.08)",
               display: "flex",
               gap: "8px",
@@ -228,6 +251,26 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
             <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--t3)", textTransform: "uppercase" }}>
               {t.cameraFocus}
             </span>
+
+            <button
+              type="button"
+              onClick={() => setActiveZone("full")}
+              style={{
+                background: activeZone === "full" ? "rgba(34, 211, 238, 0.25)" : "rgba(255, 255, 255, 0.05)",
+                border: `1px solid ${activeZone === "full" ? "#22d3ee" : "rgba(255, 255, 255, 0.1)"}`,
+                color: activeZone === "full" ? "#22d3ee" : "var(--t1)",
+                borderRadius: "8px",
+                padding: "4px 10px",
+                fontSize: "12px",
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+                cursor: "pointer",
+              }}
+            >
+              <Crosshair size={13} /> {t.focusFull || "Полный обзор"}
+            </button>
 
             <button
               type="button"
@@ -359,7 +402,11 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
                         ? "rgba(34, 211, 238, 0.15)"
                         : activeZone === "plss"
                         ? "rgba(168, 85, 247, 0.15)"
-                        : "rgba(50, 173, 230, 0.15)",
+                        : activeZone === "wrist"
+                        ? "rgba(50, 173, 230, 0.15)"
+                        : activeZone === "lcvg"
+                        ? "rgba(245, 158, 11, 0.15)"
+                        : "rgba(34, 211, 238, 0.15)",
                     color:
                       activeZone === "chest"
                         ? "#ff2d55"
@@ -367,7 +414,11 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
                         ? "#22d3ee"
                         : activeZone === "plss"
                         ? "#a855f7"
-                        : "#32ade6",
+                        : activeZone === "wrist"
+                        ? "#32ade6"
+                        : activeZone === "lcvg"
+                        ? "#f59e0b"
+                        : "#22d3ee",
                   }}
                 >
                   {activeZone === "chest" && <Heart size={20} />}
@@ -375,6 +426,7 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
                   {activeZone === "plss" && <Zap size={20} />}
                   {activeZone === "wrist" && <Droplets size={20} />}
                   {activeZone === "lcvg" && <Thermometer size={20} />}
+                  {activeZone === "full" && <Crosshair size={20} />}
                 </div>
                 <div>
                   <h3 style={{ fontSize: "16px", fontWeight: 700, margin: 0 }}>
@@ -383,6 +435,7 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
                     {activeZone === "plss" && t.sensorPlss}
                     {activeZone === "wrist" && t.sensorSpo2}
                     {activeZone === "lcvg" && t.sensorCooling}
+                    {activeZone === "full" && "Общая телеметрия скафандра EMU"}
                   </h3>
                   <div style={{ fontSize: "11px", color: "var(--t3)", marginTop: "2px" }}>
                     NASA STD-3001 Spec · Subsystem ID: CHX-{activeZone.toUpperCase()}
@@ -396,16 +449,50 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
             </div>
 
             {/* Dynamic Telemetry Metric Values */}
+            {activeZone === "full" && (
+              <div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "14px" }}>
+                  <div className="telemetry-dark-tile">
+                    <div className="lbl c-hr" style={{ fontSize: "11px" }}>Пульс экипажа</div>
+                    <div className="num" style={{ fontSize: "22px", fontWeight: 700, marginTop: "4px" }}>
+                      {Math.round(hr)} <span style={{ fontSize: "12px", color: "var(--t3)" }}>bpm</span>
+                    </div>
+                  </div>
+                  <div className="telemetry-dark-tile">
+                    <div className="lbl c-spo2" style={{ fontSize: "11px" }}>Кислород SpO₂</div>
+                    <div className="num" style={{ fontSize: "22px", fontWeight: 700, marginTop: "4px" }}>
+                      {Math.round(spo2)} <span style={{ fontSize: "12px", color: "var(--t3)" }}>%</span>
+                    </div>
+                  </div>
+                  <div className="telemetry-dark-tile">
+                    <div className="lbl" style={{ fontSize: "11px", color: "#22d3ee" }}>Давление EMU</div>
+                    <div className="num" style={{ fontSize: "20px", fontWeight: 700, marginTop: "4px" }}>
+                      29.6 <span style={{ fontSize: "12px", color: "var(--t3)" }}>кПа</span>
+                    </div>
+                  </div>
+                  <div className="telemetry-dark-tile">
+                    <div className="lbl" style={{ fontSize: "11px", color: "#a855f7" }}>Баллон O₂ (PLSS)</div>
+                    <div className="num" style={{ fontSize: "20px", fontWeight: 700, marginTop: "4px" }}>
+                      840 <span style={{ fontSize: "12px", color: "var(--t3)" }}>psi</span>
+                    </div>
+                  </div>
+                </div>
+                <div style={{ fontSize: "12px", color: "var(--t2)", lineHeight: 1.5, background: "rgba(0,0,0,0.2)", padding: "10px 12px", borderRadius: "10px" }}>
+                  Все 5 биосенсорных контуров скафандра (ЭКГ, визор, ранец PLSS, оксиметр, водяное охлаждение LCVG) функционируют в штатном режиме. Выберите зону для детализации.
+                </div>
+              </div>
+            )}
+
             {activeZone === "chest" && (
               <div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "14px" }}>
-                  <div className="mcard" style={{ padding: "10px 12px" }}>
+                  <div className="telemetry-dark-tile">
                     <div className="lbl c-hr" style={{ fontSize: "11px" }}>Текущий пульс</div>
                     <div className="num" style={{ fontSize: "22px", fontWeight: 700, marginTop: "4px" }}>
                       {Math.round(hr)} <span style={{ fontSize: "12px", color: "var(--t3)" }}>bpm</span>
                     </div>
                   </div>
-                  <div className="mcard" style={{ padding: "10px 12px" }}>
+                  <div className="telemetry-dark-tile">
                     <div className="lbl c-hr" style={{ fontSize: "11px" }}>Вариабельность HRV</div>
                     <div className="num" style={{ fontSize: "22px", fontWeight: 700, marginTop: "4px" }}>
                       54 <span style={{ fontSize: "12px", color: "var(--t3)" }}>ms</span>
@@ -421,13 +508,13 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
             {activeZone === "helmet" && (
               <div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "14px" }}>
-                  <div className="mcard" style={{ padding: "10px 12px" }}>
+                  <div className="telemetry-dark-tile">
                     <div className="lbl c-spo2" style={{ fontSize: "11px" }}>Давление шлема</div>
                     <div className="num" style={{ fontSize: "20px", fontWeight: 700, marginTop: "4px" }}>
                       29.6 <span style={{ fontSize: "12px", color: "var(--t3)" }}>кПа</span>
                     </div>
                   </div>
-                  <div className="mcard" style={{ padding: "10px 12px" }}>
+                  <div className="telemetry-dark-tile">
                     <div className="lbl c-spo2" style={{ fontSize: "11px" }}>CO₂ Скруббер</div>
                     <div className="num" style={{ fontSize: "20px", fontWeight: 700, marginTop: "4px" }}>
                       14% <span style={{ fontSize: "12px", color: "var(--t3)" }}>насыщ.</span>
@@ -443,19 +530,19 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
             {activeZone === "plss" && (
               <div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px", marginBottom: "14px" }}>
-                  <div className="mcard" style={{ padding: "8px 10px" }}>
+                  <div className="telemetry-dark-tile">
                     <div className="lbl" style={{ fontSize: "10px", color: "#a855f7" }}>Баллон O₂ #1</div>
                     <div className="num" style={{ fontSize: "18px", fontWeight: 700, marginTop: "4px" }}>
                       840 <span style={{ fontSize: "10px" }}>psi</span>
                     </div>
                   </div>
-                  <div className="mcard" style={{ padding: "8px 10px" }}>
+                  <div className="telemetry-dark-tile">
                     <div className="lbl" style={{ fontSize: "10px", color: "#a855f7" }}>Батарея</div>
                     <div className="num" style={{ fontSize: "18px", fontWeight: 700, marginTop: "4px" }}>
                       78% <span style={{ fontSize: "10px" }}>5.2 ч</span>
                     </div>
                   </div>
-                  <div className="mcard" style={{ padding: "8px 10px" }}>
+                  <div className="telemetry-dark-tile">
                     <div className="lbl" style={{ fontSize: "10px", color: "#a855f7" }}>Сублиматор</div>
                     <div className="num" style={{ fontSize: "18px", fontWeight: 700, marginTop: "4px" }}>
                       3.8 <span style={{ fontSize: "10px" }}>°C</span>
@@ -471,13 +558,13 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
             {activeZone === "wrist" && (
               <div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "14px" }}>
-                  <div className="mcard" style={{ padding: "10px 12px" }}>
+                  <div className="telemetry-dark-tile">
                     <div className="lbl c-spo2" style={{ fontSize: "11px" }}>Сатурация SpO₂</div>
                     <div className="num" style={{ fontSize: "22px", fontWeight: 700, marginTop: "4px" }}>
                       {Math.round(spo2)} <span style={{ fontSize: "12px", color: "var(--t3)" }}>%</span>
                     </div>
                   </div>
-                  <div className="mcard" style={{ padding: "10px 12px" }}>
+                  <div className="telemetry-dark-tile">
                     <div className="lbl c-spo2" style={{ fontSize: "11px" }}>Индекс перфузии (PI)</div>
                     <div className="num" style={{ fontSize: "22px", fontWeight: 700, marginTop: "4px" }}>
                       4.2 <span style={{ fontSize: "12px", color: "var(--t3)" }}>%</span>
@@ -493,13 +580,13 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
             {activeZone === "lcvg" && (
               <div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "14px" }}>
-                  <div className="mcard" style={{ padding: "10px 12px" }}>
+                  <div className="telemetry-dark-tile">
                     <div className="lbl" style={{ fontSize: "11px", color: "#f59e0b" }}>Вход / Выход</div>
                     <div className="num" style={{ fontSize: "20px", fontWeight: 700, marginTop: "4px" }}>
                       15.2 / 19.8 <span style={{ fontSize: "11px", color: "var(--t3)" }}>°C</span>
                     </div>
                   </div>
-                  <div className="mcard" style={{ padding: "10px 12px" }}>
+                  <div className="telemetry-dark-tile">
                     <div className="lbl" style={{ fontSize: "11px", color: "#f59e0b" }}>Теплоотвод</div>
                     <div className="num" style={{ fontSize: "20px", fontWeight: 700, marginTop: "4px" }}>
                       1 150 <span style={{ fontSize: "11px", color: "var(--t3)" }}>BTU/ч</span>
