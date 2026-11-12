@@ -210,13 +210,13 @@ export function TimelineView() {
     <div className="wrapc" style={{ maxWidth: "1280px", margin: "0 auto", paddingBottom: "60px" }}>
       {/* Top Header */}
       <header className="tb" style={{ marginBottom: "24px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
+        <div className="timeline-header-content">
           <div className="up">
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-              <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "var(--pr)" }}>
+            <div className="timeline-tag-row">
+              <span className="timeline-tag-mission">
                 Бортовой журнал и хронология полета
               </span>
-              <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "12px", background: "rgba(16, 185, 129, 0.15)", color: "#10b981", fontWeight: 600 }}>
+              <span className="timeline-tag-badge">
                 ● Активная телеметрия
               </span>
             </div>
@@ -228,8 +228,7 @@ export function TimelineView() {
 
           <button
             onClick={() => setIsModalOpen(true)}
-            className="btn pri"
-            style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 18px", borderRadius: "12px", fontSize: "14px", fontWeight: 600 }}
+            className="timeline-add-btn"
           >
             <Plus size={16} />
             <span>Добавить событие</span>
@@ -248,68 +247,68 @@ export function TimelineView() {
           boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
         }}
       >
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px", marginBottom: "24px" }}>
-          <div style={{ background: "var(--s2)", padding: "14px 18px", borderRadius: "14px", border: "1px solid var(--sep)" }}>
-            <div style={{ fontSize: "11px", color: "var(--t2)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.5px" }}>
+        <div className="timeline-telemetry-grid">
+          <div className="timeline-telemetry-tile">
+            <div className="timeline-telemetry-label">
               Текущая орбита
             </div>
-            <div style={{ fontSize: "24px", fontWeight: 800, color: "var(--pr)", marginTop: "4px" }}>
+            <div className="timeline-telemetry-val" style={{ color: "var(--pr)" }}>
               408.4 <span style={{ fontSize: "14px", fontWeight: 500, color: "var(--t2)" }}>км LEO</span>
             </div>
-            <div style={{ fontSize: "12px", color: "var(--t3)", marginTop: "2px" }}>
+            <div className="timeline-telemetry-sub">
               Апогей 415 км · Перигей 402 км
             </div>
           </div>
 
-          <div style={{ background: "var(--s2)", padding: "14px 18px", borderRadius: "14px", border: "1px solid var(--sep)" }}>
-            <div style={{ fontSize: "11px", color: "var(--t2)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.5px" }}>
+          <div className="timeline-telemetry-tile">
+            <div className="timeline-telemetry-label">
               Орбитальная скорость
             </div>
-            <div style={{ fontSize: "24px", fontWeight: 800, color: "var(--cy)", marginTop: "4px" }}>
+            <div className="timeline-telemetry-val" style={{ color: "var(--cy)" }}>
               7.66 <span style={{ fontSize: "14px", fontWeight: 500, color: "var(--t2)" }}>км/с</span>
             </div>
-            <div style={{ fontSize: "12px", color: "var(--t3)", marginTop: "2px" }}>
+            <div className="timeline-telemetry-sub">
               27 576 км/ч · Виток #672
             </div>
           </div>
 
-          <div style={{ background: "var(--s2)", padding: "14px 18px", borderRadius: "14px", border: "1px solid var(--sep)" }}>
-            <div style={{ fontSize: "11px", color: "var(--t2)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.5px" }}>
+          <div className="timeline-telemetry-tile">
+            <div className="timeline-telemetry-label">
               Прогресс миссии (MET)
             </div>
-            <div style={{ fontSize: "24px", fontWeight: 800, color: "var(--tx)", marginTop: "4px" }}>
+            <div className="timeline-telemetry-val" style={{ color: "var(--tx)" }}>
               День 42 <span style={{ fontSize: "14px", fontWeight: 500, color: "var(--t2)" }}>из 180</span>
             </div>
-            <div style={{ fontSize: "12px", color: "var(--t3)", marginTop: "2px" }}>
-              23.3% запланированной программы
+            <div className="timeline-telemetry-sub">
+              23.3% программы CHX-01
             </div>
           </div>
 
-          <div style={{ background: "var(--s2)", padding: "14px 18px", borderRadius: "14px", border: "1px solid var(--sep)" }}>
-            <div style={{ fontSize: "11px", color: "var(--t2)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.5px" }}>
+          <div className="timeline-telemetry-tile">
+            <div className="timeline-telemetry-label">
               Канал связи ЦУП
             </div>
-            <div style={{ fontSize: "24px", fontWeight: 800, color: "#10b981", marginTop: "4px", display: "flex", alignItems: "center", gap: "6px" }}>
-              <Radio size={20} className="pulse" /> Ku-Band Live
+            <div className="timeline-telemetry-val" style={{ color: "#10b981", display: "flex", alignItems: "center", gap: "6px" }}>
+              <Radio size={18} className="pulse" /> Ku-Band
             </div>
-            <div style={{ fontSize: "12px", color: "var(--t3)", marginTop: "2px" }}>
-              Задержка: 120 мс · Пакеты: 0 потерь
+            <div className="timeline-telemetry-sub">
+              120 мс · 0 потерь
             </div>
           </div>
         </div>
 
         {/* 5-Phase Mission Visual Tracker */}
         <div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", flexWrap: "wrap", gap: "6px" }}>
             <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--t1)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
               Фазы экспедиции CHX-01
             </span>
             <span style={{ fontSize: "12px", color: "var(--t2)" }}>
-              Текущая фаза: <strong>Фаза III — Научные эксперименты и целевые EVA</strong>
+              Текущая: <strong style={{ color: "var(--pr)" }}>Фаза III — Серия EVA</strong>
             </span>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px" }}>
+          <div className="timeline-phases-grid">
             {/* Phase 1 */}
             <div style={{ background: "var(--s2)", padding: "12px 14px", borderRadius: "12px", border: "1px solid rgba(16, 185, 129, 0.3)" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
