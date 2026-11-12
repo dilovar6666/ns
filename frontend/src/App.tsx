@@ -24,6 +24,9 @@ import {
   Box,
   LogOut,
   WifiOff,
+  Lock,
+  Shield,
+  Stethoscope,
 } from "lucide-react";
 import { api, latest } from "./api";
 import type { Astronaut, Metric, Notification } from "./api";
@@ -54,7 +57,7 @@ export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { user, logout, openAuthModal } = useAuth();
+  const { user, logout, openAuthModal, switchRolePreset, isFlightSurgeon, isCommander, isAstronaut, roleType } = useAuth();
   const { language, setLanguage, t } = useLanguage();
 
   // Strict 2-theme system: light | dark (default dark)
@@ -134,6 +137,13 @@ export default function App() {
 
         {/* Primary Navigation Items */}
         <nav className="nav" aria-label="Разделы">
+          {/* SECTION 1: Личный терминал космонавта */}
+          <div style={{ padding: "0 12px", marginTop: "4px", marginBottom: "4px" }}>
+            <span style={{ fontSize: "10px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.8px", color: "var(--t3)" }}>
+              {language === "ru" ? "Терминал экипажа" : "Crew Terminal"}
+            </span>
+          </div>
+
           <NavLink
             to="/dashboard"
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
@@ -153,12 +163,48 @@ export default function App() {
           </NavLink>
 
           <NavLink
-            to="/analytics"
+            to="/profile"
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
           >
-            <BarChart3 className="ico" />
-            <span className="nl">{t.navAnalytics}</span>
-            <span className="ns">{t.navAnalyticsSub}</span>
+            <User className="ico" />
+            <span className="nl">{t.navProfile}</span>
+            <span className="ns">{t.navProfileSub}</span>
+          </NavLink>
+
+          <NavLink
+            to="/mental"
+            className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
+          >
+            <Brain className="ico" />
+            <span className="nl">{t.navMental}</span>
+            <span className="ns">{t.navMentalSub}</span>
+          </NavLink>
+
+          <NavLink
+            to="/3d"
+            className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
+          >
+            <Box className="ico" />
+            <span className="nl">{t.nav3DViewer}</span>
+            <span className="ns">{t.nav3DViewerSub}</span>
+          </NavLink>
+
+          <NavLink
+            to="/ai"
+            className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
+          >
+            <Bot className="ico" />
+            <span className="nl">{t.navAIAssistant}</span>
+            <span className="ns">{t.navAIAssistantSub}</span>
+          </NavLink>
+
+          <NavLink
+            to="/timeline"
+            className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
+          >
+            <Calendar className="ico" />
+            <span className="nl">{t.navTimeline}</span>
+            <span className="ns">{t.navTimelineSub}</span>
           </NavLink>
 
           <NavLink
@@ -172,12 +218,12 @@ export default function App() {
           </NavLink>
 
           <NavLink
-            to="/profile"
+            to="/evidence"
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
           >
-            <User className="ico" />
-            <span className="nl">{t.navProfile}</span>
-            <span className="ns">{t.navProfileSub}</span>
+            <BookOpen className="ico" />
+            <span className="nl">{t.navEvidence}</span>
+            <span className="ns">{t.navEvidenceSub}</span>
           </NavLink>
 
           <NavLink
@@ -189,40 +235,36 @@ export default function App() {
             <span className="ns">{t.navSettingsSub}</span>
           </NavLink>
 
-          <div
-            style={{
-              height: "1px",
-              background: "var(--sep)",
-              margin: "8px 0 6px",
-            }}
-          />
+          {/* SECTION 2: Медицинский контроль ЦУП и Командование */}
+          <div style={{ height: "1px", background: "var(--sep)", margin: "10px 0 8px" }} />
+          <div style={{ padding: "0 12px", marginBottom: "6px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: "10px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.8px", color: "var(--t3)" }}>
+              {language === "ru" ? "Контроль ЦУП & Командование" : "Flight Surgeon & Ops"}
+            </span>
+            <span
+              style={{
+                fontSize: "9px",
+                fontWeight: 800,
+                padding: "1px 5px",
+                borderRadius: "4px",
+                background: isFlightSurgeon ? "rgba(16, 185, 129, 0.2)" : isCommander ? "rgba(59, 130, 246, 0.2)" : "rgba(245, 158, 11, 0.2)",
+                color: isFlightSurgeon ? "#10b981" : isCommander ? "var(--pr)" : "#f59e0b",
+              }}
+            >
+              {isFlightSurgeon ? "CMO" : isCommander ? "CDR" : "CREW"}
+            </span>
+          </div>
 
-          {/* Extended Mission Tools */}
           <NavLink
             to="/crew"
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
           >
             <Users className="ico" />
-            <span className="nl">{t.navCrew}</span>
-            <span className="ns">{t.navCrewSub}</span>
-          </NavLink>
-
-          <NavLink
-            to="/mental"
-            className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
-          >
-            <Brain className="ico" />
-            <span className="nl">{t.navMental}</span>
-            <span className="ns">{t.navMentalSub}</span>
-          </NavLink>
-
-          <NavLink
-            to="/ai"
-            className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
-          >
-            <Bot className="ico" />
-            <span className="nl">{t.navAIAssistant}</span>
-            <span className="ns">{t.navAIAssistantSub}</span>
+            <span className="nl" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span>{t.navCrew}</span>
+              {isAstronaut && <Lock size={12} style={{ color: "#f59e0b", marginLeft: "4px" }} />}
+            </span>
+            <span className="ns">{isAstronaut ? (language === "ru" ? "Ограничено (Врач ЦУП)" : "Restricted (Surgeon)") : t.navCrewSub}</span>
           </NavLink>
 
           <NavLink
@@ -235,30 +277,12 @@ export default function App() {
           </NavLink>
 
           <NavLink
-            to="/timeline"
+            to="/analytics"
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
           >
-            <Calendar className="ico" />
-            <span className="nl">{t.navTimeline}</span>
-            <span className="ns">{t.navTimelineSub}</span>
-          </NavLink>
-
-          <NavLink
-            to="/evidence"
-            className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
-          >
-            <BookOpen className="ico" />
-            <span className="nl">{t.navEvidence}</span>
-            <span className="ns">{t.navEvidenceSub}</span>
-          </NavLink>
-
-          <NavLink
-            to="/3d"
-            className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
-          >
-            <Box className="ico" />
-            <span className="nl">{t.nav3DViewer}</span>
-            <span className="ns">{t.nav3DViewerSub}</span>
+            <BarChart3 className="ico" />
+            <span className="nl">{t.navAnalytics}</span>
+            <span className="ns">{t.navAnalyticsSub}</span>
           </NavLink>
         </nav>
 
@@ -301,6 +325,44 @@ export default function App() {
                 EN
               </button>
             </div>
+          </div>
+
+          {/* Quick Role Switcher */}
+          <div style={{ background: "rgba(0,0,0,0.2)", border: "1px solid var(--sep)", borderRadius: "12px", padding: "8px 10px", marginBottom: "8px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+              <span style={{ fontSize: "10px", fontWeight: 800, textTransform: "uppercase", color: "var(--t3)", letterSpacing: "0.5px" }}>
+                {language === "ru" ? "Роль в системе:" : "System Role:"}
+              </span>
+              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: isFlightSurgeon ? "#10b981" : isCommander ? "var(--pr)" : "#f59e0b" }} />
+            </div>
+            <select
+              value={roleType}
+              onChange={(e) => {
+                const newR = e.target.value as any;
+                switchRolePreset(newR);
+                if (newR === "astronaut") {
+                  setSelectedId(2);
+                } else {
+                  setSelectedId(1);
+                }
+              }}
+              style={{
+                width: "100%",
+                background: "var(--s1)",
+                color: "var(--tx)",
+                border: "1px solid var(--sep)",
+                borderRadius: "8px",
+                fontSize: "12px",
+                fontWeight: 600,
+                padding: "5px 8px",
+                cursor: "pointer",
+                outline: "none",
+              }}
+            >
+              <option value="flight_surgeon">👨‍⚕️ Врач миссии (CMO)</option>
+              <option value="commander">🛸 Командир (Commander)</option>
+              <option value="astronaut">🚀 Космонавт (Crew)</option>
+            </select>
           </div>
 
           <div className="miss">

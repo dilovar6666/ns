@@ -1,20 +1,71 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
+export type UserRole = "flight_surgeon" | "commander" | "astronaut";
+
 export interface User {
   id: number;
   email: string;
   full_name: string;
   callsign: string;
   role: string;
+  roleType: UserRole;
+  astronautId?: number;
 }
+
+export const ROLE_PRESETS: {
+  roleType: UserRole;
+  title: string;
+  shortTitle: string;
+  full_name: string;
+  callsign: string;
+  email: string;
+  astronautId: number;
+  description: string;
+}[] = [
+  {
+    roleType: "flight_surgeon",
+    title: "Врач миссии (Flight Surgeon / CMO)",
+    shortTitle: "Врач экипажа (CMO)",
+    full_name: "Dr. Maya Chen",
+    callsign: "NOVA-01",
+    email: "maya.chen@cosmohealth.org",
+    astronautId: 1,
+    description: "Полный клинический доступ ко всем членам экипажа, выполнение протоколов SOP и управление допуском.",
+  },
+  {
+    roleType: "commander",
+    title: "Командир экспедиции (Mission Commander)",
+    shortTitle: "Командир миссии",
+    full_name: "Alex Nova",
+    callsign: "APOLLO-01",
+    email: "alex.nova@cosmohealth.org",
+    astronautId: 1,
+    description: "Оперативный контроль готовности экипажа, расписание миссии, алерты и согласование EVA.",
+  },
+  {
+    roleType: "astronaut",
+    title: "Космонавт / Исследователь (Crew Member)",
+    shortTitle: "Космонавт (Crew)",
+    full_name: "Ibrahim Rahman",
+    callsign: "ORBIT-02",
+    email: "ibrahim.rahman@cosmohealth.org",
+    astronautId: 2,
+    description: "Личный терминал здоровья: персональная телеметрия, психологические тесты, скафандр 3D и бортовой журнал.",
+  },
+];
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
+  roleType: UserRole;
+  isFlightSurgeon: boolean;
+  isCommander: boolean;
+  isAstronaut: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (data: { email: string; password: string; full_name: string; callsign?: string; role?: string }) => Promise<void>;
   logout: () => void;
+  switchRolePreset: (roleType: UserRole) => void;
   isAuthModalOpen: boolean;
   openAuthModal: (mode?: "login" | "register") => void;
   closeAuthModal: () => void;
@@ -25,25 +76,66 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const API_BASE = "http://127.0.0.1:8000/api";
 
+function inferRoleType(roleStr?: string): UserRole {
+  const r = (roleStr || "").toLowerCase();
+  if (r.includes("surgeon") || r.includes("doctor") || r.includes("врач") || r.includes("cmo") || r.includes("medical")) {
+    return "flight_surgeon";
+  }
+  if (r.includes("commander") || r.includes("командир")) {
+    return "commander";
+  }
+  return "astronaut";
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
     const saved = localStorage.getItem("cosmo_user");
     if (saved) {
-      try { return JSON.parse(saved); } catch { return null; }
+      try {
+        const parsed = JSON.parse(saved);
+        return {
+          ...parsed,
+          roleType: parsed.roleType || inferRoleType(parsed.role),
+        };
+      } catch {
+        return null;
+      }
     }
-    // Default logged in demo doctor
+    // Default logged in role: Flight Surgeon
     return {
       id: 1,
       email: "maya.chen@cosmohealth.org",
       full_name: "Dr. Maya Chen",
       callsign: "NOVA-01",
       role: "Flight Surgeon",
+      roleType: "flight_surgeon",
+      astronautId: 1,
     };
   });
 
   const [token, setToken] = useState<string | null>(() => localStorage.getItem("cosmo_token") || "demo_token");
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<"login" | "register">("login");
+
+  const roleType = user?.roleType || "flight_surgeon";
+  const isFlightSurgeon = roleType === "flight_surgeon";
+  const isCommander = roleType === "commander";
+  const isAstronaut = roleType === "astronaut";
+
+  const switchRolePreset = (newRoleType: UserRole) => {
+    const preset = ROLE_PRESETS.find((p) => p.roleType === newRoleType) || ROLE_PRESETS[0];
+    const updatedUser: User = {
+      id: preset.astronautId,
+      email: preset.email,
+      full_name: preset.full_name,
+      callsign: preset.callsign,
+      role: preset.title,
+      roleType: preset.roleType,
+      astronautId: preset.astronautId,
+    };
+    setUser(updatedUser);
+    localStorage.setItem("cosmo_user", JSON.stringify(updatedUser));
+  };
 
   const openAuthModal = (mode: "login" | "register" = "login") => {
     setAuthModalMode(mode);
@@ -67,9 +159,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const data = await res.json();
-    setUser(data.user);
+    const roleT = inferRoleType(data.user.role);
+    const u: User = { ...data.user, roleType: roleT };
+    setUser(u);
     setToken(data.token);
-    localStorage.setItem("cosmo_user", JSON.stringify(data.user));
+    localStorage.setItem("cosmo_user", JSON.stringify(u));
     localStorage.setItem("cosmo_token", data.token);
     closeAuthModal();
   };
@@ -87,9 +181,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const respData = await res.json();
-    setUser(respData.user);
+    const roleT = inferRoleType(respData.user.role);
+    const u: User = { ...respData.user, roleType: roleT };
+    setUser(u);
     setToken(respData.token);
-    localStorage.setItem("cosmo_user", JSON.stringify(respData.user));
+    localStorage.setItem("cosmo_user", JSON.stringify(u));
     localStorage.setItem("cosmo_token", respData.token);
     closeAuthModal();
   };
@@ -108,9 +204,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         token,
         isAuthenticated: !!user,
+        roleType,
+        isFlightSurgeon,
+        isCommander,
+        isAstronaut,
         login,
         register,
         logout,
+        switchRolePreset,
         isAuthModalOpen,
         openAuthModal,
         closeAuthModal,
