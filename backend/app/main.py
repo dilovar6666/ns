@@ -1,5 +1,6 @@
 import io
 import json
+import math
 import os
 import hashlib
 import secrets
@@ -169,6 +170,81 @@ def seed_rich_protocols(db: Session):
     db.commit()
 
 
+def seed_rich_metrics_if_stale(db: Session):
+    latest_metric = db.scalar(select(func.max(Metric.sampled_at)))
+    now = datetime.now(timezone.utc)
+    is_stale = False
+    if not latest_metric:
+        is_stale = True
+    else:
+        diff_seconds = (now.replace(tzinfo=None) - latest_metric.replace(tzinfo=None)).total_seconds()
+        if diff_seconds > 7200:
+            is_stale = True
+
+    if is_stale:
+        db.query(Metric).delete()
+        crew = db.query(Astronaut).all()
+        profiles = {
+            'heart_rate': ('bpm', 68, 6.0, (55, 115)),
+            'hrv': ('ms', 55, 12.0, (30, 85)),
+            'spo2': ('%', 98.2, 0.6, (95, 99.8)),
+            'respiratory_rate': ('/min', 14.5, 1.8, (11, 20)),
+            'sleep_duration': ('h', 7.4, 0.8, (5.2, 9.0)),
+            'sleep_quality': ('/5', 4.0, 0.6, (2, 5)),
+            'radiation_exposure': ('mSv', 0.58, 0.08, (0.45, 0.95)),
+            'stress': ('/5', 2.3, 0.8, (1, 5)),
+            'mood': ('/5', 3.9, 0.6, (1, 5)),
+            'focus': ('/5', 4.1, 0.5, (1, 5)),
+            'activity': ('min', 78, 18.0, (30, 130)),
+            'hydration': ('L', 2.3, 0.3, (1.8, 3.2)),
+        }
+        for astro in crew:
+            astro_seed = astro.id * 17
+            for h in range(48, -1, -1):
+                sample_time = now - timedelta(hours=h)
+                hour_of_day = sample_time.hour
+                for key, (unit, base, variance, bounds) in profiles.items():
+                    diurnal = math.sin((hour_of_day - 6) / 24.0 * 2 * math.pi)
+                    if key == 'heart_rate':
+                        val = base + diurnal * 7.0 + math.sin(h * 0.7 + astro_seed) * 3.5
+                    elif key == 'spo2':
+                        val = base + math.sin(h * 0.4 + astro_seed) * 0.4 - (0.5 if hour_of_day < 6 else 0)
+                    elif key == 'stress':
+                        val = base + (1.0 if 12 <= hour_of_day <= 16 else -0.5) + math.sin(h * 0.5) * 0.4
+                    elif key == 'radiation_exposure':
+                        val = base + (0.12 if 10 <= h <= 15 else 0) + math.sin(h * 0.3) * 0.02
+                    else:
+                        val = base + math.sin(h * 0.8 + astro_seed) * variance * 0.4
+                    val = max(bounds[0], min(bounds[1], val))
+                    if '/5' in unit:
+                        val = round(max(1, min(5, val)))
+                    else:
+                        val = round(val, 2)
+                    db.add(Metric(astronaut_id=astro.id, key=key, value=val, unit=unit, source='synthetic telemetry', sampled_at=sample_time))
+
+            for d in range(3, 43):
+                sample_time = now - timedelta(days=d)
+                for key, (unit, base, variance, bounds) in profiles.items():
+                    trend = math.sin(d * 0.15 + astro_seed) * variance * 0.6
+                    if key == 'heart_rate':
+                        val = base + (2.5 if d > 20 else 0) + trend
+                    elif key == 'spo2':
+                        val = base + math.sin(d * 0.2) * 0.3
+                    elif key == 'sleep_duration':
+                        val = base - (0.6 if d > 25 else 0) + math.sin(d * 0.4) * 0.5
+                    elif key == 'radiation_exposure':
+                        val = base + (0.35 if 9 <= d <= 12 else 0) + math.sin(d * 0.1) * 0.04
+                    else:
+                        val = base + trend
+                    val = max(bounds[0], min(bounds[1], val))
+                    if '/5' in unit:
+                        val = round(max(1, min(5, val)))
+                    else:
+                        val = round(val, 2)
+                    db.add(Metric(astronaut_id=astro.id, key=key, value=val, unit=unit, source='synthetic telemetry', sampled_at=sample_time))
+        db.commit()
+
+
 @app.on_event("startup")
 def startup():
     Base.metadata.create_all(engine)
@@ -176,6 +252,7 @@ def startup():
         seed(db)
         seed_rich_timeline(db)
         seed_rich_protocols(db)
+        seed_rich_metrics_if_stale(db)
 
 
 def role_guard(required: str, x_demo_role: str = Header(default="astronaut")):
