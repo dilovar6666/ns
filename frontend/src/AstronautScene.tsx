@@ -152,13 +152,15 @@ function Model({
     if (!ctx) return null
 
     const grad = ctx.createLinearGradient(0, 0, 256, 0)
-    grad.addColorStop(0.0, '#1e1b4b') // Deep cold purple/blue (16°C)
-    grad.addColorStop(0.18, '#2563eb') // Blue (20°C)
-    grad.addColorStop(0.38, '#06b6d4') // Cyan (24°C)
-    grad.addColorStop(0.58, '#10b981') // Green (28°C)
-    grad.addColorStop(0.74, '#eab308') // Yellow (32°C)
-    grad.addColorStop(0.88, '#f97316') // Warm Orange (35°C)
-    grad.addColorStop(1.0, '#dc2626') // Hot Red (38°C)
+    // NASA Space Medicine Thermal Profile:
+    // Cold loop (18°C) -> Cool limbs/boots (29-31°C) -> Healthy body/legs (32-34°C) -> Hot core (37.5°C)
+    grad.addColorStop(0.0, '#0284c7') // Cool PLSS Radiator (18°C)
+    grad.addColorStop(0.20, '#06b6d4') // Cyan Coolant Loop (22°C)
+    grad.addColorStop(0.38, '#10b981') // Green Limbs / Boots (29°C)
+    grad.addColorStop(0.58, '#84cc16') // Warm Green / Thighs & Calves (32°C)
+    grad.addColorStop(0.74, '#eab308') // Golden Amber / Normal Skin (34°C)
+    grad.addColorStop(0.88, '#f97316') // Warm Orange / Brain & Cranium (36°C)
+    grad.addColorStop(1.0, '#dc2626') // Hot Crimson / Cardiac Core (37.5°C)
     ctx.fillStyle = grad
     ctx.fillRect(0, 0, 256, 1)
 
@@ -172,22 +174,52 @@ function Model({
       },
       vertexShader: `
         varying vec3 vWorldPos;
+        varying vec3 vNormal;
         void main() {
           vec4 wp = modelMatrix * vec4(position, 1.0);
           vWorldPos = wp.xyz;
+          vNormal = normalize(mat3(modelMatrix) * normal);
           gl_Position = projectionMatrix * viewMatrix * wp;
         }
       `,
       fragmentShader: `
         uniform sampler2D thermalMap;
         varying vec3 vWorldPos;
+        varying vec3 vNormal;
         void main() {
-          float t = clamp((vWorldPos.y - (-1.15)) / 1.95, 0.0, 1.0);
-          float distChest = length(vWorldPos - vec3(0.0, 0.1, 0.15));
-          if (distChest < 0.35) {
-            t = mix(t, 0.96, (0.35 - distChest) / 0.35 * 0.55);
+          // Baseline healthy astronaut skin temperature: 33.0°C (t ~ 0.65, warm amber/green)
+          float t = 0.66;
+
+          // Lower limbs & legs (calves, thighs, boots):
+          // Physiologically healthy blood circulation maintains legs at 31.5°C - 34.2°C (warm green to golden amber)
+          if (vWorldPos.y < -0.15) {
+            float legHeight = clamp((vWorldPos.y - (-1.18)) / 1.05, 0.0, 1.0);
+            // From boots (31.0°C ~ 0.46) up to upper thighs (34.5°C ~ 0.72)
+            t = mix(0.48, 0.72, legHeight);
           }
-          vec4 col = texture2D(thermalMap, vec2(t, 0.5));
+
+          // Cardiac Core & Thorax: metabolic heat center 37.0°C - 37.6°C (bright crimson red)
+          float distCore = length(vWorldPos - vec3(0.0, 0.12, 0.10));
+          if (distCore < 0.40) {
+            float coreFactor = (0.40 - distCore) / 0.40;
+            t = mix(t, 0.96, coreFactor * 0.88);
+          }
+
+          // Head / Visor exhaled air & facial vascular perfusion: 35.8°C - 36.6°C (warm orange)
+          float distHead = length(vWorldPos - vec3(0.0, 0.46, 0.06));
+          if (distHead < 0.30) {
+            float headFactor = (0.30 - distHead) / 0.30;
+            t = mix(t, 0.84, headFactor * 0.75);
+          }
+
+          // PLSS Backpack Heat Exchanger / Radiator Sublimator (coolant return: 18°C - 22°C cyan/blue)
+          // Located on the backpack behind the astronaut (z < -0.16)
+          if (vWorldPos.z < -0.16 && vWorldPos.y > -0.10 && vWorldPos.y < 0.45 && abs(vWorldPos.x) < 0.34) {
+            float plssFactor = clamp((-vWorldPos.z - 0.16) / 0.22, 0.0, 1.0);
+            t = mix(t, 0.12, plssFactor * 0.90);
+          }
+
+          vec4 col = texture2D(thermalMap, vec2(clamp(t, 0.0, 1.0), 0.5));
           gl_FragColor = vec4(col.rgb, 1.0);
         }
       `,
@@ -195,20 +227,38 @@ function Model({
     })
   }, [])
 
-  // X-Ray Holographic Material
+  // X-Ray Holographic Translucent Suit Shell
   const xrayMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
       color: new THREE.Color('#00e5ff'),
-      emissive: new THREE.Color('#004466'),
-      emissiveIntensity: 0.75,
+      emissive: new THREE.Color('#002b44'),
+      emissiveIntensity: 0.4,
       transparent: true,
-      opacity: 0.38,
-      wireframe: false,
+      opacity: 0.16,
       roughness: 0.2,
       metalness: 0.8,
       depthWrite: false,
     })
   }, [])
+
+  // Skeleton Helper for 90 rigged bones
+  const skeletonHelper = useMemo(() => {
+    const helper = new THREE.SkeletonHelper(clone)
+    helper.material = new THREE.LineBasicMaterial({
+      color: new THREE.Color('#38bdf8'),
+      linewidth: 2,
+      transparent: true,
+      opacity: 0.85,
+      depthTest: false,
+    })
+    return helper
+  }, [clone])
+
+  useFrame(() => {
+    if (viewMode === 'xray') {
+      skeletonHelper.updateMatrixWorld(true)
+    }
+  })
 
   const originalMaterials = useRef<Map<THREE.Mesh, THREE.Material | THREE.Material[]>>(new Map())
 
@@ -220,7 +270,7 @@ function Model({
           originalMaterials.current.set(mesh, mesh.material)
         }
       }
-    });
+    })
   }, [clone])
 
   useEffect(() => {
@@ -242,6 +292,84 @@ function Model({
   return (
     <group ref={group} position={[0, -1.22, 0]} scale={0.80}>
       <primitive object={clone} />
+
+      {/* Internal Human Skeleton Structure in X-Ray Mode */}
+      {viewMode === 'xray' && (
+        <group>
+          {/* Rigged 90-joint dynamic skeleton lines */}
+          <primitive object={skeletonHelper} />
+
+          {/* Glowing Anatomical Cranium / Skull */}
+          <group position={[0, 2.08, 0.02]}>
+            <mesh>
+              <sphereGeometry args={[0.11, 16, 16]} />
+              <meshBasicMaterial color="#a5f3fc" transparent opacity={0.7} wireframe depthTest={false} />
+            </mesh>
+            <mesh position={[0, -0.06, 0.04]} scale={[0.85, 0.8, 0.9]}>
+              <boxGeometry args={[0.09, 0.08, 0.09]} />
+              <meshBasicMaterial color="#38bdf8" transparent opacity={0.6} wireframe depthTest={false} />
+            </mesh>
+          </group>
+
+          {/* Thoracic Ribcage (Sternum & 8 Rib pairs) */}
+          <group position={[0, 1.62, 0.02]}>
+            {/* Sternum / Core Column */}
+            <mesh position={[0, 0, 0.07]}>
+              <cylinderGeometry args={[0.015, 0.015, 0.24, 12]} />
+              <meshBasicMaterial color="#e0f2fe" transparent opacity={0.85} depthTest={false} />
+            </mesh>
+            {/* Rib rings */}
+            {[0.09, 0.05, 0.01, -0.03, -0.07].map((y, idx) => (
+              <mesh key={idx} position={[0, y, 0]} rotation={[Math.PI / 2, 0, 0]}>
+                <torusGeometry args={[0.14 - Math.abs(y) * 0.35, 0.007, 8, 24, Math.PI * 1.85]} />
+                <meshBasicMaterial color="#38bdf8" transparent opacity={0.8} depthTest={false} />
+              </mesh>
+            ))}
+          </group>
+
+          {/* Vertebral Spine Column */}
+          <group position={[0, 1.55, -0.04]}>
+            {Array.from({ length: 14 }).map((_, idx) => (
+              <mesh key={idx} position={[0, -idx * 0.034 + 0.18, 0]}>
+                <cylinderGeometry args={[0.018, 0.02, 0.018, 10]} />
+                <meshBasicMaterial color="#a5f3fc" transparent opacity={0.85} depthTest={false} />
+              </mesh>
+            ))}
+          </group>
+
+          {/* Pelvis / Pelvic Girdle */}
+          <group position={[0, 1.18, 0.0]}>
+            <mesh position={[-0.09, 0.02, 0]} rotation={[0, 0.2, -0.3]}>
+              <torusGeometry args={[0.07, 0.01, 8, 16, Math.PI * 1.2]} />
+              <meshBasicMaterial color="#38bdf8" transparent opacity={0.85} depthTest={false} />
+            </mesh>
+            <mesh position={[0.09, 0.02, 0]} rotation={[0, -0.2, 0.3]}>
+              <torusGeometry args={[0.07, 0.01, 8, 16, Math.PI * 1.2]} />
+              <meshBasicMaterial color="#38bdf8" transparent opacity={0.85} depthTest={false} />
+            </mesh>
+          </group>
+
+          {/* Major Anatomical Joint Nodes */}
+          {/* Shoulders */}
+          <mesh position={[-0.26, 1.80, 0]}><sphereGeometry args={[0.028, 12, 12]} /><meshBasicMaterial color="#38bdf8" transparent opacity={0.9} depthTest={false} /></mesh>
+          <mesh position={[0.26, 1.80, 0]}><sphereGeometry args={[0.028, 12, 12]} /><meshBasicMaterial color="#38bdf8" transparent opacity={0.9} depthTest={false} /></mesh>
+          {/* Elbows */}
+          <mesh position={[-0.46, 1.50, 0.05]}><sphereGeometry args={[0.022, 12, 12]} /><meshBasicMaterial color="#38bdf8" transparent opacity={0.9} depthTest={false} /></mesh>
+          <mesh position={[0.46, 1.50, 0.05]}><sphereGeometry args={[0.022, 12, 12]} /><meshBasicMaterial color="#38bdf8" transparent opacity={0.9} depthTest={false} /></mesh>
+          {/* Wrists */}
+          <mesh position={[-0.56, 1.22, 0.16]}><sphereGeometry args={[0.018, 12, 12]} /><meshBasicMaterial color="#38bdf8" transparent opacity={0.9} depthTest={false} /></mesh>
+          <mesh position={[0.56, 1.22, 0.16]}><sphereGeometry args={[0.018, 12, 12]} /><meshBasicMaterial color="#38bdf8" transparent opacity={0.9} depthTest={false} /></mesh>
+          {/* Hips */}
+          <mesh position={[-0.14, 1.10, 0]}><sphereGeometry args={[0.026, 12, 12]} /><meshBasicMaterial color="#38bdf8" transparent opacity={0.9} depthTest={false} /></mesh>
+          <mesh position={[0.14, 1.10, 0]}><sphereGeometry args={[0.026, 12, 12]} /><meshBasicMaterial color="#38bdf8" transparent opacity={0.9} depthTest={false} /></mesh>
+          {/* Knees */}
+          <mesh position={[-0.15, 0.62, 0.04]}><sphereGeometry args={[0.024, 12, 12]} /><meshBasicMaterial color="#38bdf8" transparent opacity={0.9} depthTest={false} /></mesh>
+          <mesh position={[0.15, 0.62, 0.04]}><sphereGeometry args={[0.024, 12, 12]} /><meshBasicMaterial color="#38bdf8" transparent opacity={0.9} depthTest={false} /></mesh>
+          {/* Ankles */}
+          <mesh position={[-0.16, 0.16, 0.02]}><sphereGeometry args={[0.020, 12, 12]} /><meshBasicMaterial color="#38bdf8" transparent opacity={0.9} depthTest={false} /></mesh>
+          <mesh position={[0.16, 0.16, 0.02]}><sphereGeometry args={[0.020, 12, 12]} /><meshBasicMaterial color="#38bdf8" transparent opacity={0.9} depthTest={false} /></mesh>
+        </group>
+      )}
 
       {/* X-Ray Sweep Scan Beam */}
       {viewMode === 'xray' && <XRayScanBeam />}
@@ -274,44 +402,74 @@ function CameraManager({
   const { camera } = useThree()
   const targetPos = useRef(new THREE.Vector3(0, isMobile ? -0.22 : -0.20, isMobile ? 3.5 : 3.1))
   const targetLook = useRef(new THREE.Vector3(0, isMobile ? -0.28 : -0.25, 0))
+  const isAnimating = useRef(false)
+  const prevZone = useRef<SensorZone | undefined>(activeZone)
 
   useEffect(() => {
-    if (!activeZone || activeZone === 'full') {
-      targetPos.current.set(0, isMobile ? -0.22 : -0.20, isMobile ? 3.5 : 3.1)
-      targetLook.current.set(0, isMobile ? -0.28 : -0.25, 0)
-      return
-    }
+    // Only animate when user actually changes activeZone
+    if (activeZone !== prevZone.current) {
+      prevZone.current = activeZone
+      isAnimating.current = true
 
-    switch (activeZone) {
-      case 'chest':
-        targetPos.current.set(0, 0.20, isMobile ? 1.55 : 1.35)
-        targetLook.current.set(0, 0.16, 0)
-        break
-      case 'helmet':
-        targetPos.current.set(0, 0.46, isMobile ? 1.25 : 1.10)
-        targetLook.current.set(0, 0.44, 0)
-        break
-      case 'plss':
-        targetPos.current.set(0, 0.28, isMobile ? -1.75 : -1.55)
-        targetLook.current.set(0, 0.20, -0.20)
-        break
-      case 'wrist':
-        targetPos.current.set(-0.85, 0.10, isMobile ? 1.10 : 0.90)
-        targetLook.current.set(-0.60, 0.05, 0.10)
-        break
-      case 'lcvg':
-        targetPos.current.set(0, -0.30, isMobile ? 2.80 : 2.45)
-        targetLook.current.set(0, -0.35, 0)
-        break
+      if (!activeZone || activeZone === 'full') {
+        targetPos.current.set(0, isMobile ? -0.22 : -0.20, isMobile ? 3.5 : 3.1)
+        targetLook.current.set(0, isMobile ? -0.28 : -0.25, 0)
+      } else {
+        switch (activeZone) {
+          case 'chest':
+            targetPos.current.set(0, 0.20, isMobile ? 1.55 : 1.35)
+            targetLook.current.set(0, 0.16, 0)
+            break
+          case 'helmet':
+            targetPos.current.set(0, 0.46, isMobile ? 1.25 : 1.10)
+            targetLook.current.set(0, 0.44, 0)
+            break
+          case 'plss':
+            targetPos.current.set(0, 0.28, isMobile ? -1.75 : -1.55)
+            targetLook.current.set(0, 0.20, -0.20)
+            break
+          case 'wrist':
+            targetPos.current.set(-0.85, 0.10, isMobile ? 1.10 : 0.90)
+            targetLook.current.set(-0.60, 0.05, 0.10)
+            break
+          case 'lcvg':
+            targetPos.current.set(0, -0.30, isMobile ? 2.80 : 2.45)
+            targetLook.current.set(0, -0.35, 0)
+            break
+        }
+      }
     }
   }, [activeZone, isMobile])
 
+  // Stop camera animation as soon as user starts manually dragging/rotating
+  useEffect(() => {
+    const controls = controlsRef.current
+    if (!controls) return
+    const onStart = () => {
+      isAnimating.current = false
+    }
+    controls.addEventListener('start', onStart)
+    return () => {
+      controls.removeEventListener('start', onStart)
+    }
+  }, [controlsRef])
+
   useFrame((_, delta) => {
-    const step = Math.min(1, delta * 3.8)
+    if (!isAnimating.current) return
+
+    const step = Math.min(1, delta * 3.5)
     camera.position.lerp(targetPos.current, step)
     if (controlsRef.current) {
       controlsRef.current.target.lerp(targetLook.current, step)
       controlsRef.current.update()
+    }
+
+    // Stop animating once close enough to target
+    if (
+      camera.position.distanceTo(targetPos.current) < 0.015 &&
+      (!controlsRef.current || controlsRef.current.target.distanceTo(targetLook.current) < 0.015)
+    ) {
+      isAnimating.current = false
     }
   })
 
@@ -330,12 +488,12 @@ export default function AstronautScene({
   const controlsRef = useRef<any>(null)
 
   return (
-    <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', touchAction: 'none' }}>
       <Canvas
         camera={{ position: [0, defaultY, defaultZ], fov: isMobile ? 44 : 40 }}
         dpr={[1, 1.5]}
         gl={{ antialias: true, alpha: true }}
-        style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
+        style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, touchAction: 'none' }}
       >
         <color attach="background" args={[viewMode === 'xray' ? '#040914' : viewMode === 'thermal' ? '#070a12' : '#08101e']} />
         
@@ -363,9 +521,14 @@ export default function AstronautScene({
 
         <OrbitControls
           ref={controlsRef}
+          makeDefault
+          enableRotate={true}
+          enableZoom={true}
           enablePan={false}
-          minDistance={0.8}
-          maxDistance={6.0}
+          rotateSpeed={0.85}
+          zoomSpeed={0.95}
+          minDistance={0.5}
+          maxDistance={7.0}
           target={[0, defaultY, 0]}
         />
       </Canvas>
@@ -377,7 +540,7 @@ export default function AstronautScene({
             position: 'absolute',
             bottom: '12px',
             left: '12px',
-            background: 'rgba(5, 10, 18, 0.85)',
+            background: 'rgba(5, 10, 18, 0.88)',
             backdropFilter: 'blur(8px)',
             WebkitBackdropFilter: 'blur(8px)',
             border: '1px solid rgba(255, 255, 255, 0.15)',
@@ -388,17 +551,19 @@ export default function AstronautScene({
             fontSize: '11px',
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8', marginBottom: '4px', fontSize: '10px', fontWeight: 700 }}>
-            <span style={{ color: '#38bdf8' }}>16°C (LCVG)</span>
-            <span style={{ color: '#22c55e' }}>28°C</span>
-            <span style={{ color: '#ef4444' }}>38°C (ЯДРО)</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8', marginBottom: '4px', fontSize: '9px', fontWeight: 700, gap: '8px' }}>
+            <span style={{ color: '#0284c7' }}>18°C PLSS</span>
+            <span style={{ color: '#10b981' }}>31°C Ноги</span>
+            <span style={{ color: '#eab308' }}>34°C Тело</span>
+            <span style={{ color: '#ef4444' }}>37.5°C Ядро</span>
           </div>
           <div
             style={{
-              width: '180px',
+              width: '200px',
+              maxWidth: 'calc(100vw - 60px)',
               height: '8px',
               borderRadius: '4px',
-              background: 'linear-gradient(to right, #1e1b4b, #2563eb, #06b6d4, #10b981, #eab308, #f97316, #dc2626)',
+              background: 'linear-gradient(to right, #0284c7, #06b6d4, #10b981, #84cc16, #eab308, #f97316, #dc2626)',
               border: '1px solid rgba(255, 255, 255, 0.2)',
             }}
           />
@@ -412,7 +577,7 @@ export default function AstronautScene({
             position: 'absolute',
             bottom: '12px',
             left: '12px',
-            background: 'rgba(5, 10, 18, 0.85)',
+            background: 'rgba(5, 10, 18, 0.88)',
             backdropFilter: 'blur(8px)',
             WebkitBackdropFilter: 'blur(8px)',
             border: '1px solid rgba(34, 211, 238, 0.3)',
@@ -429,7 +594,7 @@ export default function AstronautScene({
           }}
         >
           <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22d3ee', boxShadow: '0 0 8px #22d3ee' }} />
-          <span>РЕНТГЕН-СКАН · 5 БИОСЕНСОРОВ АКТИВНЫ</span>
+          <span>РЕНТГЕН-СКАН · СКЕЛЕТ + 5 БИОСЕНСОРОВ</span>
         </div>
       )}
     </div>
