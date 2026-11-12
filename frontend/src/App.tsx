@@ -118,14 +118,8 @@ export default function App() {
       {/* Sidebar Navigation */}
       <aside className="side" aria-label="Главное меню">
         {/* Brand Logo */}
-        <Link className="brand" to="/" title="На главную">
-          <div className="brand-mark">
-            <Activity size={20} />
-          </div>
-          <div>
-            <strong>COSMO<span>HEALTH</span>X</strong>
-            <small>MISSION HEALTH SYSTEM</small>
-          </div>
+        <Link className="brand" to="/" title="На главную" style={{ padding: "6px 8px", display: "flex", alignItems: "center" }}>
+          <img src="/cosmo-logo.png" alt="CosmoHealth" className="brand-logo-img" />
         </Link>
 
         {/* Primary Navigation Items */}
