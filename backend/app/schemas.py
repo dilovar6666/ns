@@ -8,7 +8,14 @@ class AstronautInput(BaseModel):
     name: str = Field(min_length=2, max_length=120)
     callsign: str = Field(min_length=2, max_length=40)
     specialty: str = Field(min_length=2, max_length=120)
-    mission_id: int
+    mission_id: int = 1
+    avatar_url: Optional[str] = None
+    age: Optional[int] = 34
+    blood_type: Optional[str] = "O+"
+    notes: Optional[str] = ""
+    emergency_contact: Optional[str] = ""
+    resting_hr: Optional[int] = 65
+    max_hr: Optional[int] = 175
 
 
 class AstronautOut(AstronautInput):
@@ -60,6 +67,8 @@ class RegisterRequest(BaseModel):
     full_name: str = Field(min_length=2, max_length=120)
     callsign: str = Field(default="", max_length=40)
     role: str = Field(default="Crew Member", max_length=80)
+    access_code: Optional[str] = None
+    avatar_url: Optional[str] = None
 
 
 class LoginRequest(BaseModel):
@@ -74,6 +83,11 @@ class UserOut(BaseModel):
     full_name: str
     callsign: str
     role: str
+    avatar_url: Optional[str] = None
+
+
+class AvatarUpdateInput(BaseModel):
+    avatar_url: str = Field(min_length=5, max_length=10000000)
 
 
 class AuthResponse(BaseModel):

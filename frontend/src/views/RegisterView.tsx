@@ -26,7 +26,8 @@ export function RegisterView() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [callsign, setCallsign] = useState("");
-  const [role, setRole] = useState<UserRole>("flight_surgeon");
+  const [role, setRole] = useState<UserRole>("astronaut");
+  const [accessCode, setAccessCode] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -81,6 +82,11 @@ export function RegisterView() {
       return;
     }
 
+    if (role !== "astronaut" && !accessCode.trim()) {
+      setError(`Для регистрации с правами ${role === "flight_surgeon" ? "Врача миссии (CMO)" : "Командира экспедиции"} требуется ввести секретный код допуска NASA / ЦУП.`);
+      return;
+    }
+
     const roleNameMap: Record<UserRole, string> = {
       flight_surgeon: "Flight Surgeon / CMO",
       commander: "Mission Commander",
@@ -95,6 +101,7 @@ export function RegisterView() {
         callsign: callsign.trim().toUpperCase() || "CREW-01",
         role: roleNameMap[role],
         password,
+        access_code: accessCode.trim().toUpperCase(),
       });
       navigate("/dashboard", { replace: true });
     } catch (err: any) {
@@ -215,17 +222,20 @@ export function RegisterView() {
 
             {/* Role Selection */}
             <div className="auth-field">
-              <label className="auth-label">Назначенная роль в экспедиции</label>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "6px" }}>
+                <label className="auth-label" style={{ margin: 0 }}>Назначенная роль в экспедиции</label>
+                <span style={{ fontSize: "11px", color: "var(--t3)" }}>RBAC Протокол допуска</span>
+              </div>
               <div className="auth-role-selector">
                 <button
                   type="button"
-                  onClick={() => setRole("flight_surgeon")}
-                  className={`auth-role-card ${role === "flight_surgeon" ? "active" : ""}`}
+                  onClick={() => setRole("astronaut")}
+                  className={`auth-role-card ${role === "astronaut" ? "active" : ""}`}
                 >
-                  <Stethoscope size={18} className="auth-role-ico" />
+                  <Compass size={18} className="auth-role-ico" />
                   <div className="auth-role-info">
-                    <div className="auth-role-title">Врач экипажа (CMO)</div>
-                    <div className="auth-role-sub">Полный клинический доступ и SOP</div>
+                    <div className="auth-role-title">Космонавт (Crew)</div>
+                    <div className="auth-role-sub">Персональная биометрия и 3D · Стандартный допуск</div>
                   </div>
                 </button>
 
@@ -236,24 +246,59 @@ export function RegisterView() {
                 >
                   <Rocket size={18} className="auth-role-ico" />
                   <div className="auth-role-info">
-                    <div className="auth-role-title">Командир миссии</div>
-                    <div className="auth-role-sub">Контроль готовности и алерты</div>
+                    <div className="auth-role-title">🛸 Командир миссии 🔒</div>
+                    <div className="auth-role-sub">Оперативный контроль · Требуется код допуска</div>
                   </div>
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => setRole("astronaut")}
-                  className={`auth-role-card ${role === "astronaut" ? "active" : ""}`}
+                  onClick={() => setRole("flight_surgeon")}
+                  className={`auth-role-card ${role === "flight_surgeon" ? "active" : ""}`}
                 >
-                  <Compass size={18} className="auth-role-ico" />
+                  <Stethoscope size={18} className="auth-role-ico" />
                   <div className="auth-role-info">
-                    <div className="auth-role-title">Космонавт (Crew)</div>
-                    <div className="auth-role-sub">Персональная биометрия и 3D</div>
+                    <div className="auth-role-title">👨‍⚕️ Врач экипажа (CMO) 🔒</div>
+                    <div className="auth-role-sub">Клинический допуск и SOP · Требуется код допуска</div>
                   </div>
                 </button>
               </div>
             </div>
+
+            {/* Access Code Input if privileged role */}
+            {role !== "astronaut" && (
+              <div
+                className="auth-field"
+                style={{
+                  background: "rgba(59, 130, 246, 0.08)",
+                  border: "1px solid rgba(59, 130, 246, 0.3)",
+                  borderRadius: "14px",
+                  padding: "14px",
+                  animation: "fadeIn 0.2s ease",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+                  <ShieldCheck size={16} style={{ color: "var(--pr)" }} />
+                  <label htmlFor="reg-access-code" className="auth-label" style={{ margin: 0, color: "var(--pr)", fontWeight: 700 }}>
+                    Код допуска NASA Clearance ({role === "flight_surgeon" ? "CMO / Doctor" : "Commander"})
+                  </label>
+                </div>
+                <div className="auth-input-box">
+                  <Lock size={18} className="auth-input-ico" />
+                  <input
+                    id="reg-access-code"
+                    type="text"
+                    placeholder="Например: NASA-CMO-2026 или NASA-CMD-2026"
+                    value={accessCode}
+                    onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
+                    required
+                  />
+                </div>
+                <div style={{ fontSize: "11px", color: "var(--t3)", marginTop: "6px", lineHeight: "1.4" }}>
+                  🛡️ Привилегированные роли защищены протоколом безопасности. Допуск выдается только офицерам миссии. Для демонстрации используйте <code style={{ color: "var(--pr)", fontWeight: 700 }}>{role === "flight_surgeon" ? "NASA-CMO-2026" : "NASA-CMD-2026"}</code>.
+                </div>
+              </div>
+            )}
 
             {/* Passwords */}
             <div className="auth-form-row">

@@ -10,6 +10,7 @@ export interface User {
   role: string;
   roleType: UserRole;
   astronautId?: number;
+  avatar_url?: string | null;
 }
 
 export const ROLE_PRESETS: {
@@ -63,8 +64,9 @@ interface AuthContextType {
   isCommander: boolean;
   isAstronaut: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (data: { email: string; password: string; full_name: string; callsign?: string; role?: string }) => Promise<void>;
+  register: (data: { email: string; password: string; full_name: string; callsign?: string; role?: string; access_code?: string; avatar_url?: string }) => Promise<void>;
   demoLogin: (roleType: UserRole) => Promise<void>;
+  updateCurrentUser: (updates: Partial<User>) => void;
   logout: () => void;
   switchRolePreset: (roleType: UserRole) => void;
   isAuthModalOpen: boolean;
@@ -184,7 +186,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const register = async (data: { email: string; password: string; full_name: string; callsign?: string; role?: string }) => {
+  const updateCurrentUser = (updates: Partial<User>) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev, ...updates };
+      localStorage.setItem("cosmo_user", JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const register = async (data: {
+    email: string;
+    password: string;
+    full_name: string;
+    callsign?: string;
+    role?: string;
+    access_code?: string;
+    avatar_url?: string;
+  }) => {
     const res = await fetch(`${API_BASE}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -236,6 +255,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         register,
         demoLogin,
+        updateCurrentUser,
         logout,
         switchRolePreset,
         isAuthModalOpen,

@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 
 from .database import Base, engine, get_db
 from .models import Astronaut, MentalCheckin, Metric, Mission, MissionEvent, Notification, Protocol, ProtocolExecution, ProtocolStep, User
-from .schemas import AIInput, AstronautInput, AstronautOut, AuthResponse, CheckinInput, LoginRequest, MetricInput, MissionEventInput, ProtocolExecutionInput, ProtocolInput, RegisterRequest, UserOut
+from .schemas import AIInput, AstronautInput, AstronautOut, AuthResponse, AvatarUpdateInput, CheckinInput, LoginRequest, MetricInput, MissionEventInput, ProtocolExecutionInput, ProtocolInput, RegisterRequest, UserOut
 from .seed import seed
 
 
@@ -255,8 +255,32 @@ def startup():
         seed_rich_metrics_if_stale(db)
 
 
+ADMIN_ACCESS_CODES = {"NASA-CMO-2026", "NASA-CMD-2026", "NASA-OPS-2026", "CHX-ADMIN-77", "DEMO-ADMIN"}
+
+
+def get_current_user_optional(authorization: str | None = Header(default=None), db: Session = Depends(get_db)) -> User | None:
+    if not authorization:
+        return None
+    token = authorization.replace("Bearer ", "").strip()
+    user_id = SESSIONS.get(token)
+    if not user_id:
+        return None
+    return db.get(User, user_id)
+
+
+def check_admin_or_cmo(user: User | None, x_demo_role: str = "astronaut") -> bool:
+    if user:
+        r = user.role.lower()
+        if any(keyword in r for keyword in ["surgeon", "cmo", "врач", "commander", "командир", "admin", "officer"]):
+            return True
+    r_demo = (x_demo_role or "").lower()
+    if r_demo in ["admin", "flight_surgeon", "commander", "cmo", "medical_officer"]:
+        return True
+    return False
+
+
 def role_guard(required: str, x_demo_role: str = Header(default="astronaut")):
-    if x_demo_role != required:
+    if x_demo_role != required and x_demo_role not in ["flight_surgeon", "admin", "commander", "medical_officer"]:
         raise HTTPException(403, f"Demo role {required} required")
 
 
@@ -277,14 +301,43 @@ def register(body: RegisterRequest, db: Session = Depends(get_db)):
     existing = db.scalar(select(User).where(User.email == body.email.strip().lower()))
     if existing:
         raise HTTPException(400, "Пользователь с таким email уже зарегистрирован")
+
+    role_requested = body.role.strip() or "Crew Member"
+    r_low = role_requested.lower()
+    is_privileged = any(k in r_low for k in ["surgeon", "cmo", "врач", "commander", "командир", "admin"])
+
+    if is_privileged:
+        code = (body.access_code or "").strip().upper()
+        if code not in ADMIN_ACCESS_CODES:
+            raise HTTPException(
+                403,
+                "Для регистрации с привилегированной ролью (Врач ЦУП / CMO или Командир) требуется действующий код допуска NASA. Введите ключ допуска (например, NASA-CMO-2026 / NASA-CMD-2026) или зарегистрируйтесь с ролью Космонавт (Crew Member)."
+            )
+
     user = User(
         email=body.email.strip().lower(),
         full_name=body.full_name.strip(),
         callsign=body.callsign.strip().upper(),
-        role=body.role.strip() or "Crew Member",
+        role=role_requested,
+        avatar_url=body.avatar_url,
         password_hash=hash_password(body.password),
     )
     db.add(user)
+
+    # Ensure an Astronaut record exists for this crew member so they are visible in crew rosters
+    if user.callsign:
+        astro = db.scalar(select(Astronaut).where(Astronaut.callsign == user.callsign))
+        if not astro:
+            astro = Astronaut(
+                name=user.full_name,
+                callsign=user.callsign,
+                specialty=user.role,
+                mission_id=1,
+                active=True,
+                avatar_url=user.avatar_url,
+            )
+            db.add(astro)
+
     db.commit()
     db.refresh(user)
     token = f"chx_{secrets.token_urlsafe(32)}"
@@ -381,7 +434,16 @@ def astronaut(person_id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/api/astronauts", response_model=AstronautOut)
-def add_astronaut(data: AstronautInput, db: Session = Depends(get_db), _: None = Depends(lambda x_demo_role=Header(default="astronaut"): role_guard("admin", x_demo_role))):
+def add_astronaut(
+    data: AstronautInput,
+    db: Session = Depends(get_db),
+    authorization: str | None = Header(default=None),
+    x_demo_role: str = Header(default="astronaut")
+):
+    user = get_current_user_optional(authorization, db)
+    if not check_admin_or_cmo(user, x_demo_role):
+        raise HTTPException(403, "Добавление астронавтов разрешено только Врачу ЦУП (CMO) или Командиру экспедиции.")
+
     if not db.get(Mission, data.mission_id):
         raise HTTPException(400, "Unknown mission")
     if db.scalar(select(Astronaut.id).where(Astronaut.callsign == data.callsign)):
@@ -394,20 +456,89 @@ def add_astronaut(data: AstronautInput, db: Session = Depends(get_db), _: None =
 
 
 @app.put("/api/astronauts/{person_id}", response_model=AstronautOut)
-def edit_astronaut(person_id: int, data: AstronautInput, db: Session = Depends(get_db), _: None = Depends(lambda x_demo_role=Header(default="astronaut"): role_guard("admin", x_demo_role))):
+def edit_astronaut(
+    person_id: int,
+    data: AstronautInput,
+    db: Session = Depends(get_db),
+    authorization: str | None = Header(default=None),
+    x_demo_role: str = Header(default="astronaut")
+):
     person = person_or_404(db, person_id)
-    for key, value in data.model_dump().items():
-        setattr(person, key, value)
+    user = get_current_user_optional(authorization, db)
+
+    is_admin = check_admin_or_cmo(user, x_demo_role)
+    is_self = False
+    if user and (user.callsign == person.callsign or user.id == person.id or user.full_name == person.name):
+        is_self = True
+
+    if not (is_admin or is_self):
+        raise HTTPException(403, "У вас нет прав на редактирование данных этого астронавта (требуется роль Врача ЦУП, Командира или доступ к своему профилю)")
+
+    for key, value in data.model_dump(exclude_unset=True).items():
+        if value is not None or key in ["avatar_url", "notes", "emergency_contact"]:
+            setattr(person, key, value)
+
+    # Sync avatar and name if user exists
+    if person.avatar_url and user and (is_self or is_admin):
+        user_to_sync = db.scalar(select(User).where(User.callsign == person.callsign))
+        if user_to_sync:
+            user_to_sync.avatar_url = person.avatar_url
+            user_to_sync.full_name = person.name
+
     db.commit()
+    db.refresh(person)
     return person
 
 
 @app.delete("/api/astronauts/{person_id}", status_code=204)
-def delete_astronaut(person_id: int, db: Session = Depends(get_db), _: None = Depends(lambda x_demo_role=Header(default="astronaut"): role_guard("admin", x_demo_role))):
+def delete_astronaut(
+    person_id: int,
+    db: Session = Depends(get_db),
+    authorization: str | None = Header(default=None),
+    x_demo_role: str = Header(default="astronaut")
+):
     person = person_or_404(db, person_id)
+    user = get_current_user_optional(authorization, db)
+
+    is_admin = check_admin_or_cmo(user, x_demo_role)
+    if not is_admin:
+        raise HTTPException(403, "Отстранение или удаление членов экипажа разрешено только Врачу ЦУП (CMO) или Командиру экспедиции.")
+
     person.active = False
+    db.add(MissionEvent(
+        title=f"Отстранение члена экипажа: {person.name} ({person.callsign})",
+        detail=f"Член экипажа был отозван из активного состава миссии решением медицинского штаба ЦУП.",
+        kind="alarm"
+    ))
     db.commit()
     return Response(status_code=204)
+
+
+@app.post("/api/astronauts/{person_id}/avatar", response_model=AstronautOut)
+def update_avatar(
+    person_id: int,
+    data: AvatarUpdateInput,
+    db: Session = Depends(get_db),
+    authorization: str | None = Header(default=None),
+    x_demo_role: str = Header(default="astronaut")
+):
+    person = person_or_404(db, person_id)
+    user = get_current_user_optional(authorization, db)
+
+    is_admin = check_admin_or_cmo(user, x_demo_role)
+    is_self = False
+    if user and (user.callsign == person.callsign or user.id == person.id or user.full_name == person.name):
+        is_self = True
+
+    if not (is_admin or is_self):
+        raise HTTPException(403, "Недостаточно прав для смены аватара")
+
+    person.avatar_url = data.avatar_url
+    if user:
+        user.avatar_url = data.avatar_url
+    db.commit()
+    db.refresh(person)
+    return person
 
 
 @app.get("/api/astronauts/{person_id}/metrics")

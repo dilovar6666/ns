@@ -18,6 +18,7 @@ class User(Base):
     callsign: Mapped[str] = mapped_column(String(40), default="")
     role: Mapped[str] = mapped_column(String(80), default="Crew Member")
     password_hash: Mapped[str] = mapped_column(String(256))
+    avatar_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 
@@ -36,6 +37,13 @@ class Astronaut(Base):
     specialty: Mapped[str] = mapped_column(String(120))
     mission_id: Mapped[int] = mapped_column(ForeignKey("missions.id"), index=True)
     active: Mapped[bool] = mapped_column(Boolean, default=True)
+    avatar_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    age: Mapped[int] = mapped_column(Integer, default=34)
+    blood_type: Mapped[str] = mapped_column(String(10), default="O+")
+    notes: Mapped[str] = mapped_column(Text, default="")
+    emergency_contact: Mapped[str] = mapped_column(String(120), default="")
+    resting_hr: Mapped[int] = mapped_column(Integer, default=65)
+    max_hr: Mapped[int] = mapped_column(Integer, default=175)
     mission: Mapped[Mission] = relationship()
 
 

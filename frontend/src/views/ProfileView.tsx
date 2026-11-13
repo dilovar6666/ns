@@ -12,9 +12,18 @@ import {
   LayoutDashboard,
   Award,
   Activity,
+  Edit2,
+  Camera,
+  Upload,
+  X,
+  Shield,
+  Phone,
+  FileText,
+  UserCheck,
 } from "lucide-react";
 import type { Astronaut, Metric } from "../api";
-import { latest } from "../api";
+import { api, latest } from "../api";
+import { useAuth } from "../context/AuthContext";
 import { AstronautProfileCanvas } from "../components/AstronautProfileCanvas";
 
 type Props = {
@@ -22,6 +31,7 @@ type Props = {
   crew: Astronaut[];
   metrics: Metric[];
   onSelectAstronaut: (id: number) => void;
+  onRefreshCrew?: () => void;
 };
 
 export function ProfileView({
@@ -29,11 +39,32 @@ export function ProfileView({
   crew,
   metrics,
   onSelectAstronaut,
+  onRefreshCrew,
 }: Props) {
+  const { user, isFlightSurgeon, isCommander, isAstronaut, updateCurrentUser } = useAuth();
+
   const [savedToast, setSavedToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
   const [hrThreshold, setHrThreshold] = useState("105");
   const [spo2Threshold, setSpo2Threshold] = useState("94");
   const [sleepTarget, setSleepTarget] = useState("8.0");
+
+  // Edit Profile Modal
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    callsign: "",
+    specialty: "",
+    age: 34,
+    blood_type: "O+",
+    resting_hr: 65,
+    max_hr: 175,
+    emergency_contact: "",
+    notes: "",
+    avatar_url: "",
+  });
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editError, setEditError] = useState("");
 
   const latestList = latest(metrics);
   const currentHr = latestList.find((m) => m.key === "heart_rate")?.value ?? 72;
@@ -41,19 +72,120 @@ export function ProfileView({
   const currentSleep = latestList.find((m) => m.key === "sleep_duration")?.value ?? 7.5;
   const currentActivity = latestList.find((m) => m.key === "activity")?.value ?? 8230;
 
-  const handleSavePreferences = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSavedToast(true);
-    setTimeout(() => setSavedToast(false), 3000);
-  };
-
-  const astronautName = astronaut?.name || "Алекс Нова";
+  const astronautName = astronaut?.name || user?.full_name || "Алекс Нова";
+  const avatarUrl = astronaut?.avatar_url || user?.avatar_url || null;
   const initials = astronautName
     .split(" ")
     .map((w) => w[0])
     .join("")
     .slice(0, 2)
     .toUpperCase();
+
+  const isOwnProfile = user?.astronautId
+    ? astronaut?.id === user.astronautId
+    : astronaut?.callsign === user?.callsign || astronaut?.id === 1;
+
+  const canEdit = isFlightSurgeon || isCommander || isOwnProfile;
+
+  const showNotification = (msg: string) => {
+    setToastMessage(msg);
+    setSavedToast(true);
+    setTimeout(() => {
+      setSavedToast(false);
+      setToastMessage("");
+    }, 3500);
+  };
+
+  const handleSavePreferences = (e: React.FormEvent) => {
+    e.preventDefault();
+    showNotification("Персонализированные пороги оповещения успешно сохранены в медицинскую карту.");
+  };
+
+  const handleImageFileChange = (file: File) => {
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Размер изображения не должен превышать 2 МБ");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      if (e.target?.result && astronaut) {
+        const base64 = e.target.result as string;
+        try {
+          await api(`/astronauts/${astronaut.id}/avatar`, isFlightSurgeon ? "flight_surgeon" : "astronaut", {
+            method: "POST",
+            body: JSON.stringify({ avatar_url: base64 }),
+          });
+          updateCurrentUser({ avatar_url: base64 });
+          showNotification("Аватарка успешно обновлена!");
+          if (onRefreshCrew) onRefreshCrew();
+        } catch (err: any) {
+          alert(err.message || "Ошибка при загрузке аватара");
+        }
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleOpenEditModal = () => {
+    if (!astronaut) return;
+    setEditForm({
+      name: astronaut.name || "",
+      callsign: astronaut.callsign || "",
+      specialty: astronaut.specialty || "",
+      age: astronaut.age || 34,
+      blood_type: astronaut.blood_type || "O+",
+      resting_hr: astronaut.resting_hr || 65,
+      max_hr: astronaut.max_hr || 175,
+      emergency_contact: astronaut.emergency_contact || "",
+      notes: astronaut.notes || "",
+      avatar_url: astronaut.avatar_url || "",
+    });
+    setEditError("");
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!astronaut) return;
+    setSavingEdit(true);
+    setEditError("");
+    try {
+      await api<Astronaut>(`/astronauts/${astronaut.id}`, isFlightSurgeon ? "flight_surgeon" : "astronaut", {
+        method: "PUT",
+        body: JSON.stringify({
+          name: editForm.name.trim(),
+          callsign: editForm.callsign.trim().toUpperCase(),
+          specialty: editForm.specialty.trim(),
+          mission_id: astronaut.mission_id || 1,
+          active: astronaut.active,
+          age: Number(editForm.age) || 34,
+          blood_type: editForm.blood_type,
+          resting_hr: Number(editForm.resting_hr) || 65,
+          max_hr: Number(editForm.max_hr) || 175,
+          emergency_contact: editForm.emergency_contact.trim(),
+          notes: editForm.notes.trim(),
+          avatar_url: editForm.avatar_url || null,
+        }),
+      });
+
+      if (isOwnProfile) {
+        updateCurrentUser({
+          full_name: editForm.name.trim(),
+          callsign: editForm.callsign.trim().toUpperCase(),
+          avatar_url: editForm.avatar_url || undefined,
+        });
+      }
+
+      setShowEditModal(false);
+      showNotification("Данные профиля и медицинская карта успешно обновлены!");
+      if (onRefreshCrew) onRefreshCrew();
+    } catch (err: any) {
+      setEditError(err.message || "Ошибка при сохранении профиля");
+    } finally {
+      setSavingEdit(false);
+    }
+  };
 
   return (
     <div className="wrapc" style={{ maxWidth: "1240px", margin: "0 auto", paddingBottom: "70px" }}>
@@ -62,13 +194,13 @@ export function ProfileView({
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
           <div>
             <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "1.2px", textTransform: "uppercase", color: "var(--t3)", marginBottom: "4px" }}>
-              СРЕДА, 11 НОЯБРЯ
+              КОСМИЧЕСКАЯ ЭКСПЕДИЦИЯ CHX-01
             </div>
             <h1 className="disp" style={{ fontSize: "34px", fontWeight: 700, margin: "0 0 6px", letterSpacing: "-0.03em" }}>
-              Astronaut Profile
+              Astronaut Profile & Telemetry Card
             </h1>
             <p style={{ margin: 0, fontSize: "13px", color: "var(--t2)" }}>
-              • Профиль, миссия и предпочтения. Демо-данные
+              Медицинский паспорт, биометрический допуск и индивидуальные настройки NASA STD-3001
             </p>
           </div>
 
@@ -100,7 +232,7 @@ export function ProfileView({
         </div>
       </header>
 
-      {/* Seamless Hero Row: Info on Left, 3D Helmet on Right (NO outer card, NO frame/box) */}
+      {/* Seamless Hero Row: Info on Left, 3D Helmet on Right */}
       <section
         className="profile-helmet-grid"
         style={{
@@ -111,35 +243,88 @@ export function ProfileView({
         {/* Left: Astronaut Profile Information */}
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "20px" }}>
-            {/* Round Initials Avatar Badge */}
-            <div
-              style={{
-                width: "72px",
-                height: "72px",
-                borderRadius: "50%",
-                background: "rgba(255, 255, 255, 0.12)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "22px",
-                fontWeight: 700,
-                color: "#FFFFFF",
-                border: "1px solid rgba(255, 255, 255, 0.18)",
-                flexShrink: 0,
-              }}
-            >
-              {initials}
+            {/* Round Avatar with Photo Upload overlay */}
+            <div style={{ position: "relative" }}>
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt={astronautName}
+                  style={{
+                    width: "78px",
+                    height: "78px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    border: "2px solid rgba(255, 255, 255, 0.25)",
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+                    flexShrink: 0,
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: "78px",
+                    height: "78px",
+                    borderRadius: "50%",
+                    background: "rgba(255, 255, 255, 0.12)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "24px",
+                    fontWeight: 700,
+                    color: "#FFFFFF",
+                    border: "1px solid rgba(255, 255, 255, 0.18)",
+                    flexShrink: 0,
+                  }}
+                >
+                  {initials}
+                </div>
+              )}
+
+              {/* Camera Upload Button Overlay */}
+              {canEdit && (
+                <label
+                  title="Изменить фотографию профиля"
+                  style={{
+                    position: "absolute",
+                    bottom: "-2px",
+                    right: "-2px",
+                    width: "28px",
+                    height: "28px",
+                    borderRadius: "50%",
+                    background: "var(--pr)",
+                    color: "#ffffff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
+                    border: "2px solid #000000",
+                    transition: "transform 0.15s ease",
+                  }}
+                >
+                  <Camera size={14} />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    style={{ display: "none" }}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleImageFileChange(file);
+                    }}
+                  />
+                </label>
+              )}
             </div>
 
             <div>
               <div style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.2px", color: "var(--t3)", marginBottom: "4px" }}>
-                ASTRONAUT PROFILE
+                ASTRONAUT PROFILE · {astronaut?.callsign || "CHX-01"}
               </div>
-              <h2 style={{ margin: 0, fontSize: "34px", fontWeight: 800, color: "#FFFFFF", letterSpacing: "-0.02em" }}>
+              <h2 style={{ margin: 0, fontSize: "32px", fontWeight: 800, color: "#FFFFFF", letterSpacing: "-0.02em" }}>
                 {astronautName}
               </h2>
               <div style={{ fontSize: "14px", color: "var(--t2)", marginTop: "4px" }}>
-                {astronaut?.specialty || "Бортинженер, экипаж демо-миссии CHX-01"}
+                {astronaut?.specialty || "Бортинженер, экипаж миссии CHX-01"}
               </div>
             </div>
           </div>
@@ -157,7 +342,7 @@ export function ProfileView({
                 color: "rgba(255, 255, 255, 0.85)",
               }}
             >
-              ID: CHX-01-AN-0{astronaut?.id || 7}
+              Позывной: {astronaut?.callsign || "APOLLO-01"} · ID #{astronaut?.id || 1}
             </span>
 
             <span
@@ -175,12 +360,50 @@ export function ProfileView({
               }}
             >
               <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#34D399" }} />
-              Миссия активна
+              Class I Flight Active
+            </span>
+
+            <span
+              style={{
+                background: "rgba(59, 130, 246, 0.15)",
+                border: "1px solid rgba(59, 130, 246, 0.3)",
+                padding: "6px 14px",
+                borderRadius: "999px",
+                fontSize: "12px",
+                fontWeight: 600,
+                color: "var(--pr)",
+              }}
+            >
+              {astronaut?.age || 34} лет · {astronaut?.blood_type || "O+"}
             </span>
           </div>
 
           {/* Action Buttons */}
           <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
+            {canEdit && (
+              <button
+                type="button"
+                onClick={handleOpenEditModal}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "11px 22px",
+                  borderRadius: "999px",
+                  background: "var(--pr)",
+                  color: "#FFFFFF",
+                  fontSize: "14px",
+                  fontWeight: 700,
+                  border: "none",
+                  cursor: "pointer",
+                  boxShadow: "0 4px 15px rgba(59, 130, 246, 0.35)",
+                }}
+              >
+                <Edit2 size={16} />
+                <span>Редактировать данные</span>
+              </button>
+            )}
+
             <Link
               to="/dashboard"
               style={{
@@ -223,7 +446,7 @@ export function ProfileView({
           </div>
         </div>
 
-        {/* Right: 3D Helmet ONLY - Completely seamless, NO box, NO card border */}
+        {/* Right: 3D Helmet */}
         <div
           className="profile-canvas-col"
           style={{
@@ -255,14 +478,15 @@ export function ProfileView({
             gap: "10px",
             fontWeight: 600,
             fontSize: "13px",
+            animation: "fadeIn 0.2s ease",
           }}
         >
           <CheckCircle size={18} />
-          <span>Персонализированные пороги оповещения успешно сохранены в медицинскую карту.</span>
+          <span>{toastMessage || "Данные успешно обновлены."}</span>
         </div>
       )}
 
-      {/* Main Two-Column Grid: Mission Info & Monitoring Overview (exactly matching design) */}
+      {/* Main Two-Column Grid: Mission Info & Monitoring Overview */}
       <div className="responsive-split-2col" style={{ marginBottom: "28px" }}>
         {/* Mission Information Card */}
         <div
@@ -300,7 +524,7 @@ export function ProfileView({
           <div style={{ display: "flex", flexDirection: "column", gap: "12px", fontSize: "13px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: "10px", borderBottom: "1px solid var(--sep)" }}>
               <span style={{ color: "var(--t3)" }}>Название миссии</span>
-              <span style={{ fontWeight: 600 }}>CHX-01, демонстрационная</span>
+              <span style={{ fontWeight: 600 }}>CHX-01, орбитальная</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: "10px", borderBottom: "1px solid var(--sep)" }}>
               <span style={{ color: "var(--t3)" }}>Продолжительность</span>
@@ -311,7 +535,7 @@ export function ProfileView({
               <span style={{ fontWeight: 600 }}>1 окт 2026 — 29 мар 2027</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--t3)" }}>Статус</span>
+              <span style={{ color: "var(--t3)" }}>Статус миссии</span>
               <span style={{ fontWeight: 700, color: "#10b981", display: "inline-flex", alignItems: "center", gap: "5px" }}>
                 <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#10b981" }} />
                 Активна
@@ -320,7 +544,7 @@ export function ProfileView({
           </div>
         </div>
 
-        {/* Monitoring Overview Card */}
+        {/* Biometrics & Medical Passport Card */}
         <div
           style={{
             background: "var(--s1)",
@@ -336,258 +560,324 @@ export function ProfileView({
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px" }}>
               <h2 style={{ margin: 0, fontSize: "17px", fontWeight: 700, display: "flex", alignItems: "center", gap: "8px" }}>
-                <Activity size={18} style={{ color: "var(--cy)" }} />
-                <span>Monitoring Overview</span>
+                <Shield size={18} style={{ color: "var(--ok)" }} />
+                <span>Медицинский паспорт и допуск NASA STD</span>
               </h2>
-              <Link to="/analytics" style={{ fontSize: "12px", color: "var(--pr)", textDecoration: "none", fontWeight: 600 }}>
-                Analytics &gt;
-              </Link>
+              {canEdit && (
+                <button
+                  type="button"
+                  onClick={handleOpenEditModal}
+                  style={{ background: "none", border: "none", color: "var(--pr)", fontSize: "12px", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}
+                >
+                  <Edit2 size={13} />
+                  <span>Изменить</span>
+                </button>
+              )}
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              {/* Heart Rate */}
-              <Link to="/monitoring" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 14px", background: "var(--s2)", borderRadius: "12px", border: "1px solid var(--sep)", textDecoration: "none", color: "inherit" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <Heart size={16} color="var(--hr)" />
-                  <div>
-                    <div style={{ fontSize: "13px", fontWeight: 600 }}>Heart Rate</div>
-                    <div style={{ fontSize: "11px", color: "var(--t3)" }}>{currentHr} bpm</div>
-                  </div>
-                </div>
-                <span style={{ fontSize: "11px", fontWeight: 700, color: "#10b981" }}>● В диапазоне &gt;</span>
-              </Link>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "14px" }}>
+              <div style={{ background: "var(--s2)", padding: "12px 14px", borderRadius: "12px", border: "1px solid var(--sep)" }}>
+                <div style={{ fontSize: "11px", color: "var(--t3)", marginBottom: "2px" }}>Группа крови & Rh</div>
+                <div style={{ fontSize: "16px", fontWeight: 700, color: "var(--tx)" }}>{astronaut?.blood_type || "O (I) Rh+"}</div>
+              </div>
+              <div style={{ background: "var(--s2)", padding: "12px 14px", borderRadius: "12px", border: "1px solid var(--sep)" }}>
+                <div style={{ fontSize: "11px", color: "var(--t3)", marginBottom: "2px" }}>Возраст / Лет</div>
+                <div style={{ fontSize: "16px", fontWeight: 700, color: "var(--tx)" }}>{astronaut?.age || 34} года</div>
+              </div>
+              <div style={{ background: "var(--s2)", padding: "12px 14px", borderRadius: "12px", border: "1px solid var(--sep)" }}>
+                <div style={{ fontSize: "11px", color: "var(--t3)", marginBottom: "2px" }}>Базовый пульс покоя</div>
+                <div style={{ fontSize: "16px", fontWeight: 700, color: "var(--pr)" }}>{astronaut?.resting_hr || 65} bpm</div>
+              </div>
+              <div style={{ background: "var(--s2)", padding: "12px 14px", borderRadius: "12px", border: "1px solid var(--sep)" }}>
+                <div style={{ fontSize: "11px", color: "var(--t3)", marginBottom: "2px" }}>Максимальная ЧСС</div>
+                <div style={{ fontSize: "16px", fontWeight: 700, color: "#f59e0b" }}>{astronaut?.max_hr || 175} bpm</div>
+              </div>
+            </div>
 
-              {/* SpO2 */}
-              <Link to="/monitoring" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 14px", background: "var(--s2)", borderRadius: "12px", border: "1px solid var(--sep)", textDecoration: "none", color: "inherit" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <Droplets size={16} color="var(--cy)" />
-                  <div>
-                    <div style={{ fontSize: "13px", fontWeight: 600 }}>Oxygen Saturation</div>
-                    <div style={{ fontSize: "11px", color: "var(--t3)" }}>{currentSpo2}%</div>
-                  </div>
+            <div style={{ fontSize: "12px", color: "var(--t2)", background: "rgba(0,0,0,0.15)", padding: "12px 14px", borderRadius: "12px", border: "1px solid var(--sep)" }}>
+              <div style={{ fontWeight: 700, color: "var(--t1)", marginBottom: "4px", display: "flex", alignItems: "center", gap: "6px" }}>
+                <FileText size={14} style={{ color: "var(--cy)" }} />
+                <span>Клинические отметки ЦУП:</span>
+              </div>
+              <div>
+                {astronaut?.notes || "Допуск к внекорабельной деятельности (EVA) подтвержден. Показатели сердечно-сосудистой адаптации стабильны."}
+              </div>
+              {astronaut?.emergency_contact && (
+                <div style={{ marginTop: "8px", paddingTop: "8px", borderTop: "1px dashed var(--sep)", display: "flex", alignItems: "center", gap: "6px", color: "var(--t3)" }}>
+                  <Phone size={13} />
+                  <span>Экстренный контакт: <b style={{ color: "var(--tx)" }}>{astronaut.emergency_contact}</b></span>
                 </div>
-                <span style={{ fontSize: "11px", fontWeight: 700, color: "#10b981" }}>● В диапазоне &gt;</span>
-              </Link>
-
-              {/* Sleep */}
-              <Link to="/monitoring" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 14px", background: "var(--s2)", borderRadius: "12px", border: "1px solid var(--sep)", textDecoration: "none", color: "inherit" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <Moon size={16} color="#8b5cf6" />
-                  <div>
-                    <div style={{ fontSize: "13px", fontWeight: 600 }}>Sleep</div>
-                    <div style={{ fontSize: "11px", color: "var(--t3)" }}>7 ч 30 мин</div>
-                  </div>
-                </div>
-                <span style={{ fontSize: "11px", fontWeight: 700, color: "#f59e0b" }}>Требует внимания &gt;</span>
-              </Link>
-
-              {/* Physical Activity */}
-              <Link to="/monitoring" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 14px", background: "var(--s2)", borderRadius: "12px", border: "1px solid var(--sep)", textDecoration: "none", color: "inherit" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <Footprints size={16} color="var(--pr)" />
-                  <div>
-                    <div style={{ fontSize: "13px", fontWeight: 600 }}>Physical Activity</div>
-                    <div style={{ fontSize: "11px", color: "var(--t3)" }}>8 230 шагов</div>
-                  </div>
-                </div>
-                <span style={{ fontSize: "11px", fontWeight: 700, color: "#10b981" }}>● В диапазоне &gt;</span>
-              </Link>
+              )}
             </div>
           </div>
+        </div>
+      </div>
 
-          <Link
-            to="/alerts"
+      {/* Edit Profile Modal */}
+      {showEditModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.8)",
+            backdropFilter: "blur(8px)",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+          }}
+          onClick={() => setShowEditModal(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
             style={{
-              marginTop: "16px",
-              padding: "10px 14px",
-              borderRadius: "12px",
-              background: "var(--s2)",
+              background: "var(--s1)",
               border: "1px solid var(--sep)",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              textDecoration: "none",
-              color: "var(--tx)",
-              fontSize: "13px",
-              fontWeight: 600,
+              borderRadius: "20px",
+              padding: "26px",
+              width: "100%",
+              maxWidth: "540px",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              boxShadow: "0 25px 60px rgba(0,0,0,0.6)",
             }}
           >
-            <span>Уведомления</span>
-            <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "10px", background: "rgba(239, 68, 68, 0.2)", color: "#ef4444", fontWeight: 700 }}>
-              2
-            </span>
-          </Link>
-        </div>
-      </div>
-
-      {/* Monitoring Baseline & Personalized Alert Thresholds */}
-      <div className="responsive-split-2col">
-        {/* Baseline Card */}
-        <div
-          style={{
-            background: "var(--s1)",
-            border: "1px solid var(--sep)",
-            borderRadius: "20px",
-            padding: "24px 28px",
-          }}
-        >
-          <h2 style={{ margin: "0 0 16px", fontSize: "17px", fontWeight: 700, display: "flex", alignItems: "center", gap: "8px" }}>
-            <Award size={18} style={{ color: "var(--pr)" }} />
-            <span>Monitoring Baseline (ЦПК)</span>
-          </h2>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "var(--s2)", borderRadius: "12px", border: "1px solid var(--sep)" }}>
-              <div>
-                <div style={{ fontSize: "13px", fontWeight: 600 }}>ЧСС в покое (Базовый уровень)</div>
-                <div style={{ fontSize: "11px", color: "var(--t3)" }}>Предполетный замер в клиностазе</div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <Edit2 size={20} style={{ color: "var(--pr)" }} />
+                <h2 style={{ margin: 0, fontSize: "18px", fontWeight: 700 }}>
+                  Редактировать данные профиля: {astronautName}
+                </h2>
               </div>
-              <span style={{ fontSize: "15px", fontWeight: 700 }}>64 bpm</span>
+              <button
+                onClick={() => setShowEditModal(false)}
+                style={{ background: "none", border: "none", color: "var(--t2)", cursor: "pointer" }}
+              >
+                <X size={20} />
+              </button>
             </div>
 
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "var(--s2)", borderRadius: "12px", border: "1px solid var(--sep)" }}>
-              <div>
-                <div style={{ fontSize: "13px", fontWeight: 600 }}>Базальная сатурация SpO₂</div>
-                <div style={{ fontSize: "11px", color: "var(--t3)" }}>Среднесуточный уровень в нормоксии</div>
+            {editError && (
+              <div
+                style={{
+                  background: "rgba(239, 68, 68, 0.15)",
+                  color: "var(--cr)",
+                  padding: "10px 14px",
+                  borderRadius: "10px",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  marginBottom: "16px",
+                }}
+              >
+                {editError}
               </div>
-              <span style={{ fontSize: "15px", fontWeight: 700 }}>98.2 %</span>
-            </div>
+            )}
 
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "var(--s2)", borderRadius: "12px", border: "1px solid var(--sep)" }}>
-              <div>
-                <div style={{ fontSize: "13px", fontWeight: 600 }}>VO₂ Max (Аэробная выносливость)</div>
-                <div style={{ fontSize: "11px", color: "var(--t3)" }}>Тест на эргометре CEVIS</div>
+            <form onSubmit={handleSaveEdit} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              {/* Photo Upload */}
+              <div style={{ display: "flex", alignItems: "center", gap: "14px", background: "var(--s2)", padding: "12px", borderRadius: "14px", border: "1px solid var(--sep)" }}>
+                {editForm.avatar_url ? (
+                  <img
+                    src={editForm.avatar_url}
+                    alt="Аватарка"
+                    style={{ width: "56px", height: "56px", borderRadius: "50%", objectFit: "cover", border: "2px solid var(--pr)" }}
+                  />
+                ) : (
+                  <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "var(--s1)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--t3)", border: "1px dashed var(--sep)" }}>
+                    <Camera size={22} />
+                  </div>
+                )}
+                <div>
+                  <div style={{ fontSize: "12px", fontWeight: 700, marginBottom: "4px" }}>Фотография профиля</div>
+                  <label
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "6px 12px",
+                      borderRadius: "8px",
+                      background: "var(--s1)",
+                      border: "1px solid var(--sep)",
+                      color: "var(--tx)",
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                    }}
+                  >
+                    <Upload size={13} />
+                    <span>Загрузить новый снимок</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      style={{ display: "none" }}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          if (file.size > 2 * 1024 * 1024) {
+                            alert("Файл слишком велик (макс 2 МБ)");
+                            return;
+                          }
+                          const reader = new FileReader();
+                          reader.onload = (ev) => {
+                            if (ev.target?.result) {
+                              setEditForm((prev) => ({ ...prev, avatar_url: ev.target!.result as string }));
+                            }
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                  </label>
+                  {editForm.avatar_url && (
+                    <button
+                      type="button"
+                      onClick={() => setEditForm((prev) => ({ ...prev, avatar_url: "" }))}
+                      style={{ marginLeft: "8px", background: "none", border: "none", color: "#ef4444", fontSize: "11px", cursor: "pointer" }}
+                    >
+                      Очистить
+                    </button>
+                  )}
+                </div>
               </div>
-              <span style={{ fontSize: "15px", fontWeight: 700 }}>52.4 мл/кг/мин</span>
-            </div>
 
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "var(--s2)", borderRadius: "12px", border: "1px solid var(--sep)" }}>
-              <div>
-                <div style={{ fontSize: "13px", fontWeight: 600 }}>Переносимость перегрузок +Gz</div>
-                <div style={{ fontSize: "11px", color: "var(--t3)" }}>Центрифуга ЦФ-18</div>
+              {/* Name & Callsign */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "var(--t2)", marginBottom: "4px" }}>
+                    Имя и фамилия
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.name}
+                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                    required
+                    style={{ width: "100%", padding: "8px 12px", borderRadius: "10px", background: "var(--s2)", border: "1px solid var(--sep)", color: "var(--tx)", fontSize: "13px" }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "var(--t2)", marginBottom: "4px" }}>
+                    Позывной (Callsign)
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.callsign}
+                    onChange={(e) => setEditForm({ ...editForm, callsign: e.target.value })}
+                    required
+                    style={{ width: "100%", padding: "8px 12px", borderRadius: "10px", background: "var(--s2)", border: "1px solid var(--sep)", color: "var(--tx)", fontSize: "13px" }}
+                  />
+                </div>
               </div>
-              <span style={{ fontSize: "15px", fontWeight: 700, color: "#10b981" }}>+7.5 Gz (30 сек)</span>
-            </div>
-          </div>
-        </div>
 
-        {/* Personalized Threshold Preferences */}
-        <div
-          style={{
-            background: "var(--s1)",
-            border: "1px solid var(--sep)",
-            borderRadius: "20px",
-            padding: "24px 28px",
-          }}
-        >
-          <h2 style={{ margin: "0 0 6px", fontSize: "17px", fontWeight: 700 }}>
-            Индивидуальные пороговые настройки
-          </h2>
-          <p style={{ margin: "0 0 16px", fontSize: "12px", color: "var(--t3)" }}>
-            Параметры срабатывания предупредительных триггеров биомониторинга
-          </p>
-
-          <form onSubmit={handleSavePreferences} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "var(--s2)", borderRadius: "12px", border: "1px solid var(--sep)" }}>
+              {/* Specialty */}
               <div>
-                <div style={{ fontSize: "13px", fontWeight: 600 }}>Порог тахикардии в покое</div>
-                <div style={{ fontSize: "11px", color: "var(--t3)" }}>Оповещение при ЧСС свыше порога</div>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <input
-                  type="number"
-                  value={hrThreshold}
-                  onChange={(e) => setHrThreshold(e.target.value)}
-                  style={{
-                    width: "70px",
-                    padding: "6px 10px",
-                    borderRadius: "8px",
-                    background: "var(--s1)",
-                    border: "1px solid var(--sep)",
-                    color: "var(--tx)",
-                    fontSize: "13px",
-                    fontWeight: 700,
-                    textAlign: "center",
-                    outline: "none",
-                  }}
-                />
-                <span style={{ fontSize: "12px", color: "var(--t3)" }}>bpm</span>
-              </div>
-            </div>
-
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "var(--s2)", borderRadius: "12px", border: "1px solid var(--sep)" }}>
-              <div>
-                <div style={{ fontSize: "13px", fontWeight: 600 }}>Порог гипоксии (SpO₂)</div>
-                <div style={{ fontSize: "11px", color: "var(--t3)" }}>Критический триггер для дыхательного контура</div>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <input
-                  type="number"
-                  value={spo2Threshold}
-                  onChange={(e) => setSpo2Threshold(e.target.value)}
-                  style={{
-                    width: "70px",
-                    padding: "6px 10px",
-                    borderRadius: "8px",
-                    background: "var(--s1)",
-                    border: "1px solid var(--sep)",
-                    color: "var(--tx)",
-                    fontSize: "13px",
-                    fontWeight: 700,
-                    textAlign: "center",
-                    outline: "none",
-                  }}
-                />
-                <span style={{ fontSize: "12px", color: "var(--t3)" }}>%</span>
-              </div>
-            </div>
-
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "var(--s2)", borderRadius: "12px", border: "1px solid var(--sep)" }}>
-              <div>
-                <div style={{ fontSize: "13px", fontWeight: 600 }}>Целевая длительность сна</div>
-                <div style={{ fontSize: "11px", color: "var(--t3)" }}>Минимум для предотвращения когнитивного спада</div>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "var(--t2)", marginBottom: "4px" }}>
+                  Специализация и назначение
+                </label>
                 <input
                   type="text"
-                  value={sleepTarget}
-                  onChange={(e) => setSleepTarget(e.target.value)}
-                  style={{
-                    width: "70px",
-                    padding: "6px 10px",
-                    borderRadius: "8px",
-                    background: "var(--s1)",
-                    border: "1px solid var(--sep)",
-                    color: "var(--tx)",
-                    fontSize: "13px",
-                    fontWeight: 700,
-                    textAlign: "center",
-                    outline: "none",
-                  }}
+                  value={editForm.specialty}
+                  onChange={(e) => setEditForm({ ...editForm, specialty: e.target.value })}
+                  required
+                  style={{ width: "100%", padding: "8px 12px", borderRadius: "10px", background: "var(--s2)", border: "1px solid var(--sep)", color: "var(--tx)", fontSize: "13px" }}
                 />
-                <span style={{ fontSize: "12px", color: "var(--t3)" }}>ч</span>
               </div>
-            </div>
 
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "var(--s2)", borderRadius: "12px", border: "1px solid var(--sep)" }}>
+              {/* Age, Blood Type, Resting HR */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "var(--t2)", marginBottom: "4px" }}>
+                    Возраст
+                  </label>
+                  <input
+                    type="number"
+                    value={editForm.age}
+                    onChange={(e) => setEditForm({ ...editForm, age: Number(e.target.value) })}
+                    style={{ width: "100%", padding: "8px 12px", borderRadius: "10px", background: "var(--s2)", border: "1px solid var(--sep)", color: "var(--tx)", fontSize: "13px" }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "var(--t2)", marginBottom: "4px" }}>
+                    Группа крови
+                  </label>
+                  <select
+                    value={editForm.blood_type}
+                    onChange={(e) => setEditForm({ ...editForm, blood_type: e.target.value })}
+                    style={{ width: "100%", padding: "8px 12px", borderRadius: "10px", background: "var(--s2)", border: "1px solid var(--sep)", color: "var(--tx)", fontSize: "13px" }}
+                  >
+                    <option value="O+">O (I) Rh+</option>
+                    <option value="O-">O (I) Rh-</option>
+                    <option value="A+">A (II) Rh+</option>
+                    <option value="A-">A (II) Rh-</option>
+                    <option value="B+">B (III) Rh+</option>
+                    <option value="B-">B (III) Rh-</option>
+                    <option value="AB+">AB (IV) Rh+</option>
+                    <option value="AB-">AB (IV) Rh-</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "var(--t2)", marginBottom: "4px" }}>
+                    Базовый пульс
+                  </label>
+                  <input
+                    type="number"
+                    value={editForm.resting_hr}
+                    onChange={(e) => setEditForm({ ...editForm, resting_hr: Number(e.target.value) })}
+                    style={{ width: "100%", padding: "8px 12px", borderRadius: "10px", background: "var(--s2)", border: "1px solid var(--sep)", color: "var(--tx)", fontSize: "13px" }}
+                  />
+                </div>
+              </div>
+
+              {/* Emergency Contact */}
               <div>
-                <div style={{ fontSize: "13px", fontWeight: 600 }}>Группа крови и резус-фактор</div>
-                <div style={{ fontSize: "11px", color: "var(--t3)" }}>Для экстренного переливания в полете</div>
+                <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "var(--t2)", marginBottom: "4px" }}>
+                  Экстренный контакт (Земля / Координационный центр)
+                </label>
+                <input
+                  type="text"
+                  placeholder="+1 (281) 483-0111 / Координатор полета"
+                  value={editForm.emergency_contact}
+                  onChange={(e) => setEditForm({ ...editForm, emergency_contact: e.target.value })}
+                  style={{ width: "100%", padding: "8px 12px", borderRadius: "10px", background: "var(--s2)", border: "1px solid var(--sep)", color: "var(--tx)", fontSize: "13px" }}
+                />
               </div>
-              <span style={{ fontSize: "14px", fontWeight: 800, color: "var(--tx)" }}>A(II) Rh+</span>
-            </div>
 
-            <button
-              type="submit"
-              className="btn pri"
-              style={{ padding: "12px", borderRadius: "12px", fontSize: "13px", fontWeight: 700, marginTop: "6px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}
-            >
-              <Save size={16} />
-              <span>Сохранить персональные параметры</span>
-            </button>
-          </form>
+              {/* Notes */}
+              <div>
+                <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "var(--t2)", marginBottom: "4px" }}>
+                  Клинические отметки и протоколы
+                </label>
+                <textarea
+                  rows={3}
+                  value={editForm.notes}
+                  onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
+                  placeholder="Особенности адаптации к невесомости, протоколы физических тренировок..."
+                  style={{ width: "100%", padding: "8px 12px", borderRadius: "10px", background: "var(--s2)", border: "1px solid var(--sep)", color: "var(--tx)", fontSize: "13px", resize: "vertical" }}
+                />
+              </div>
+
+              <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", marginTop: "8px" }}>
+                <button
+                  type="button"
+                  className="btn sec"
+                  onClick={() => setShowEditModal(false)}
+                  style={{ padding: "8px 16px", borderRadius: "10px" }}
+                >
+                  Отмена
+                </button>
+                <button
+                  type="submit"
+                  className="btn pri"
+                  disabled={savingEdit}
+                  style={{ padding: "8px 22px", borderRadius: "10px" }}
+                >
+                  {savingEdit ? "Сохранение..." : "Сохранить профиль"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

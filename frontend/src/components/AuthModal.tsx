@@ -12,7 +12,8 @@ export function AuthModal() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [callsign, setCallsign] = useState("");
-  const [role, setRole] = useState("Flight Surgeon");
+  const [role, setRole] = useState("Crew Member / Astronaut");
+  const [accessCode, setAccessCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -30,7 +31,10 @@ export function AuthModal() {
         await login(email, password);
         setSuccess(t.loginSuccess);
       } else {
-        await register({ email, password, full_name: fullName, callsign, role });
+        if ((role.includes("Surgeon") || role.includes("Commander")) && !accessCode.trim()) {
+          throw new Error("Для роли Врача или Командира требуется код допуска NASA (например: NASA-CMO-2026 или NASA-CMD-2026)");
+        }
+        await register({ email, password, full_name: fullName, callsign, role, access_code: accessCode.trim().toUpperCase() });
         setSuccess(t.registerSuccess);
       }
     } catch (err: any) {
@@ -251,13 +255,30 @@ export function AuthModal() {
                     className="inp"
                     style={{ width: "100%" }}
                   >
-                    <option value="Flight Surgeon">Flight Surgeon</option>
-                    <option value="Mission Commander">Commander</option>
-                    <option value="EVA Specialist">EVA Specialist</option>
-                    <option value="Biomedical Engineer">Engineer</option>
+                    <option value="Crew Member / Astronaut">🚀 Космонавт (Crew)</option>
+                    <option value="Biomedical Engineer">🔧 Бортинженер</option>
+                    <option value="Flight Surgeon">👨‍⚕️ Врач экипажа (CMO) 🔒</option>
+                    <option value="Mission Commander">🛸 Командир миссии 🔒</option>
                   </select>
                 </div>
               </div>
+
+              {(role.includes("Surgeon") || role.includes("Commander")) && (
+                <div style={{ marginTop: "10px", padding: "10px 12px", borderRadius: "10px", background: "rgba(59, 130, 246, 0.1)", border: "1px solid rgba(59, 130, 246, 0.3)" }}>
+                  <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "var(--pr)", marginBottom: "4px" }}>
+                    🔒 Код допуска NASA Clearance
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="NASA-CMO-2026 или NASA-CMD-2026"
+                    value={accessCode}
+                    onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
+                    className="inp"
+                    style={{ width: "100%", fontSize: "12px" }}
+                    required
+                  />
+                </div>
+              )}
             </>
           )}
 

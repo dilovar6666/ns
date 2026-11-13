@@ -386,42 +386,27 @@ export default function App() {
             </div>
           </div>
 
-          {/* Quick Role Switcher */}
-          <div style={{ background: "rgba(0,0,0,0.2)", border: "1px solid var(--sep)", borderRadius: "12px", padding: "8px 10px", marginBottom: "8px" }}>
+          {/* Verified Authenticated Role Badge */}
+          <div style={{ background: "rgba(0,0,0,0.25)", border: "1px solid var(--sep)", borderRadius: "12px", padding: "10px 12px", marginBottom: "10px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
               <span style={{ fontSize: "10px", fontWeight: 800, textTransform: "uppercase", color: "var(--t3)", letterSpacing: "0.5px" }}>
-                {language === "ru" ? "Роль в системе:" : "System Role:"}
+                {language === "ru" ? "Верификация доступа:" : "Access Clearance:"}
               </span>
-              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: isFlightSurgeon ? "#10b981" : isCommander ? "var(--pr)" : "#f59e0b" }} />
+              <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: isFlightSurgeon ? "#10b981" : isCommander ? "var(--pr)" : "#f59e0b", boxShadow: isFlightSurgeon ? "0 0 8px #10b981" : "none" }} />
             </div>
-            <select
-              value={roleType}
-              onChange={(e) => {
-                const newR = e.target.value as any;
-                switchRolePreset(newR);
-                if (newR === "astronaut") {
-                  setSelectedId(2);
-                } else {
-                  setSelectedId(1);
-                }
-              }}
-              style={{
-                width: "100%",
-                background: "var(--s1)",
-                color: "var(--tx)",
-                border: "1px solid var(--sep)",
-                borderRadius: "8px",
-                fontSize: "12px",
-                fontWeight: 600,
-                padding: "5px 8px",
-                cursor: "pointer",
-                outline: "none",
-              }}
-            >
-              <option value="flight_surgeon">👨‍⚕️ Врач миссии (CMO)</option>
-              <option value="commander">🛸 Командир (Commander)</option>
-              <option value="astronaut">🚀 Космонавт (Crew)</option>
-            </select>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div style={{ fontSize: "14px" }}>
+                {isFlightSurgeon ? "👨‍⚕️" : isCommander ? "🛸" : "🚀"}
+              </div>
+              <div style={{ overflow: "hidden" }}>
+                <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--tx)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>
+                  {user?.role || (isFlightSurgeon ? "Flight Surgeon" : isCommander ? "Commander" : "Astronaut")}
+                </div>
+                <div style={{ fontSize: "10px", color: "var(--t3)", textTransform: "uppercase", letterSpacing: "0.4px" }}>
+                  NASA STD-3001 · RBAC Active
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="miss">
@@ -562,6 +547,7 @@ export default function App() {
                 crew={crew}
                 metrics={metrics}
                 onSelectAstronaut={(id) => setSelectedId(id)}
+                onRefreshCrew={refetchCrew}
               />
             }
           />

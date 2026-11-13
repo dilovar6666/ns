@@ -7,6 +7,13 @@ export type Astronaut = {
   specialty: string
   mission_id: number
   active: boolean
+  avatar_url?: string | null
+  age?: number
+  blood_type?: string
+  notes?: string
+  emergency_contact?: string
+  resting_hr?: number
+  max_hr?: number
 }
 
 export type Mission = {
