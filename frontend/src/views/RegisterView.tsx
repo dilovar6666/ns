@@ -51,9 +51,9 @@ export function RegisterView() {
     if (/[0-9]/.test(password)) score++;
     if (/[^A-Za-z0-9]/.test(password) || /[A-Z]/.test(password)) score++;
 
-    if (score <= 1) return { level: 1, text: "Базовый", color: "#ef4444" };
-    if (score <= 3) return { level: 2, text: "Хороший", color: "#f59e0b" };
-    return { level: 3, text: "Высокий (NASA STD)", color: "#10b981" };
+    if (score <= 1) return { level: 1, text: "Basic", color: "#ef4444" };
+    if (score <= 3) return { level: 2, text: "Good", color: "#f59e0b" };
+    return { level: 3, text: "Strong (NASA STD)", color: "#10b981" };
   };
 
   const strength = getPasswordStrength();
@@ -63,27 +63,27 @@ export function RegisterView() {
     setError(null);
 
     if (!fullName.trim() || !email.trim() || !password) {
-      setError("Заполните все обязательные поля формы");
+      setError("Please complete all required fields");
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Введенные пароли не совпадают");
+      setError("Passwords do not match");
       return;
     }
 
     if (password.length < 6) {
-      setError("Пароль должен содержать не менее 6 символов");
+      setError("Password must contain at least 6 characters");
       return;
     }
 
     if (!acceptTerms) {
-      setError("Необходимо принять стандарты биомедицинской безопасности NASA STD-3001");
+      setError("You must accept NASA STD-3001 biomedical security standards");
       return;
     }
 
     if (role !== "astronaut" && !accessCode.trim()) {
-      setError(`Для регистрации с правами ${role === "flight_surgeon" ? "Врача миссии (CMO)" : "Командира экспедиции"} требуется ввести секретный код допуска NASA / ЦУП.`);
+      setError(`Registration with privileged role ${role === "flight_surgeon" ? "Flight Surgeon (CMO)" : "Mission Commander (CDR)"} requires a secret NASA / Flight Operations clearance code.`);
       return;
     }
 
@@ -105,7 +105,7 @@ export function RegisterView() {
       });
       navigate("/dashboard", { replace: true });
     } catch (err: any) {
-      setError(err.message || "Ошибка при регистрации в системе");
+      setError(err.message || "Error during mission console registration");
     } finally {
       setLoading(false);
     }
@@ -120,7 +120,7 @@ export function RegisterView() {
       <header className="auth-header">
         <Link to="/" className="auth-back-link">
           <ArrowLeft size={16} />
-          <span>На главную страницу</span>
+          <span>Back to Home Page</span>
         </Link>
         <Link to="/" className="auth-brand">
           <img src="/cosmo-logo.png" alt="CosmoHealth" className="auth-logo-img" />
@@ -141,19 +141,19 @@ export function RegisterView() {
             <div className="auth-icon-wrap" style={{ background: "rgba(59, 130, 246, 0.15)", borderColor: "rgba(59, 130, 246, 0.3)" }}>
               <UserPlus size={28} className="auth-shield-icon" style={{ color: "#38bdf8" }} />
             </div>
-            <h1 className="auth-title">Регистрация в CosmoHealthX</h1>
+            <h1 className="auth-title">Register for CosmoHealthX</h1>
             <p className="auth-subtitle">
-              Создание профиля члена экипажа или специалиста телемедицины миссии CHX-01
+              Create expedition crew member or flight surgeon medical dossier for Mission CHX-01
             </p>
           </div>
 
           {/* Quick Navigation Tabs */}
           <div className="auth-tab-switch">
             <Link to="/login" className="auth-tab-btn">
-              Вход
+              Sign In
             </Link>
             <button type="button" className="auth-tab-btn active">
-              Регистрация
+              Register
             </button>
           </div>
 
@@ -170,14 +170,14 @@ export function RegisterView() {
             <div className="auth-form-row">
               <div className="auth-field">
                 <label htmlFor="reg-fullname" className="auth-label">
-                  Имя и фамилия
+                  Full Name
                 </label>
                 <div className="auth-input-box">
                   <User size={18} className="auth-input-ico" />
                   <input
                     id="reg-fullname"
                     type="text"
-                    placeholder="Др. Майя Чен"
+                    placeholder="Dr. Maya Chen"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required
@@ -187,7 +187,7 @@ export function RegisterView() {
 
               <div className="auth-field">
                 <label htmlFor="reg-callsign" className="auth-label">
-                  Позывной экипажа
+                  Crew Callsign
                 </label>
                 <div className="auth-input-box">
                   <Radio size={18} className="auth-input-ico" />
@@ -204,7 +204,7 @@ export function RegisterView() {
 
             <div className="auth-field">
               <label htmlFor="reg-email" className="auth-label">
-                Служебный адрес электронной почты
+                Mission Email Address
               </label>
               <div className="auth-input-box">
                 <Mail size={18} className="auth-input-ico" />
@@ -223,8 +223,8 @@ export function RegisterView() {
             {/* Role Selection */}
             <div className="auth-field">
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "6px" }}>
-                <label className="auth-label" style={{ margin: 0 }}>Назначенная роль в экспедиции</label>
-                <span style={{ fontSize: "11px", color: "var(--t3)" }}>RBAC Протокол допуска</span>
+                <label className="auth-label" style={{ margin: 0 }}>Assigned Expedition Role</label>
+                <span style={{ fontSize: "11px", color: "var(--t3)" }}>RBAC Clearance Level</span>
               </div>
               <div className="auth-role-selector">
                 <button
@@ -234,8 +234,8 @@ export function RegisterView() {
                 >
                   <Compass size={18} className="auth-role-ico" />
                   <div className="auth-role-info">
-                    <div className="auth-role-title">Космонавт (Crew)</div>
-                    <div className="auth-role-sub">Персональная биометрия и 3D · Стандартный допуск</div>
+                    <div className="auth-role-title">Astronaut (Crew)</div>
+                    <div className="auth-role-sub">Personal Biometrics & 3D · Standard Exterior Clearance</div>
                   </div>
                 </button>
 
@@ -246,8 +246,8 @@ export function RegisterView() {
                 >
                   <Rocket size={18} className="auth-role-ico" />
                   <div className="auth-role-info">
-                    <div className="auth-role-title">🛸 Командир миссии 🔒</div>
-                    <div className="auth-role-sub">Оперативный контроль · Требуется код допуска</div>
+                    <div className="auth-role-title">🛸 Mission Commander 🔒</div>
+                    <div className="auth-role-sub">Operational Command · Requires Clearance Code</div>
                   </div>
                 </button>
 
@@ -258,8 +258,8 @@ export function RegisterView() {
                 >
                   <Stethoscope size={18} className="auth-role-ico" />
                   <div className="auth-role-info">
-                    <div className="auth-role-title">👨‍⚕️ Врач экипажа (CMO) 🔒</div>
-                    <div className="auth-role-sub">Клинический допуск и SOP · Требуется код допуска</div>
+                    <div className="auth-role-title">👨‍⚕️ Flight Surgeon (CMO) 🔒</div>
+                    <div className="auth-role-sub">Full Clinical Authority & SOP · Requires Clearance Code</div>
                   </div>
                 </button>
               </div>
@@ -280,7 +280,7 @@ export function RegisterView() {
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
                   <ShieldCheck size={16} style={{ color: "var(--pr)" }} />
                   <label htmlFor="reg-access-code" className="auth-label" style={{ margin: 0, color: "var(--pr)", fontWeight: 700 }}>
-                    Код допуска NASA Clearance ({role === "flight_surgeon" ? "CMO / Doctor" : "Commander"})
+                    NASA Clearance Authorization Code ({role === "flight_surgeon" ? "CMO / Doctor" : "Commander"})
                   </label>
                 </div>
                 <div className="auth-input-box">
@@ -288,14 +288,14 @@ export function RegisterView() {
                   <input
                     id="reg-access-code"
                     type="text"
-                    placeholder="Например: NASA-CMO-2026 или NASA-CMD-2026"
+                    placeholder="E.g.: NASA-CMO-2026 or NASA-CMD-2026"
                     value={accessCode}
                     onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
                     required
                   />
                 </div>
                 <div style={{ fontSize: "11px", color: "var(--t3)", marginTop: "6px", lineHeight: "1.4" }}>
-                  🛡️ Привилегированные роли защищены протоколом безопасности. Допуск выдается только офицерам миссии. Для демонстрации используйте <code style={{ color: "var(--pr)", fontWeight: 700 }}>{role === "flight_surgeon" ? "NASA-CMO-2026" : "NASA-CMD-2026"}</code>.
+                  🛡️ Privileged command and medical roles require verified NASA mission authorization. For evaluation, use <code style={{ color: "var(--pr)", fontWeight: 700 }}>{role === "flight_surgeon" ? "NASA-CMO-2026" : "NASA-CMD-2026"}</code>.
                 </div>
               </div>
             )}
@@ -304,7 +304,7 @@ export function RegisterView() {
             <div className="auth-form-row">
               <div className="auth-field">
                 <label htmlFor="reg-password" className="auth-label">
-                  Пароль
+                  Password
                 </label>
                 <div className="auth-input-box">
                   <Lock size={18} className="auth-input-ico" />
@@ -321,7 +321,7 @@ export function RegisterView() {
                     type="button"
                     className="auth-eye-btn"
                     onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? "Скрыть" : "Показать"}
+                    aria-label={showPassword ? "Hide" : "Show"}
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -330,7 +330,7 @@ export function RegisterView() {
 
               <div className="auth-field">
                 <label htmlFor="reg-confirm" className="auth-label">
-                  Повторите пароль
+                  Confirm Password
                 </label>
                 <div className="auth-input-box">
                   <Lock size={18} className="auth-input-ico" />
@@ -356,7 +356,7 @@ export function RegisterView() {
                   <div className={`auth-bar ${strength.level >= 3 ? "filled" : ""}`} style={{ backgroundColor: strength.color }} />
                 </div>
                 <span className="auth-strength-text" style={{ color: strength.color }}>
-                  Сложность: {strength.text}
+                  Strength: {strength.text}
                 </span>
               </div>
             )}
@@ -370,7 +370,7 @@ export function RegisterView() {
                   onChange={(e) => setAcceptTerms(e.target.checked)}
                 />
                 <span>
-                  Принимаю требования протоколов NASA STD-3001 и соглашение об обработке медицинской телеметрии
+                  I accept NASA STD-3001 medical standards and the autonomous telemetry processing agreement
                 </span>
               </label>
             </div>
@@ -383,11 +383,11 @@ export function RegisterView() {
               {loading ? (
                 <span className="auth-spinner-wrap">
                   <span className="auth-spinner" />
-                  <span>Создание аккаунта...</span>
+                  <span>Creating Account...</span>
                 </span>
               ) : (
                 <>
-                  <span>Зарегистрироваться и войти</span>
+                  <span>Register & Launch Console</span>
                   <ArrowRight size={18} />
                 </>
               )}
@@ -396,9 +396,9 @@ export function RegisterView() {
 
           {/* Footer of Card */}
           <div className="auth-card-footer">
-            <span>Уже есть учетная запись?</span>
+            <span>Already have mission clearance?</span>
             <Link to="/login" className="auth-link-highlight">
-              Войти в систему →
+              Sign In →
             </Link>
           </div>
         </div>
@@ -407,7 +407,7 @@ export function RegisterView() {
         <div className="auth-footer-notice">
           <CheckCircle2 size={14} style={{ color: "#10b981", flexShrink: 0 }} />
           <span>
-            Регистрация создает защищенный профиль в базе данных экспедиции CHX-01 с разделением ролевого доступа.
+            Registration provisions a cryptographically secured profile in the CHX-01 mission registry with role-based access control.
           </span>
         </div>
       </main>

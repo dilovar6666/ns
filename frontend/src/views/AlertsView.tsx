@@ -50,10 +50,10 @@ export function AlertsView({
       {/* Header */}
       <header className="tb">
         <div className="up">
-          <p className="eyb">Центр оперативного оповещения миссии</p>
+          <p className="eyb">Mission Operational Anomaly Notification Center</p>
           <h1 className="lt disp">Alerts & Notifications</h1>
           <p className="sub">
-            Автоматическая детекция физиологических аномалий и протокольных событий
+            Automated physiological anomaly detection and clinical contingency logging
           </p>
         </div>
         <div className="tbr up" style={{ animationDelay: "60ms" }}>
@@ -63,7 +63,7 @@ export function AlertsView({
               onClick={handleMarkAllRead}
               style={{ fontSize: "13px", padding: "8px 14px" }}
             >
-              <Check className="ico sm" /> Отметить все прочитанными
+              <Check className="ico sm" /> Mark All as Read
             </button>
           )}
           <Link
@@ -71,7 +71,7 @@ export function AlertsView({
             to="/profile"
             style={{ width: "40px", height: "40px" }}
           >
-            {astronaut?.name?.slice(0, 2).toUpperCase() || "АН"}
+            {astronaut?.name?.slice(0, 2).toUpperCase() || "AN"}
           </Link>
         </div>
       </header>
@@ -92,25 +92,25 @@ export function AlertsView({
             className={filter === "all" ? "on" : ""}
             onClick={() => setFilter("all")}
           >
-            Все ({notifications.length})
+            All ({notifications.length})
           </button>
           <button
             className={filter === "unread" ? "on" : ""}
             onClick={() => setFilter("unread")}
           >
-            Непрочитанные ({unreadCount})
+            Unread ({unreadCount})
           </button>
           <button
             className={filter === "warning" ? "on" : ""}
             onClick={() => setFilter("warning")}
           >
-            Предупреждения ({notifications.filter((n) => n.level === "warning").length})
+            Warnings ({notifications.filter((n) => n.level === "warning").length})
           </button>
           <button
             className={filter === "critical" ? "on" : ""}
             onClick={() => setFilter("critical")}
           >
-            Критические ({notifications.filter((n) => n.level === "critical").length})
+            Critical ({notifications.filter((n) => n.level === "critical").length})
           </button>
         </div>
       </div>
@@ -125,9 +125,9 @@ export function AlertsView({
                 className="ico"
                 style={{ width: "48px", height: "48px", color: "var(--ok)", marginBottom: "12px" }}
               />
-              <h2 className="h2">Нет активных уведомлений</h2>
+              <h2 className="h2">No active warnings</h2>
               <p className="cap" style={{ marginTop: "4px" }}>
-                Все телеметрические показатели экипажа находятся в безопасных физиологических границах.
+                All crew biometric telemetry is currently within nominal safety envelopes.
               </p>
             </div>
           ) : (
@@ -193,7 +193,7 @@ export function AlertsView({
                     }}
                     style={{ fontSize: "12px", padding: "6px 12px", alignSelf: "center" }}
                   >
-                    Прочитано
+                    Read
                   </button>
                 )}
               </div>
@@ -229,7 +229,7 @@ export function AlertsView({
                 marginBottom: "14px",
               }}
             >
-              Уровень: {selectedAlert.level}
+              Severity: {selectedAlert.level.toUpperCase()}
             </div>
 
             <h2 className="h2" style={{ fontSize: "18px", marginBottom: "10px" }}>
@@ -241,30 +241,30 @@ export function AlertsView({
             </p>
 
             <div className="kv">
-              <span>Статус прочтения:</span>
+              <span>Review Status:</span>
               <span style={{ fontWeight: 600, color: selectedAlert.read ? "var(--ok)" : "var(--wa)" }}>
-                {selectedAlert.read ? "Подтверждено" : "Ожидает квитирования"}
+                {selectedAlert.read ? "Acknowledged" : "Pending Acknowledgment"}
               </span>
             </div>
 
             <div className="kv">
-              <span>Время фиксации:</span>
+              <span>Timestamp:</span>
               <span className="num" style={{ fontWeight: 600 }}>
                 {new Date(selectedAlert.created_at).toLocaleString("ru-RU")}
               </span>
             </div>
 
             <div className="kv">
-              <span>Связанный субъект:</span>
+              <span>Associated Crew Member:</span>
               <span style={{ fontWeight: 600 }}>
-                {astronaut?.name || "Экипаж CHX-01"}
+                {astronaut?.name || "Expedition CHX-01 Crew"}
               </span>
             </div>
 
             <div className="kv">
-              <span>Рекомендуемое действие:</span>
+              <span>Recommended Clinical Action:</span>
               <span style={{ fontWeight: 600, color: "var(--pr)" }}>
-                Сверить протокол EVA-04
+                Verify Protocol EVA-04
               </span>
             </div>
 
@@ -274,7 +274,7 @@ export function AlertsView({
                 onClick={() => onMarkNotificationRead(selectedAlert.id)}
                 style={{ width: "100%", marginTop: "20px", fontSize: "14px" }}
               >
-                <Check className="ico sm" /> Подтвердить ознакомление
+                <Check className="ico sm" /> Acknowledge
               </button>
             )}
           </aside>

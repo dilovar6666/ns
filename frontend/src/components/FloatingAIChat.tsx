@@ -39,7 +39,7 @@ export function FloatingAIChat({ astronaut, metrics = [] }: Props) {
     {
       id: "init",
       sender: "ai",
-      text: "Здравствуйте! Я CosmoHealthX AI — бортовой медицинский интеллект на базе Gemini 3.5. Готов ответить на любые клинические вопросы по телеметрии экипажа, скафандрам EVA или протоколам NASA STD-3001.",
+      text: "Hello! I am CosmoHealthX AI — onboard clinical copilot powered by Gemini 3.5. Ready to answer clinical questions regarding crew telemetry, EVA space suits, or NASA STD-3001 protocols.",
       timestamp: new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }),
       riskLevel: "low",
       confidence: 0.98,
@@ -59,10 +59,10 @@ export function FloatingAIChat({ astronaut, metrics = [] }: Props) {
   }, [messages, isOpen]);
 
   const quickPrompts = [
-    "Оценить ЧСС и готовность к EVA",
-    "Уровень радиации за сегодня",
-    "Анализ глубокого сна экипажа",
-    "Протокол при тахикардии",
+    "Evaluate HR and EVA readiness",
+    "Today's radiation exposure",
+    "Analyze crew deep sleep architecture",
+    "Protocol for EVA tachycardia",
   ];
 
   const handleSend = async (textToSend: string) => {
@@ -90,7 +90,7 @@ export function FloatingAIChat({ astronaut, metrics = [] }: Props) {
         }),
       });
 
-      const aiText = response.recommendation || response.answer || "Анализ завершен успешно.";
+      const aiText = response.recommendation || response.answer || "Clinical telemetry analysis complete.";
 
       const aiMsg: Message = {
         id: `a-${Date.now()}`,
@@ -106,7 +106,7 @@ export function FloatingAIChat({ astronaut, metrics = [] }: Props) {
       const errorMsg: Message = {
         id: `err-${Date.now()}`,
         sender: "ai",
-        text: "Внимание: временная задержка Ku-Band линка. По локальным данным биосенсоров показатели экипажа стабильны (ЧСС 72 bpm, SpO2 98%). Повторите запрос при следующем сеансе связи.",
+        text: "Caution: Ku-Band ground link latency. Local sensor cache confirms crew biometrics nominal (HR 72 bpm, SpO2 98%). Retry when Ku-band link re-establishes.",
         timestamp: new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }),
         riskLevel: "low",
       };
@@ -121,7 +121,7 @@ export function FloatingAIChat({ astronaut, metrics = [] }: Props) {
       {
         id: "cleared",
         sender: "ai",
-        text: "Диалог сброшен. Готов к новым вопросам по телеметрии и здоровью экипажа.",
+        text: "Conversation cleared. Ready for new inquiries regarding crew biometrics and mission health.",
         timestamp: new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }),
       },
     ]);
@@ -134,7 +134,7 @@ export function FloatingAIChat({ astronaut, metrics = [] }: Props) {
         <button
           onClick={() => setIsOpen(true)}
           className="floating-ai-btn"
-          title="Спросить бортовой ИИ (Gemini)"
+          title="Ask Clinical Copilot (Gemini)"
         >
           <Bot size={26} />
           {/* Pulsing Aura */}
@@ -212,7 +212,7 @@ export function FloatingAIChat({ astronaut, metrics = [] }: Props) {
                 </div>
                 {!isMinimized && (
                   <div style={{ fontSize: "11px", color: "var(--t3)", display: "flex", alignItems: "center", gap: "4px" }}>
-                    <Radio size={10} className="pulse" /> Канал ЦУП Ku-Band активен
+                    <Radio size={10} className="pulse" /> Ku-Band Ground Link Active
                   </div>
                 )}
               </div>
@@ -227,7 +227,7 @@ export function FloatingAIChat({ astronaut, metrics = [] }: Props) {
                     clearChat();
                   }}
                   style={{ background: "none", border: "none", color: "var(--t3)", cursor: "pointer", padding: "4px" }}
-                  title="Очистить историю"
+                  title="Clear Chat"
                 >
                   <Trash2 size={15} />
                 </button>
@@ -308,7 +308,7 @@ export function FloatingAIChat({ astronaut, metrics = [] }: Props) {
                               fontWeight: 700,
                             }}
                           >
-                            · {m.riskLevel.toUpperCase()} РИСК
+                            · {m.riskLevel.toUpperCase()} RISK
                           </span>
                         )}
                       </div>
@@ -332,7 +332,7 @@ export function FloatingAIChat({ astronaut, metrics = [] }: Props) {
                     }}
                   >
                     <Activity className="spin" size={14} style={{ color: "var(--pr)" }} />
-                    <span>Gemini анализирует телеметрию...</span>
+                    <span>Gemini analyzing biometric telemetry...</span>
                   </div>
                 )}
 
@@ -389,7 +389,7 @@ export function FloatingAIChat({ astronaut, metrics = [] }: Props) {
               >
                 <input
                   type="text"
-                  placeholder="Задайте вопрос бортовому ИИ..."
+                  placeholder="Ask onboard AI copilot regarding crew telemetry..."
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   disabled={loading}

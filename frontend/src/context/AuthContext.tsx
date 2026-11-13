@@ -25,33 +25,33 @@ export const ROLE_PRESETS: {
 }[] = [
   {
     roleType: "flight_surgeon",
-    title: "Врач миссии (Flight Surgeon / CMO)",
-    shortTitle: "Врач экипажа (CMO)",
+    title: "Flight Surgeon / Chief Medical Officer (CMO)",
+    shortTitle: "Flight Surgeon (CMO)",
     full_name: "Dr. Maya Chen",
     callsign: "NOVA-01",
     email: "maya.chen@cosmohealth.org",
     astronautId: 1,
-    description: "Полный клинический доступ ко всем членам экипажа, выполнение протоколов SOP и управление допуском.",
+    description: "Full clinical authority across all crew members, SOP protocol execution, and flight clearance management.",
   },
   {
     roleType: "commander",
-    title: "Командир экспедиции (Mission Commander)",
-    shortTitle: "Командир миссии",
+    title: "Mission Commander (CDR)",
+    shortTitle: "Mission Commander",
     full_name: "Alex Nova",
     callsign: "APOLLO-01",
     email: "alex.nova@cosmohealth.org",
     astronautId: 1,
-    description: "Оперативный контроль готовности экипажа, расписание миссии, алерты и согласование EVA.",
+    description: "Operational mission readiness command, flight timeline, emergency alerts, and EVA authorizations.",
   },
   {
     roleType: "astronaut",
-    title: "Космонавт / Исследователь (Crew Member)",
-    shortTitle: "Космонавт (Crew)",
+    title: "Mission Specialist / Astronaut (Crew)",
+    shortTitle: "Astronaut (Crew)",
     full_name: "Ibrahim Rahman",
     callsign: "ORBIT-02",
     email: "ibrahim.rahman@cosmohealth.org",
     astronautId: 2,
-    description: "Личный терминал здоровья: персональная телеметрия, психологические тесты, скафандр 3D и бортовой журнал.",
+    description: "Personal health console: individual biometrics, BHP assessments, 3D suit diagnostics, and flight log.",
   },
 ];
 
@@ -81,10 +81,10 @@ const API_BASE = "http://127.0.0.1:8000/api";
 
 function inferRoleType(roleStr?: string): UserRole {
   const r = (roleStr || "").toLowerCase();
-  if (r.includes("surgeon") || r.includes("doctor") || r.includes("врач") || r.includes("cmo") || r.includes("medical")) {
+  if (r.includes("surgeon") || r.includes("doctor") || r.includes("surgeon") || r.includes("cmo") || r.includes("medical")) {
     return "flight_surgeon";
   }
-  if (r.includes("commander") || r.includes("командир")) {
+  if (r.includes("commander") || r.includes("commander")) {
     return "commander";
   }
   return "astronaut";
@@ -149,7 +149,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.detail || "Неверный логин или пароль");
+      throw new Error(err.detail || "Invalid email or password");
     }
 
     const data = await res.json();
@@ -212,7 +212,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.detail || "Ошибка регистрации");
+      throw new Error(err.detail || "Registration error");
     }
 
     const respData = await res.json();

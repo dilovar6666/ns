@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Heart,
@@ -33,6 +33,30 @@ export function MonitoringView({
   onSelectAstronaut,
 }: Props) {
   const [activeTab, setActiveTab] = useState<MetricTab>("heart_rate");
+  const tabsContainerRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
+  const scrollToTab = (key: MetricTab) => {
+    const el = tabRefs.current[key];
+    const container = tabsContainerRef.current;
+    if (el && container) {
+      const elLeft = el.offsetLeft;
+      const elWidth = el.offsetWidth;
+      const containerWidth = container.clientWidth;
+      const targetScroll = elLeft - (containerWidth / 2) + (elWidth / 2);
+      container.scrollTo({
+        left: Math.max(0, targetScroll),
+        behavior: "smooth",
+      });
+    }
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      scrollToTab(activeTab);
+    }, 60);
+    return () => clearTimeout(timer);
+  }, [activeTab]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
   const currentMetricList = metrics.filter((m) => m.key === activeTab);
@@ -54,9 +78,9 @@ export function MonitoringView({
     heart_rate: {
       name: "Heart Rate",
       unit: "bpm",
-      desc: "Частота сердечных сокращений в покое и при нагрузке в условиях невесомости.",
-      normalRange: "60 – 100 bpm (норма в покое: 62-78 bpm)",
-      significance: "В микрогравитации кровь перемещается в верхнюю половину туловища (fluid shift), что приводит к снижению объема циркулирующей плазмы и компенсаторной тахикардии.",
+      desc: "Heart rate at rest and during workload in microgravity.",
+      normalRange: "60 – 100 bpm (resting target: 62-78 bpm)",
+      significance: "In microgravity, blood shifts cephalad (fluid shift), leading to circulating plasma volume contraction and compensatory resting tachycardia.",
       color: "var(--hr)",
       icon: Heart,
       defaultVal: 72,
@@ -66,9 +90,9 @@ export function MonitoringView({
     spo2: {
       name: "Oxygen Saturation",
       unit: "%",
-      desc: "Процент оксигемоглобина в артериальной крови астронавта.",
-      normalRange: "95 – 100% (тревога: < 94%)",
-      significance: "Критический параметр при дыхании в скафандре (EVA) и контроле парциального давления O2/CO2 в жилом модуле корабля.",
+      desc: "Oxyhemoglobin percentage in astronaut arterial blood.",
+      normalRange: "95 – 100% (clinical alert: < 94%)",
+      significance: "Critical parameter during EVA suit respiration and atmospheric ppO2/ppCO2 regulation within orbital habitat.",
       color: "var(--o2)",
       icon: Droplets,
       defaultVal: 98,
@@ -77,10 +101,10 @@ export function MonitoringView({
     },
     sleep_duration: {
       name: "Sleep Duration",
-      unit: "ч",
-      desc: "Длительность непрерывного сна и циркадная фазовая стабильность.",
-      normalRange: "7.0 – 8.5 ч/сутки",
-      significance: "90-минутный орбитальный цикл восходов/закатов нарушает выработку мелатонина. Хронический дефицит сна ведет к когнитивным ошибкам.",
+      unit: "h",
+      desc: "Continuous sleep duration and circadian phase stability.",
+      normalRange: "7.0 – 8.5 h/day",
+      significance: "90-minute orbital sunrise/sunset cycles disrupt melatonin secretion. Cumulative sleep debt increases critical error rates.",
       color: "var(--sl)",
       icon: Moon,
       defaultVal: 7.5,
@@ -89,10 +113,10 @@ export function MonitoringView({
     },
     activity: {
       name: "Physical Activity",
-      unit: "шагов",
-      desc: "Суточный объем упражнений на беговой дорожке T2 и велоэргометре CEVIS.",
-      normalRange: "8 000 – 12 000 шагов (эквивалент 2.5 ч/день)",
-      significance: "Обязательные контрмеры против остеопении и атрофии постуральных мышц в условиях нулевой гравитации.",
+      unit: "steps",
+      desc: "Daily aerobic workout on T2 Treadmill and CEVIS Cycle Ergometer.",
+      normalRange: "8,000 – 12,000 steps (2.5 h/day countermeasure equivalent)",
+      significance: "Mandatory countermeasure against microgravity bone mineral loss and postural muscle atrophy.",
       color: "var(--ac)",
       icon: Footprints,
       defaultVal: 8230,
@@ -102,9 +126,9 @@ export function MonitoringView({
     core_temp: {
       name: "Core Temperature",
       unit: "°C",
-      desc: "Температура ядра тела, контролируемая непрерывным датчиком теплового потока.",
+      desc: "Core body temperature monitored via continuous double-sensor heat flux telemetry.",
       normalRange: "36.2 – 37.2 °C",
-      significance: "Космическая лихорадка (Space fever) — феномен повышения базальной температуры ядра на ~1°C из-за снижения теплоотдачи конвекцией.",
+      significance: "Space fever: core temperature elevation by ~1°C caused by impaired convective heat dissipation in zero-g.",
       color: "var(--wa)",
       icon: Thermometer,
       defaultVal: 36.6,
@@ -113,10 +137,10 @@ export function MonitoringView({
     },
     radiation_exposure: {
       name: "Radiation Exposure",
-      unit: "мЗв/сут",
-      desc: "Накопленная доза галактического космического излучения (GCR) и солнечных протонов.",
-      normalRange: "< 1.5 мЗв/сутки",
-      significance: "Радиационный мониторинг защищает от лучевой болезни и повреждений ДНК при выходе за пределы магнитосферы Земли.",
+      unit: "mSv/day",
+      desc: "Cumulative ionizing radiation from galactic cosmic rays (GCR) and solar proton events (SPE).",
+      normalRange: "< 1.5 mSv/day",
+      significance: "Active dosimetric monitoring mitigates acute radiation sickness, DNA damage, and lifetime cancer risk beyond Earth magnetosphere.",
       color: "var(--cr)",
       icon: ShieldAlert,
       defaultVal: 0.65,
@@ -134,11 +158,11 @@ export function MonitoringView({
       {/* Header */}
       <header className="tb">
         <div className="up">
-          <p className="eyb">Телеметрия в реальном времени · CHX-01</p>
+          <p className="eyb">Real-Time Biometric Stream · CHX-01</p>
           <h1 className="lt disp">Health Monitoring</h1>
           <p className="sub">
             <span className="live"></span>
-            Непрерывный поток физиологических данных астронавта
+            Continuous high-frequency physiological telemetry streaming
           </p>
         </div>
         <div className="tbr up" style={{ animationDelay: "60ms" }}>
@@ -147,7 +171,7 @@ export function MonitoringView({
               className="inp"
               value={astronaut?.id}
               onChange={(e) => onSelectAstronaut(Number(e.target.value))}
-              aria-label="Выбрать астронавта"
+              aria-label="Select crew member"
             >
               {crew.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -156,7 +180,7 @@ export function MonitoringView({
               ))}
             </select>
           )}
-          <Link className="ib" to="/alerts" aria-label="Уведомления">
+          <Link className="ib" to="/alerts" aria-label="Alerts">
             <Bell className="ico" />
             {unreadCount > 0 && <span className="dot"></span>}
           </Link>
@@ -165,7 +189,7 @@ export function MonitoringView({
             to="/profile"
             style={{ width: "40px", height: "40px" }}
           >
-            {astronaut?.name?.slice(0, 2).toUpperCase() || "АН"}
+            {astronaut?.name?.slice(0, 2).toUpperCase() || "AN"}
           </Link>
         </div>
       </header>
@@ -182,15 +206,28 @@ export function MonitoringView({
           marginTop: "16px",
         }}
       >
-        <div className="tabs tabs-scrollable" role="group" aria-label="Показатель">
+        <div
+          ref={tabsContainerRef}
+          className="tabs tabs-scrollable"
+          role="tablist"
+          aria-label="Biometric Target"
+        >
           {(Object.keys(configs) as MetricTab[]).map((key) => {
             const cfg = configs[key];
             const Icon = cfg.icon;
             return (
               <button
                 key={key}
+                ref={(el) => {
+                  tabRefs.current[key] = el;
+                }}
+                role="tab"
+                aria-selected={activeTab === key}
                 className={`tab ${activeTab === key ? "on" : ""}`}
-                onClick={() => setActiveTab(key)}
+                onClick={() => {
+                  setActiveTab(key);
+                  scrollToTab(key);
+                }}
               >
                 <span style={{ display: "inline-flex", color: cfg.color }}>
                   <Icon className="gly" />
@@ -212,12 +249,12 @@ export function MonitoringView({
               {currentCfg.name}
             </span>
             <span className="st ok">
-              <i></i>В целевом диапазоне
+              <i></i>Target Nominal Envelope
             </span>
           </div>
 
           <div style={{ margin: "20px 0 24px" }}>
-            <div className="cap">Текущее значение (бортовой биосенсор)</div>
+            <div className="cap">Current Reading (Wearable Biosensor)</div>
             <div className="big num">
               <b>{typeof displayVal === "number" ? (displayVal % 1 !== 0 ? displayVal.toFixed(1) : Math.round(displayVal)) : displayVal}</b>
               <em>{currentCfg.unit}</em>
@@ -310,7 +347,7 @@ export function MonitoringView({
                   marginRight: "6px",
                 }}
               />
-              Целевой физиологический коридор (NASA STD-3001)
+              Target Physiological Corridor (NASA STD-3001)
             </span>
             <span>
               <i
@@ -321,17 +358,17 @@ export function MonitoringView({
                   marginRight: "6px",
                 }}
               />
-              Фактическая телеметрия (интервал: 10 с)
+              Live Telemetry Stream (10-second sampling window)
             </span>
           </div>
         </div>
 
         {/* Right: Clinical & Spaceflight Context */}
         <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-          {/* Card: Что показывает */}
+          {/* Card: Clinical Significance */}
           <div className="cd up" style={{ padding: "22px 24px" }}>
             <h2 className="h2" style={{ marginBottom: "12px" }}>
-              Что показывает
+              Clinical Significance
             </h2>
             <p style={{ fontSize: "14px", lineHeight: "1.6", color: "var(--t2)", margin: 0 }}>
               {currentCfg.desc}
@@ -339,7 +376,7 @@ export function MonitoringView({
 
             <div style={{ marginTop: "16px", borderTop: "1px solid var(--sep)", paddingTop: "14px" }}>
               <div className="cap" style={{ fontWeight: 600, color: "var(--t1)", marginBottom: "6px" }}>
-                Значение в условиях космического полета:
+                Zero-G Adaptation Dynamics:
               </div>
               <p style={{ fontSize: "13px", lineHeight: "1.5", color: "var(--t2)", margin: 0 }}>
                 {currentCfg.significance}
@@ -350,24 +387,24 @@ export function MonitoringView({
           {/* Quick Threshold Guidelines */}
           <div className="cd up" style={{ padding: "22px 24px" }}>
             <h2 className="h2" style={{ marginBottom: "12px" }}>
-              Пороговые уровни контроля
+              Clinical Control Thresholds
             </h2>
             <div className="kv">
-              <span>Оптимально:</span>
+              <span>Target Range:</span>
               <span className="num" style={{ fontWeight: 600, color: "var(--ok)" }}>
                 {currentCfg.normalRange}
               </span>
             </div>
             <div className="kv">
-              <span>Предупреждение:</span>
+              <span>Warning:</span>
               <span className="num" style={{ fontWeight: 600, color: "var(--wa)" }}>
-                Выход за границы на ±15%
+                Variance ±15% from baseline
               </span>
             </div>
             <div className="kv">
-              <span>Критический триггер:</span>
+              <span>Critical Trigger:</span>
               <span className="num" style={{ fontWeight: 600, color: "var(--cr)" }}>
-                Активация медицинского протокола
+                Immediate SOP Protocol Activation
               </span>
             </div>
           </div>
@@ -377,13 +414,13 @@ export function MonitoringView({
       {/* Telemetry Stream Log Table */}
       <section className="cd up" style={{ marginTop: "24px", padding: "24px 28px" }}>
         <div className="ch" style={{ marginBottom: "16px" }}>
-          <h2 className="h2">Последние измерения</h2>
-          <span className="cap">Период: текущий виток</span>
+          <h2 className="h2">Recent Telemetry Samples</h2>
+          <span className="cap">Timeframe: Current Orbit</span>
         </div>
 
         {currentMetricList.length === 0 ? (
           <div className="cap" style={{ textAlign: "center", padding: "30px 0" }}>
-            Данные телеметрии для данного биомаркера активны. Значение в пределах нормы.
+            Continuous biosensor data active. All points conform to clinical target ranges.
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column" }}>
@@ -400,7 +437,7 @@ export function MonitoringView({
                   {m.value} {m.unit}
                 </span>
                 <span className="st ok">
-                  <i></i>В норме
+                  <i></i>Nominal
                 </span>
               </div>
             ))}

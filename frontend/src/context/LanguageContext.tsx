@@ -120,119 +120,6 @@ export interface Translations {
   coolingLoop: string;
 }
 
-const translationsRU: Translations = {
-  navDashboard: "Dashboard",
-  navDashboardSub: "Обзор",
-  navMonitoring: "Monitoring",
-  navMonitoringSub: "Мониторинг",
-  navAnalytics: "Analytics",
-  navAnalyticsSub: "Аналитика",
-  navAlerts: "Alerts",
-  navAlertsSub: "Оповещения",
-  navProfile: "Profile",
-  navProfileSub: "Профиль",
-  navSettings: "Settings",
-  navSettingsSub: "Настройки",
-  navCrew: "Crew",
-  navCrewSub: "Экипаж",
-  navMental: "Mental",
-  navMentalSub: "Психология",
-  navAIAssistant: "AI Assistant",
-  navAIAssistantSub: "ИИ Ассистент",
-  navProtocols: "Protocols",
-  navProtocolsSub: "Протоколы",
-  navTimeline: "Timeline",
-  navTimelineSub: "Таймлайн",
-  navEvidence: "Evidence",
-  navEvidenceSub: "Стандарты NASA",
-  nav3DViewer: "3D Viewer",
-  nav3DViewerSub: "Скафандр 3D",
-
-  liveDemo: "Live · Демо",
-  inRange: "В норме",
-  attention: "Внимание",
-  critical: "Критично",
-  missionDay: "День",
-  ofDay: "из",
-  heartRate: "Пульс",
-  oxygen: "Кислород",
-  sleep: "Сон",
-  activity: "Активность",
-  coreTemp: "Температура тела",
-  radiation: "Уровень радиации",
-
-  signIn: "Войти",
-  signUp: "Регистрация",
-  signOut: "Выйти",
-  email: "Электронная почта",
-  password: "Пароль",
-  fullName: "ФИО / Имя",
-  callsign: "Позывной (например NOVA-01)",
-  role: "Должность",
-  quickDemoLogin: "Быстрый вход для демонстрации",
-  dontHaveAccount: "Нет аккаунта? Зарегистрироваться",
-  alreadyHaveAccount: "Уже есть аккаунт? Войти",
-  loginSuccess: "Успешный вход в систему",
-  registerSuccess: "Учётная запись успешно создана",
-
-  settingsTitle: "Настройки платформы",
-  settingsSubtitle: "Визуальная тема оформления, локализация, автономная репликация и оповещения",
-  appearanceTitle: "Отображение и тема",
-  appearanceSubtitle: "Выберите цветовую гамму интерфейса, оптимизированную под условия освещения",
-  themeLight: "Apple Light",
-  themeLightSub: "Дневной свет",
-  themeDark: "Dark Space",
-  themeDarkSub: "OLED энергосбережение",
-  languageLabel: "Язык интерфейса",
-  languageSub: "Локализация интерфейса и медицинской терминологии",
-  animationsLabel: "Плавные анимации графиков",
-  animationsSub: "Аппаратное ускорение рендеринга 60 FPS",
-  syncTitle: "Автономная синхронизация",
-  syncSubtitle: "Режим работы без постоянного подключения к наземному центру управления (ЦУП)",
-  linkStatus: "Статус связи:",
-  busActive: "Бортовая шина активна",
-  offlineQueue: "Очередь оффлайн-запросов:",
-  packets: "пакетов",
-  sampleRate: "Частота опроса биосенсоров:",
-  syncNow: "Синхронизировать сейчас",
-  syncing: "Синхронизация...",
-  clearCache: "Очистить кэш",
-  alertsSectionTitle: "Уведомления и алерты биометрии",
-  alertsSectionSubtitle: "Автоматические триггеры звукового и визуального оповещения в жилом модуле",
-  alertTachycardia: "Превышение ЧСС (Тахикардия)",
-  alertTachycardiaSub: "Звуковой сигнал при пульсе свыше порога в покое",
-  alertSpo2: "Критическая десатурация SpO₂",
-  alertSpo2Sub: "Активация при падении кислорода ниже 94%",
-  alertSleepDeficit: "Дефицит фазы глубокого сна",
-  alertSleepDeficitSub: "Оповещение врача экипажа при сокращении SWS",
-  alertRadiation: "Радиационный шторм (SPE Warning)",
-  alertRadiationSub: "Автоматический приказ занять радиационное убежище",
-  settingSaved: "Настройка успешно сохранена",
-
-  viewerTitle: "3D EVA Suit & Mission Console",
-  viewerSubtitle: "Интерактивная анатомическая телеметрия скафандра и системы жизнеобеспечения PLSS",
-  sensorHolter: "Кардиомонитор ECG",
-  sensorSpo2: "Пульсоксиметрия SpO₂",
-  sensorCooling: "Контур охлаждения LCVG",
-  sensorPressure: "Давление скафандра (100% O₂)",
-  sensorPlss: "Рюкзак PLSS (Жизнеобеспечение)",
-  sensorHelmet: "Шлем & Проекционный дисплей HUD",
-  plssStatusTitle: "Диагностика систем скафандра PLSS",
-  subsystemDiagnostics: "Аппаратный мониторинг и контуры жизнеобеспечения",
-  cameraFocus: "Фокус камеры:",
-  focusFull: "Весь скафандр",
-  focusChest: "Грудь (ЭКГ)",
-  focusPlss: "Рюкзак PLSS",
-  focusHelmet: "Шлем / Визор",
-  viewMode: "Режим визуализации:",
-  modeStandard: "Стандартный",
-  modeXray: "Рентген / Сенсоры",
-  modeThermal: "Тепловая карта",
-  calibrateSensors: "Калибровать датчики",
-  emergencyFlush: "Аварийная продувка O₂",
-  coolingLoop: "Регулировка охлаждения",
-};
-
 const translationsEN: Translations = {
   navDashboard: "Dashboard",
   navDashboardSub: "Overview",
@@ -346,6 +233,8 @@ const translationsEN: Translations = {
   coolingLoop: "Adjust Cooling Loop",
 };
 
+const translationsRU: Translations = translationsEN;
+
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
@@ -355,17 +244,9 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<Language>(() => {
-    const saved = localStorage.getItem("cosmo_lang");
-    return saved === "en" ? "en" : "ru";
-  });
-
-  const setLanguage = (lang: Language) => {
-    setLanguageState(lang);
-    localStorage.setItem("cosmo_lang", lang);
-  };
-
-  const t = language === "en" ? translationsEN : translationsRU;
+  const language: Language = "en";
+  const setLanguage = (_lang: Language) => {};
+  const t = translationsEN;
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>

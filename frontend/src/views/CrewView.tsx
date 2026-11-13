@@ -46,7 +46,7 @@ export function CrewView({
   const [showAddModal, setShowAddModal] = useState(false);
   const [name, setName] = useState("");
   const [callsign, setCallsign] = useState("");
-  const [specialty, setSpecialty] = useState("Бортинженер-исследователь");
+  const [specialty, setSpecialty] = useState("Flight Engineer / Mission Specialist");
   const [age, setAge] = useState(34);
   const [bloodType, setBloodType] = useState("O+");
   const [restingHr, setRestingHr] = useState(65);
@@ -87,7 +87,7 @@ export function CrewView({
   const handleImageUpload = (file: File, callback: (base64: string) => void) => {
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) {
-      alert("Размер изображения не должен превышать 2 МБ");
+      alert("Image size must not exceed 2 MB");
       return;
     }
     const reader = new FileReader();
@@ -102,7 +102,7 @@ export function CrewView({
   const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !callsign.trim()) {
-      setErrorMsg("Пожалуйста, заполните имя и позывной астронавта.");
+      setErrorMsg("Please provide astronaut name and callsign.");
       return;
     }
     setSaving(true);
@@ -127,9 +127,9 @@ export function CrewView({
       setCallsign("");
       setAvatarUrl("");
       onRefreshCrew();
-      showToast(`Астронавт ${name.trim()} успешно зачислен в состав миссии CHX-01.`);
+      showToast(`Astronaut ${name.trim()} successfully commissioned to Mission CHX-01.`);
     } catch (err: any) {
-      setErrorMsg(err.message || "Ошибка при добавлении астронавта.");
+      setErrorMsg(err.message || "Error adding crew member.");
     } finally {
       setSaving(false);
     }
@@ -177,9 +177,9 @@ export function CrewView({
       });
       setEditingAstronaut(null);
       onRefreshCrew();
-      showToast(`Данные астронавта ${editForm.name} успешно обновлены в ЦУП.`);
+      showToast(`Dossier for astronaut ${editForm.name} updated in Mission Control.`);
     } catch (err: any) {
-      setEditError(err.message || "Ошибка при обновлении данных.");
+      setEditError(err.message || "Error updating dossier.");
     } finally {
       setSavingEdit(false);
     }
@@ -192,11 +192,11 @@ export function CrewView({
       await api(`/astronauts/${deletingAstronaut.id}`, isFlightSurgeon ? "flight_surgeon" : "commander", {
         method: "DELETE",
       });
-      showToast(`Член экипажа ${deletingAstronaut.name} отстранен от выполнения космической миссии.`);
+      showToast(`Crew member ${deletingAstronaut.name} has been discharged from active flight duty.`);
       setDeletingAstronaut(null);
       onRefreshCrew();
     } catch (err: any) {
-      alert(err.message || "Ошибка при отстранении члена экипажа");
+      alert(err.message || "Error discharging crew member");
     } finally {
       setIsDeleting(false);
     }
@@ -238,7 +238,7 @@ export function CrewView({
           <div className="up">
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
               <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "var(--pr)" }}>
-                Личный состав экспедиции CHX-01 · Управление допуском
+                Expedition CHX-01 Flight Roster · Clearance Management
               </span>
               <span
                 style={{
@@ -265,20 +265,20 @@ export function CrewView({
                 <Shield size={12} />
                 <span>
                   {isFlightSurgeon
-                    ? "Врач миссии (CMO) · Полный административный доступ"
+                    ? "Flight Surgeon (CMO) · Full Administrative Authority"
                     : isCommander
-                    ? "Командир миссии · Оперативный контроль"
-                    : "Космонавт · Личный защищенный терминал"}
+                    ? "Mission Commander · Operational Command Authority"
+                    : "Astronaut · Private Medical Terminal"}
                 </span>
               </span>
             </div>
             <h1 className="lt disp" style={{ margin: "0 0 6px" }}>Crew Health Overview</h1>
             <p className="sub" style={{ margin: 0, maxWidth: "780px", color: "var(--t2)" }}>
               {isFlightSurgeon
-                ? "Клинический контроль физиологической готовности и статуса каждого члена экипажа (полный доступ врача ЦУП)."
+                ? "Clinical monitoring of physiological readiness and flight clearance for every crew member (Full CMO Authority)."
                 : isCommander
-                ? "Оперативная сводка статуса боеготовности экипажа миссии CHX-01 (режим командира экспедиции)."
-                : "Персональный доступ космонавта. Данные сослуживцев защищены протоколом врачебной тайны NASA STD-3001."}
+                ? "Operational mission readiness briefing for Expedition CHX-01 (Commander Mode)."
+                : "Personal astronaut medical record. Crew telemetry protected under NASA STD-3001 clinical privacy protocol."}
             </p>
           </div>
 
@@ -300,7 +300,7 @@ export function CrewView({
                 }}
               >
                 <UserPlus size={16} />
-                <span>Добавить астронавта</span>
+                <span>Add Crew Member</span>
               </button>
             )}
           </div>
@@ -329,10 +329,10 @@ export function CrewView({
             </div>
             <div>
               <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--tx)" }}>
-                Разделение ролей: Режим космонавта (Personal Privacy Protocol)
+                Role-Based Access: Astronaut Privacy Protocol
               </div>
               <div style={{ fontSize: "12px", color: "var(--t2)", marginTop: "2px" }}>
-                В соответствии со стандартами медицинской тайны NASA STD-3001, подробные клинические карты сослуживцев скрыты. Вы можете редактировать и просматривать только свой профиль.
+                In compliance with NASA STD-3001 medical confidentiality standards, colleague clinical dossiers are restricted. You may only inspect and manage your own record.
               </div>
             </div>
           </div>
@@ -391,10 +391,10 @@ export function CrewView({
                   {member.name}
                 </h3>
                 <div style={{ fontSize: "12px", color: "var(--t3)", marginBottom: "12px" }}>
-                  Позывной: {member.callsign} · {member.specialty}
+                  Callsign: {member.callsign} · {member.specialty}
                 </div>
                 <div style={{ fontSize: "11px", color: "var(--t2)", maxWidth: "260px", lineHeight: "1.5" }}>
-                  🔒 Медицинская карта защищена протоколом NASA STD-3001. Полный доступ разрешен только Врачу ЦУП (Flight Surgeon).
+                  🔒 Medical dossier protected under NASA STD-3001. Full access restricted to Flight Surgeon (CMO).
                 </div>
               </div>
             );
@@ -477,12 +477,12 @@ export function CrewView({
                           letterSpacing: "0.5px",
                         }}
                       >
-                        АКТИВЕН
+                        ACTIVE
                       </span>
                     )}
                   </div>
                   <span style={{ fontSize: "12px", color: "var(--t3)", display: "block", marginTop: "2px" }}>
-                    Позывной: <b>{member.callsign}</b> · ID #{member.id}
+                    Callsign: <b>{member.callsign}</b> · ID #{member.id}
                   </span>
                 </div>
               </div>
@@ -490,28 +490,28 @@ export function CrewView({
               {/* Bio summary table */}
               <div style={{ display: "flex", flexDirection: "column", gap: "7px", borderTop: "1px solid var(--sep)", borderBottom: "1px solid var(--sep)", padding: "10px 0", fontSize: "12px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ color: "var(--t3)" }}>Специализация:</span>
+                  <span style={{ color: "var(--t3)" }}>Specialization:</span>
                   <span style={{ fontWeight: 600, maxWidth: "180px", textAlign: "right", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                     {member.specialty}
                   </span>
                 </div>
 
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ color: "var(--t3)" }}>Возраст / Группа:</span>
+                  <span style={{ color: "var(--t3)" }}>Age / Blood:</span>
                   <span style={{ fontWeight: 600 }}>
-                    {member.age || 34} лет · {member.blood_type || "O+"}
+                    {member.age || 34} years · {member.blood_type || "O+"}
                   </span>
                 </div>
 
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ color: "var(--t3)" }}>Базовый пульс:</span>
+                  <span style={{ color: "var(--t3)" }}>Baseline HR:</span>
                   <span style={{ fontWeight: 700, color: "var(--tx)" }}>
-                    {member.resting_hr || 65} bpm (макс {member.max_hr || 175})
+                    {member.resting_hr || 65} bpm (max {member.max_hr || 175})
                   </span>
                 </div>
 
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ color: "var(--t3)" }}>Статус допуска:</span>
+                  <span style={{ color: "var(--t3)" }}>Flight Clearance:</span>
                   <span style={{ color: "#10b981", fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
                     ● Class I Flight Active
                   </span>
@@ -526,7 +526,7 @@ export function CrewView({
                     onClick={() => onSelectAstronaut(member.id)}
                     style={{ flex: 1, fontSize: "12px", padding: "8px 10px", borderRadius: "10px" }}
                   >
-                    {isSelected ? "Текущий" : "Мониторинг"}
+                    {isSelected ? "Current" : "Monitoring"}
                   </button>
                 )}
                 <Link
@@ -543,7 +543,7 @@ export function CrewView({
                     justifyContent: "center",
                   }}
                 >
-                  Профиль
+                  Dossier
                 </Link>
               </div>
 
@@ -570,7 +570,7 @@ export function CrewView({
                     }}
                   >
                     <Edit2 size={13} />
-                    <span>Изменить</span>
+                    <span>Edit</span>
                   </button>
 
                   <button
@@ -593,7 +593,7 @@ export function CrewView({
                     }}
                   >
                     <Trash2 size={13} />
-                    <span>Отстранить</span>
+                    <span>Discharge</span>
                   </button>
                 </div>
               )}
@@ -636,7 +636,7 @@ export function CrewView({
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <Edit2 size={20} style={{ color: "var(--pr)" }} />
                 <h2 style={{ margin: 0, fontSize: "18px", fontWeight: 700 }}>
-                  Редактирование профиля: {editingAstronaut.name}
+                  Edit Profile Dossier: {editingAstronaut.name}
                 </h2>
               </div>
               <button
@@ -669,7 +669,7 @@ export function CrewView({
                 {editForm.avatar_url ? (
                   <img
                     src={editForm.avatar_url}
-                    alt="Аватар"
+                    alt="Avatar"
                     style={{ width: "60px", height: "60px", borderRadius: "50%", objectFit: "cover", border: "2px solid var(--pr)" }}
                   />
                 ) : (
@@ -678,7 +678,7 @@ export function CrewView({
                   </div>
                 )}
                 <div>
-                  <div style={{ fontSize: "12px", fontWeight: 700, marginBottom: "4px" }}>Фотография / Аватарка</div>
+                  <div style={{ fontSize: "12px", fontWeight: 700, marginBottom: "4px" }}>Astronaut Photograph / Avatar</div>
                   <label
                     style={{
                       display: "inline-flex",
@@ -695,7 +695,7 @@ export function CrewView({
                     }}
                   >
                     <Upload size={13} />
-                    <span>Загрузить фото</span>
+                    <span>Upload Photo</span>
                     <input
                       type="file"
                       accept="image/*"
@@ -714,7 +714,7 @@ export function CrewView({
                       onClick={() => setEditForm((prev) => ({ ...prev, avatar_url: "" }))}
                       style={{ marginLeft: "8px", background: "none", border: "none", color: "#ef4444", fontSize: "11px", cursor: "pointer" }}
                     >
-                      Удалить
+                      Delete
                     </button>
                   )}
                 </div>
@@ -724,7 +724,7 @@ export function CrewView({
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
                 <div>
                   <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "var(--t2)", marginBottom: "4px" }}>
-                    ФИО астронавта
+                    Full Name
                   </label>
                   <input
                     type="text"
@@ -736,7 +736,7 @@ export function CrewView({
                 </div>
                 <div>
                   <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "var(--t2)", marginBottom: "4px" }}>
-                    Позывной (Callsign)
+                    Callsign (Callsign)
                   </label>
                   <input
                     type="text"
@@ -751,7 +751,7 @@ export function CrewView({
               {/* Specialty */}
               <div>
                 <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "var(--t2)", marginBottom: "4px" }}>
-                  Специализация и должность
+                  Specialization & Role
                 </label>
                 <input
                   type="text"
@@ -766,7 +766,7 @@ export function CrewView({
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
                 <div>
                   <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "var(--t2)", marginBottom: "4px" }}>
-                    Возраст
+                    Age
                   </label>
                   <input
                     type="number"
@@ -777,7 +777,7 @@ export function CrewView({
                 </div>
                 <div>
                   <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "var(--t2)", marginBottom: "4px" }}>
-                    Группа крови
+                    Blood Type
                   </label>
                   <select
                     value={editForm.blood_type}
@@ -796,7 +796,7 @@ export function CrewView({
                 </div>
                 <div>
                   <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "var(--t2)", marginBottom: "4px" }}>
-                    Базовый пульс
+                    Baseline Heart Rate
                   </label>
                   <input
                     type="number"
@@ -810,11 +810,11 @@ export function CrewView({
               {/* Emergency Contact */}
               <div>
                 <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "var(--t2)", marginBottom: "4px" }}>
-                  Контактное лицо на Земле (Emergency Contact)
+                  Ground Emergency Contact
                 </label>
                 <input
                   type="text"
-                  placeholder="напр. Координационный центр ЦУП: +1 (281) 483-0111"
+                  placeholder="e.g. Mission Control Emergency Desk: +1 (281) 483-0111"
                   value={editForm.emergency_contact}
                   onChange={(e) => setEditForm({ ...editForm, emergency_contact: e.target.value })}
                   style={{ width: "100%", padding: "8px 12px", borderRadius: "10px", background: "var(--s2)", border: "1px solid var(--sep)", color: "var(--tx)", fontSize: "13px" }}
@@ -824,13 +824,13 @@ export function CrewView({
               {/* Notes */}
               <div>
                 <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "var(--t2)", marginBottom: "4px" }}>
-                  Клинические отметки и протоколы врача
+                  Flight Surgeon Clinical Notes & Protocols
                 </label>
                 <textarea
                   rows={3}
                   value={editForm.notes}
                   onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
-                  placeholder="Физиологические особенности, допуск к внекорабельной деятельности (EVA), режим тренировок..."
+                  placeholder="Physiological idiosyncrasies, EVA clearance, countermeasure workout regimen..."
                   style={{ width: "100%", padding: "8px 12px", borderRadius: "10px", background: "var(--s2)", border: "1px solid var(--sep)", color: "var(--tx)", fontSize: "13px", resize: "vertical" }}
                 />
               </div>
@@ -842,7 +842,7 @@ export function CrewView({
                   onClick={() => setEditingAstronaut(null)}
                   style={{ padding: "8px 16px", borderRadius: "10px" }}
                 >
-                  Отмена
+                  Cancel
                 </button>
                 <button
                   type="submit"
@@ -850,7 +850,7 @@ export function CrewView({
                   disabled={savingEdit}
                   style={{ padding: "8px 22px", borderRadius: "10px" }}
                 >
-                  {savingEdit ? "Сохранение..." : "Сохранить изменения"}
+                  {savingEdit ? "Saving..." : "Save Changes"}
                 </button>
               </div>
             </form>
@@ -904,11 +904,11 @@ export function CrewView({
             </div>
 
             <h2 style={{ margin: "0 0 8px", fontSize: "19px", fontWeight: 700 }}>
-              Отстранить члена экипажа?
+              Discharge Crew Member?
             </h2>
 
             <p style={{ margin: "0 0 20px", fontSize: "13px", color: "var(--t2)", lineHeight: "1.5" }}>
-              Вы действительно хотите отстранить <b>{deletingAstronaut.name}</b> ({deletingAstronaut.callsign}) от участия в миссии CHX-01? Запись будет переведена в архив медицинского штаба.
+              Are you sure you want to discharge <b>{deletingAstronaut.name}</b> ({deletingAstronaut.callsign}) from Expedition CHX-01 flight duty? The dossier will be archived in the flight medical registry.
             </p>
 
             <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
@@ -918,7 +918,7 @@ export function CrewView({
                 onClick={() => setDeletingAstronaut(null)}
                 style={{ padding: "10px 18px", borderRadius: "10px" }}
               >
-                Отмена
+                Cancel
               </button>
               <button
                 type="button"
@@ -935,7 +935,7 @@ export function CrewView({
                   cursor: "pointer",
                 }}
               >
-                {isDeleting ? "Отстранение..." : "Подтвердить отстранение"}
+                {isDeleting ? "Discharging..." : "Confirm Discharge"}
               </button>
             </div>
           </div>
@@ -973,7 +973,7 @@ export function CrewView({
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <Stethoscope size={20} style={{ color: "var(--pr)" }} />
-                <h2 style={{ margin: 0, fontSize: "18px", fontWeight: 700 }}>Регистрация члена экипажа (ЦУП)</h2>
+                <h2 style={{ margin: 0, fontSize: "18px", fontWeight: 700 }}>Crew Member Commissioning (Mission Control)</h2>
               </div>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -1003,7 +1003,7 @@ export function CrewView({
               {/* Photo Upload */}
               <div style={{ display: "flex", alignItems: "center", gap: "14px", background: "var(--s2)", padding: "10px 14px", borderRadius: "12px", border: "1px solid var(--sep)" }}>
                 {avatarUrl ? (
-                  <img src={avatarUrl} alt="Аватар" style={{ width: "48px", height: "48px", borderRadius: "50%", objectFit: "cover", border: "2px solid var(--pr)" }} />
+                  <img src={avatarUrl} alt="Avatar" style={{ width: "48px", height: "48px", borderRadius: "50%", objectFit: "cover", border: "2px solid var(--pr)" }} />
                 ) : (
                   <div style={{ width: "48px", height: "48px", borderRadius: "50%", background: "var(--s1)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--t3)" }}>
                     <Camera size={20} />
@@ -1011,7 +1011,7 @@ export function CrewView({
                 )}
                 <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 12px", borderRadius: "8px", background: "var(--s1)", border: "1px solid var(--sep)", color: "var(--tx)", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}>
                   <Upload size={13} />
-                  <span>Загрузить фото/аватар</span>
+                  <span>Upload Astronaut Photo</span>
                   <input
                     type="file"
                     accept="image/*"
@@ -1026,11 +1026,11 @@ export function CrewView({
 
               <div>
                 <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "var(--t2)", marginBottom: "6px" }}>
-                  Полное имя астронавта
+                  Astronaut Full Name
                 </label>
                 <input
                   type="text"
-                  placeholder="напр. Елена Соколова"
+                  placeholder="e.g. Elena Sokolova"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
@@ -1049,11 +1049,11 @@ export function CrewView({
 
               <div>
                 <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "var(--t2)", marginBottom: "6px" }}>
-                  Позывной (Callsign)
+                  Callsign (Callsign)
                 </label>
                 <input
                   type="text"
-                  placeholder="напр. FALCON-2"
+                  placeholder="e.g. FALCON-02"
                   value={callsign}
                   onChange={(e) => setCallsign(e.target.value)}
                   required
@@ -1072,7 +1072,7 @@ export function CrewView({
 
               <div>
                 <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "var(--t2)", marginBottom: "6px" }}>
-                  Специализация в полете
+                  Mission Flight Specialization
                 </label>
                 <select
                   value={specialty}
@@ -1088,18 +1088,18 @@ export function CrewView({
                     outline: "none",
                   }}
                 >
-                  <option value="Командир экипажа">Командир экипажа</option>
-                  <option value="Бортинженер-исследователь">Бортинженер-исследователь</option>
-                  <option value="Врач экипажа (Crew Medical Officer)">Врач экипажа (Crew Medical Officer)</option>
-                  <option value="Специалист по научным экспериментам">Специалист по научным экспериментам</option>
-                  <option value="Пилот спускаемого аппарата">Пилот спускаемого аппарата</option>
+                  <option value="Mission Commander">Mission Commander</option>
+                  <option value="Flight Engineer / Specialist">Flight Engineer / Specialist</option>
+                  <option value="Flight Surgeon / CMO">Flight Surgeon / CMO</option>
+                  <option value="Payload / Science Specialist">Payload / Science Specialist</option>
+                  <option value="Spacecraft Pilot">Spacecraft Pilot</option>
                 </select>
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
                 <div>
                   <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "var(--t2)", marginBottom: "6px" }}>
-                    Возраст
+                    Age
                   </label>
                   <input
                     type="number"
@@ -1110,7 +1110,7 @@ export function CrewView({
                 </div>
                 <div>
                   <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "var(--t2)", marginBottom: "6px" }}>
-                    Базовый пульс (ЧСС)
+                    Baseline Resting Heart Rate (bpm)
                   </label>
                   <input
                     type="number"
@@ -1128,7 +1128,7 @@ export function CrewView({
                   onClick={() => setShowAddModal(false)}
                   style={{ padding: "10px 16px", borderRadius: "10px" }}
                 >
-                  Отмена
+                  Cancel
                 </button>
                 <button
                   type="submit"
@@ -1136,7 +1136,7 @@ export function CrewView({
                   disabled={saving}
                   style={{ padding: "10px 20px", borderRadius: "10px" }}
                 >
-                  {saving ? "Сохранение..." : "Зарегистрировать в миссии"}
+                  {saving ? "Registering..." : "Commission to Mission"}
                 </button>
               </div>
             </form>

@@ -32,13 +32,13 @@ export function AuthModal() {
         setSuccess(t.loginSuccess);
       } else {
         if ((role.includes("Surgeon") || role.includes("Commander")) && !accessCode.trim()) {
-          throw new Error("Для роли Врача или Командира требуется код допуска NASA (например: NASA-CMO-2026 или NASA-CMD-2026)");
+          throw new Error("NASA Clearance code required for Flight Surgeon or Commander (e.g. NASA-CMO-2026 or NASA-CMD-2026)");
         }
         await register({ email, password, full_name: fullName, callsign, role, access_code: accessCode.trim().toUpperCase() });
         setSuccess(t.registerSuccess);
       }
     } catch (err: any) {
-      setError(err.message || "Ошибка авторизации");
+      setError(err.message || "Authorization error");
     } finally {
       setLoading(false);
     }
@@ -50,7 +50,7 @@ export function AuthModal() {
     try {
       await login(demoEmail, "cosmo123");
     } catch (err: any) {
-      setError(err.message || "Ошибка быстрого входа");
+      setError(err.message || "Quick login error");
     } finally {
       setLoading(false);
     }
@@ -222,7 +222,7 @@ export function AuthModal() {
                   <input
                     type="text"
                     required
-                    placeholder="Алекс Нова"
+                    placeholder="Alex Nova"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     className="inp"
@@ -255,10 +255,10 @@ export function AuthModal() {
                     className="inp"
                     style={{ width: "100%" }}
                   >
-                    <option value="Crew Member / Astronaut">🚀 Космонавт (Crew)</option>
-                    <option value="Biomedical Engineer">🔧 Бортинженер</option>
-                    <option value="Flight Surgeon">👨‍⚕️ Врач экипажа (CMO) 🔒</option>
-                    <option value="Mission Commander">🛸 Командир миссии 🔒</option>
+                    <option value="Crew Member / Astronaut">🚀 Astronaut (Crew)</option>
+                    <option value="Biomedical Engineer">🔧 Flight Engineer</option>
+                    <option value="Flight Surgeon">👨‍⚕️ Flight Surgeon (CMO) 🔒</option>
+                    <option value="Mission Commander">🛸 Mission Commander 🔒</option>
                   </select>
                 </div>
               </div>
@@ -266,11 +266,11 @@ export function AuthModal() {
               {(role.includes("Surgeon") || role.includes("Commander")) && (
                 <div style={{ marginTop: "10px", padding: "10px 12px", borderRadius: "10px", background: "rgba(59, 130, 246, 0.1)", border: "1px solid rgba(59, 130, 246, 0.3)" }}>
                   <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "var(--pr)", marginBottom: "4px" }}>
-                    🔒 Код допуска NASA Clearance
+                    🔒 NASA Clearance Code
                   </label>
                   <input
                     type="text"
-                    placeholder="NASA-CMO-2026 или NASA-CMD-2026"
+                    placeholder="NASA-CMO-2026 or NASA-CMD-2026"
                     value={accessCode}
                     onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
                     className="inp"

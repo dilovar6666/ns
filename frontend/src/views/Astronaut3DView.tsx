@@ -50,13 +50,13 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
     setCalibrating(true);
     setTimeout(() => {
       setCalibrating(false);
-      triggerToast("Все 5 биосенсоров PLSS откалиброваны. Погрешность < 0.2%");
+      triggerToast("All 5 PLSS biosensors calibrated nominal. Drift < 0.2%");
     }, 1800);
   };
 
   const handleCoolingChange = (lvl: "min" | "opt" | "max") => {
     setCoolingLevel(lvl);
-    triggerToast(`Контур LCVG установлен в режим: ${lvl.toUpperCase()}`);
+    triggerToast(`LCVG Cooling Loop set to: ${lvl.toUpperCase()}`);
   };
 
   return (
@@ -222,7 +222,7 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
                   }}
                 >
                   <RefreshCw className="spin" size={24} style={{ marginBottom: "8px", color: "var(--pr)" }} />
-                  Загрузка 3D модели скафандра и сенсорных контуров...
+                  Loading 3D space suit model and sensor clusters...
                 </div>
               }
             >
@@ -269,7 +269,7 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
                 cursor: "pointer",
               }}
             >
-              <Crosshair size={13} /> {t.focusFull || "Полный обзор"}
+              <Crosshair size={13} /> {t.focusFull || "Full Perspective"}
             </button>
 
             <button
@@ -435,7 +435,7 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
                     {activeZone === "plss" && t.sensorPlss}
                     {activeZone === "wrist" && t.sensorSpo2}
                     {activeZone === "lcvg" && t.sensorCooling}
-                    {activeZone === "full" && "Общая телеметрия скафандра EMU"}
+                    {activeZone === "full" && "Global EMU Suit Telemetry & Status"}
                   </h3>
                   <div style={{ fontSize: "11px", color: "var(--t3)", marginTop: "2px" }}>
                     NASA STD-3001 Spec · Subsystem ID: CHX-{activeZone.toUpperCase()}
@@ -444,7 +444,7 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
               </div>
 
               <span className="st ok">
-                <i></i>Номинал
+                <i></i>Nominal
               </span>
             </div>
 
@@ -453,32 +453,32 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
               <div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "14px" }}>
                   <div className="telemetry-dark-tile">
-                    <div className="lbl c-hr" style={{ fontSize: "11px" }}>Пульс экипажа</div>
+                    <div className="lbl c-hr" style={{ fontSize: "11px" }}>Crew Heart Rate</div>
                     <div className="num" style={{ fontSize: "22px", fontWeight: 700, marginTop: "4px" }}>
                       {Math.round(hr)} <span style={{ fontSize: "12px", color: "var(--t3)" }}>bpm</span>
                     </div>
                   </div>
                   <div className="telemetry-dark-tile">
-                    <div className="lbl c-spo2" style={{ fontSize: "11px" }}>Кислород SpO₂</div>
+                    <div className="lbl c-spo2" style={{ fontSize: "11px" }}>Oxygen Saturation SpO₂</div>
                     <div className="num" style={{ fontSize: "22px", fontWeight: 700, marginTop: "4px" }}>
                       {Math.round(spo2)} <span style={{ fontSize: "12px", color: "var(--t3)" }}>%</span>
                     </div>
                   </div>
                   <div className="telemetry-dark-tile">
-                    <div className="lbl" style={{ fontSize: "11px", color: "#22d3ee" }}>Давление EMU</div>
+                    <div className="lbl" style={{ fontSize: "11px", color: "#22d3ee" }}>EMU Suit Pressure</div>
                     <div className="num" style={{ fontSize: "20px", fontWeight: 700, marginTop: "4px" }}>
-                      29.6 <span style={{ fontSize: "12px", color: "var(--t3)" }}>кПа</span>
+                      29.6 <span style={{ fontSize: "12px", color: "var(--t3)" }}>kPa</span>
                     </div>
                   </div>
                   <div className="telemetry-dark-tile">
-                    <div className="lbl" style={{ fontSize: "11px", color: "#a855f7" }}>Баллон O₂ (PLSS)</div>
+                    <div className="lbl" style={{ fontSize: "11px", color: "#a855f7" }}>PLSS O₂ Cylinder</div>
                     <div className="num" style={{ fontSize: "20px", fontWeight: 700, marginTop: "4px" }}>
                       840 <span style={{ fontSize: "12px", color: "var(--t3)" }}>psi</span>
                     </div>
                   </div>
                 </div>
                 <div style={{ fontSize: "12px", color: "var(--t2)", lineHeight: 1.5, background: "rgba(0,0,0,0.2)", padding: "10px 12px", borderRadius: "10px" }}>
-                  Все 5 биосенсорных контуров скафандра (ЭКГ, визор, ранец PLSS, оксиметр, водяное охлаждение LCVG) функционируют в штатном режиме. Выберите зону для детализации.
+                  All 5 space suit sensor clusters (ECG holter, helmet HUD, PLSS backpack, wrist oximeter, and LCVG water loop) nominal. Select cluster to inspect telemetry.
                 </div>
               </div>
             )}
@@ -487,20 +487,20 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
               <div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "14px" }}>
                   <div className="telemetry-dark-tile">
-                    <div className="lbl c-hr" style={{ fontSize: "11px" }}>Текущий пульс</div>
+                    <div className="lbl c-hr" style={{ fontSize: "11px" }}>Current Pulse</div>
                     <div className="num" style={{ fontSize: "22px", fontWeight: 700, marginTop: "4px" }}>
                       {Math.round(hr)} <span style={{ fontSize: "12px", color: "var(--t3)" }}>bpm</span>
                     </div>
                   </div>
                   <div className="telemetry-dark-tile">
-                    <div className="lbl c-hr" style={{ fontSize: "11px" }}>Вариабельность HRV</div>
+                    <div className="lbl c-hr" style={{ fontSize: "11px" }}>HRV Variance</div>
                     <div className="num" style={{ fontSize: "22px", fontWeight: 700, marginTop: "4px" }}>
                       54 <span style={{ fontSize: "12px", color: "var(--t3)" }}>ms</span>
                     </div>
                   </div>
                 </div>
                 <div style={{ fontSize: "12px", color: "var(--t2)", lineHeight: 1.5, background: "rgba(0,0,0,0.2)", padding: "10px 12px", borderRadius: "10px" }}>
-                  3-канальный холтер биосенсоров ткани скафандра. Синусовый ритм стабильный. Признаков ишемии или тахиаритмии не обнаружено.
+                  3-lead ECG biosensor embedded in suit inner garment. Sinus rhythm regular. No signs of ischemia or tachyarrhythmia detected.
                 </div>
               </div>
             )}
@@ -509,20 +509,20 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
               <div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "14px" }}>
                   <div className="telemetry-dark-tile">
-                    <div className="lbl c-spo2" style={{ fontSize: "11px" }}>Давление шлема</div>
+                    <div className="lbl c-spo2" style={{ fontSize: "11px" }}>Helmet Delta-P</div>
                     <div className="num" style={{ fontSize: "20px", fontWeight: 700, marginTop: "4px" }}>
-                      29.6 <span style={{ fontSize: "12px", color: "var(--t3)" }}>кПа</span>
+                      29.6 <span style={{ fontSize: "12px", color: "var(--t3)" }}>kPa</span>
                     </div>
                   </div>
                   <div className="telemetry-dark-tile">
-                    <div className="lbl c-spo2" style={{ fontSize: "11px" }}>CO₂ Скруббер</div>
+                    <div className="lbl c-spo2" style={{ fontSize: "11px" }}>CO₂ Scrubber</div>
                     <div className="num" style={{ fontSize: "20px", fontWeight: 700, marginTop: "4px" }}>
-                      14% <span style={{ fontSize: "12px", color: "var(--t3)" }}>насыщ.</span>
+                      14% <span style={{ fontSize: "12px", color: "var(--t3)" }}>capacity</span>
                     </div>
                   </div>
                 </div>
                 <div style={{ fontSize: "12px", color: "var(--t2)", lineHeight: 1.5, background: "rgba(0,0,0,0.2)", padding: "10px 12px", borderRadius: "10px" }}>
-                  Золотое напыление визора отражает 99.8% ультрафиолета и ИК-излучения. Вентилятор обдува стекла работает на 100% мощности (defog активен).
+                  Gold electro-deposited visor reflects 99.8% UV and solar IR. Defog air circulating fan operating at 100% duty cycle.
                 </div>
               </div>
             )}
@@ -531,26 +531,26 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
               <div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px", marginBottom: "14px" }}>
                   <div className="telemetry-dark-tile">
-                    <div className="lbl" style={{ fontSize: "10px", color: "#a855f7" }}>Баллон O₂ #1</div>
+                    <div className="lbl" style={{ fontSize: "10px", color: "#a855f7" }}>O₂ Tank #1</div>
                     <div className="num" style={{ fontSize: "18px", fontWeight: 700, marginTop: "4px" }}>
                       840 <span style={{ fontSize: "10px" }}>psi</span>
                     </div>
                   </div>
                   <div className="telemetry-dark-tile">
-                    <div className="lbl" style={{ fontSize: "10px", color: "#a855f7" }}>Батарея</div>
+                    <div className="lbl" style={{ fontSize: "10px", color: "#a855f7" }}>Battery</div>
                     <div className="num" style={{ fontSize: "18px", fontWeight: 700, marginTop: "4px" }}>
-                      78% <span style={{ fontSize: "10px" }}>5.2 ч</span>
+                      78% <span style={{ fontSize: "10px" }}>5.2 hrs</span>
                     </div>
                   </div>
                   <div className="telemetry-dark-tile">
-                    <div className="lbl" style={{ fontSize: "10px", color: "#a855f7" }}>Сублиматор</div>
+                    <div className="lbl" style={{ fontSize: "10px", color: "#a855f7" }}>Sublimator</div>
                     <div className="num" style={{ fontSize: "18px", fontWeight: 700, marginTop: "4px" }}>
                       3.8 <span style={{ fontSize: "10px" }}>°C</span>
                     </div>
                   </div>
                 </div>
                 <div style={{ fontSize: "12px", color: "var(--t2)", lineHeight: 1.5, background: "rgba(0,0,0,0.2)", padding: "10px 12px", borderRadius: "10px" }}>
-                  Автономный ранец первичного жизнеобеспечения. Расход кислорода в пределах нормы (0.07 кг/ч). Запас воды в испарителе — 4.2 литра.
+                  Primary Life Support System backpack. Oxygen consumption nominal (0.07 kg/h). Feedwater reserve: 4.2 Liters.
                 </div>
               </div>
             )}
@@ -559,20 +559,20 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
               <div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "14px" }}>
                   <div className="telemetry-dark-tile">
-                    <div className="lbl c-spo2" style={{ fontSize: "11px" }}>Сатурация SpO₂</div>
+                    <div className="lbl c-spo2" style={{ fontSize: "11px" }}>Oxygen Saturation (SpO₂)</div>
                     <div className="num" style={{ fontSize: "22px", fontWeight: 700, marginTop: "4px" }}>
                       {Math.round(spo2)} <span style={{ fontSize: "12px", color: "var(--t3)" }}>%</span>
                     </div>
                   </div>
                   <div className="telemetry-dark-tile">
-                    <div className="lbl c-spo2" style={{ fontSize: "11px" }}>Индекс перфузии (PI)</div>
+                    <div className="lbl c-spo2" style={{ fontSize: "11px" }}>Perfusion Index (PI)</div>
                     <div className="num" style={{ fontSize: "22px", fontWeight: 700, marginTop: "4px" }}>
                       4.2 <span style={{ fontSize: "12px", color: "var(--t3)" }}>%</span>
                     </div>
                   </div>
                 </div>
                 <div style={{ fontSize: "12px", color: "var(--t2)", lineHeight: 1.5, background: "rgba(0,0,0,0.2)", padding: "10px 12px", borderRadius: "10px" }}>
-                  Оптический пульсоксиметрический манжет на запястье скафандра. Периферический кровоток кисти руки в норме при давлении перчаток 29.6 кПа.
+                  Optical pulse oximeter cuff on suit wrist ring. Peripheral perfusion nominal under 29.6 kPa pressurized glove condition.
                 </div>
               </div>
             )}
@@ -581,15 +581,15 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
               <div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "14px" }}>
                   <div className="telemetry-dark-tile">
-                    <div className="lbl" style={{ fontSize: "11px", color: "#f59e0b" }}>Вход / Выход</div>
+                    <div className="lbl" style={{ fontSize: "11px", color: "#f59e0b" }}>Inlet / Outlet Temp</div>
                     <div className="num" style={{ fontSize: "20px", fontWeight: 700, marginTop: "4px" }}>
                       15.2 / 19.8 <span style={{ fontSize: "11px", color: "var(--t3)" }}>°C</span>
                     </div>
                   </div>
                   <div className="telemetry-dark-tile">
-                    <div className="lbl" style={{ fontSize: "11px", color: "#f59e0b" }}>Теплоотвод</div>
+                    <div className="lbl" style={{ fontSize: "11px", color: "#f59e0b" }}>Heat Rejection</div>
                     <div className="num" style={{ fontSize: "20px", fontWeight: 700, marginTop: "4px" }}>
-                      1 150 <span style={{ fontSize: "11px", color: "var(--t3)" }}>BTU/ч</span>
+                      1,150 <span style={{ fontSize: "11px", color: "var(--t3)" }}>BTU/h</span>
                     </div>
                   </div>
                 </div>
@@ -609,7 +609,7 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
                       cursor: "pointer",
                     }}
                   >
-                    Мин (14°C)
+                    Min (14°C)
                   </button>
                   <button
                     type="button"
@@ -626,7 +626,7 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
                       cursor: "pointer",
                     }}
                   >
-                    Комфорт (17°C)
+                    Comfort (17°C)
                   </button>
                   <button
                     type="button"
@@ -643,7 +643,7 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
                       cursor: "pointer",
                     }}
                   >
-                    Макс (21°C)
+                    Max (21°C)
                   </button>
                 </div>
               </div>
@@ -669,8 +669,8 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
               {/* O2 Resupply Loop */}
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "4px" }}>
-                  <span style={{ color: "var(--t2)" }}>Запас кислорода O₂ (Primary + Sec)</span>
-                  <span style={{ fontWeight: 600, color: "var(--pr)" }}>98% (6.4 ч)</span>
+                  <span style={{ color: "var(--t2)" }}>Oxygen Supply O₂ (Primary + Sec)</span>
+                  <span style={{ fontWeight: 600, color: "var(--pr)" }}>98% (6.4 hrs)</span>
                 </div>
                 <div style={{ height: "6px", background: "rgba(255,255,255,0.08)", borderRadius: "3px", overflow: "hidden" }}>
                   <div style={{ width: "98%", height: "100%", background: "var(--pr)" }} />
@@ -680,8 +680,8 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
               {/* PLSS Battery */}
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "4px" }}>
-                  <span style={{ color: "var(--t2)" }}>Энергоблок PLSS Li-Ion (380 Wh)</span>
-                  <span style={{ fontWeight: 600, color: "#22c55e" }}>78% (5.2 ч)</span>
+                  <span style={{ color: "var(--t2)" }}>PLSS Li-Ion Battery Pack (380 Wh)</span>
+                  <span style={{ fontWeight: 600, color: "#22c55e" }}>78% (5.2 hrs)</span>
                 </div>
                 <div style={{ height: "6px", background: "rgba(255,255,255,0.08)", borderRadius: "3px", overflow: "hidden" }}>
                   <div style={{ width: "78%", height: "100%", background: "#22c55e" }} />
@@ -691,8 +691,8 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
               {/* CO2 Scrubber */}
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "4px" }}>
-                  <span style={{ color: "var(--t2)" }}>Поглотитель CO₂ (LiOH / Metox)</span>
-                  <span style={{ fontWeight: 600, color: "#38bdf8" }}>86% емкости</span>
+                  <span style={{ color: "var(--t2)" }}>CO₂ Scrubber Canister (Metox / LiOH)</span>
+                  <span style={{ fontWeight: 600, color: "#38bdf8" }}>86% capacity</span>
                 </div>
                 <div style={{ height: "6px", background: "rgba(255,255,255,0.08)", borderRadius: "3px", overflow: "hidden" }}>
                   <div style={{ width: "86%", height: "100%", background: "#38bdf8" }} />
@@ -702,7 +702,7 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
               {/* Feedwater Sublimator */}
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "4px" }}>
-                  <span style={{ color: "var(--t2)" }}>Охлаждающая вода сублиматора</span>
+                  <span style={{ color: "var(--t2)" }}>Sublimator Feedwater Reserve (4.2 L)</span>
                   <span style={{ fontWeight: 600, color: "#f59e0b" }}>82% (4.1 L)</span>
                 </div>
                 <div style={{ height: "6px", background: "rgba(255,255,255,0.08)", borderRadius: "3px", overflow: "hidden" }}>
@@ -720,13 +720,13 @@ export function Astronaut3DView({ astronaut, metrics }: Props) {
                 disabled={calibrating}
                 style={{ flex: 1, fontSize: "12px", padding: "8px 12px", justifyContent: "center" }}
               >
-                <RefreshCw size={14} className={calibrating ? "spin" : ""} /> {calibrating ? "Калибровка..." : t.calibrateSensors}
+                <RefreshCw size={14} className={calibrating ? "spin" : ""} /> {calibrating ? "Calibrating..." : t.calibrateSensors}
               </button>
 
               <button
                 type="button"
                 className="btn-secondary"
-                onClick={() => triggerToast("Аварийная продувка 100% O₂ проверена. Клапан сброса герметичен.")}
+                onClick={() => triggerToast("Emergency 100% O2 purge tested nominal. Relief valve sealed.")}
                 style={{ flex: 1, fontSize: "12px", padding: "8px 12px", justifyContent: "center" }}
               >
                 <Wind size={14} /> {t.emergencyFlush}

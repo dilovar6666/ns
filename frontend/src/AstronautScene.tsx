@@ -16,11 +16,11 @@ export type AstronautSceneProps = {
 }
 
 const HOTSPOT_CONFIGS = [
-  { id: 'chest' as const, pos: [0, 0.10, 0.28] as const, label: 'ЭКГ (Грудь)', color: '#ff2d55' },
-  { id: 'helmet' as const, pos: [0, 0.46, 0.25] as const, label: 'Шлем / Визор', color: '#22d3ee' },
-  { id: 'plss' as const, pos: [0, 0.20, -0.38] as const, label: 'Рюкзак PLSS', color: '#a855f7' },
-  { id: 'wrist' as const, pos: [-0.60, -0.05, 0.16] as const, label: 'SpO₂ Запястье', color: '#32ade6' },
-  { id: 'lcvg' as const, pos: [0, -0.35, 0.24] as const, label: 'Контур LCVG', color: '#f59e0b' },
+  { id: 'chest' as const, pos: [0, 1.60, 0.26] as const, label: 'ECG (Chest)', color: '#ff2d55' },
+  { id: 'helmet' as const, pos: [0, 2.05, 0.20] as const, label: 'Helmet / Visor', color: '#22d3ee' },
+  { id: 'plss' as const, pos: [0, 1.60, -0.38] as const, label: 'PLSS Life Support', color: '#a855f7' },
+  { id: 'wrist' as const, pos: [-0.56, 1.22, 0.20] as const, label: 'SpO₂ Wrist', color: '#32ade6' },
+  { id: 'lcvg' as const, pos: [0, 0.85, 0.24] as const, label: 'LCVG Cooling Loop', color: '#f59e0b' },
 ]
 
 function HotspotMarker({
@@ -129,13 +129,15 @@ function Model({
   onSelectZone?: (zone: SensorZone) => void
   interactive?: boolean
 }) {
+  const { scene: rootScene } = useThree()
   const group = useRef<Group>(null)
   const { scene, animations } = useGLTF('/models/astronaut.glb')
   const clone = useMemo(() => SkeletonUtils.clone(scene), [scene])
   const { actions } = useAnimations(animations, group)
 
   useEffect(() => {
-    const action = actions.floating || actions.idle
+    // Play idle animation for a clean, upright, perfectly straight and centered astronaut
+    const action = actions.idle || actions.floating
     action?.play()
     return () => {
       action?.stop()
@@ -254,7 +256,31 @@ function Model({
     return helper
   }, [clone])
 
-  useFrame(() => {
+  // In Three.js, SkeletonHelper's matrix is set to clone.matrixWorld.
+  // It must be added directly to rootScene (not nested inside a transformed group)
+  // to avoid double-multiplying the group transform which displaced it outside the body.
+  useEffect(() => {
+    if (viewMode === 'xray') {
+      rootScene.add(skeletonHelper)
+      return () => {
+        rootScene.remove(skeletonHelper)
+      }
+    } else {
+      rootScene.remove(skeletonHelper)
+    }
+  }, [viewMode, skeletonHelper, rootScene])
+
+  useFrame((state) => {
+    if (group.current) {
+      // Natural zero-G microgravity hover while remaining strictly centered on the X axis
+      group.current.position.y = -0.78 + Math.sin(state.clock.elapsedTime * 1.3) * 0.02
+      group.current.position.x = 0
+      // Subtle yaw sway (±0.04 rad = ~2.3 deg)
+      group.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.45) * 0.05
+      group.current.rotation.x = 0
+      group.current.rotation.z = 0
+      group.current.updateMatrixWorld(true)
+    }
     if (viewMode === 'xray') {
       skeletonHelper.updateMatrixWorld(true)
     }
@@ -290,14 +316,12 @@ function Model({
   }, [clone, viewMode, xrayMaterial, thermalMaterial])
 
   return (
-    <group ref={group} position={[0, -1.22, 0]} scale={0.80}>
+    <group ref={group} position={[0, -0.78, 0]} scale={0.80}>
       <primitive object={clone} />
 
       {/* Internal Human Skeleton Structure in X-Ray Mode */}
       {viewMode === 'xray' && (
         <group>
-          {/* Rigged 90-joint dynamic skeleton lines */}
-          <primitive object={skeletonHelper} />
 
           {/* Glowing Anatomical Cranium / Skull */}
           <group position={[0, 2.08, 0.02]}>
@@ -400,8 +424,8 @@ function CameraManager({
   controlsRef: React.RefObject<any>
 }) {
   const { camera } = useThree()
-  const targetPos = useRef(new THREE.Vector3(0, isMobile ? -0.22 : -0.20, isMobile ? 3.5 : 3.1))
-  const targetLook = useRef(new THREE.Vector3(0, isMobile ? -0.28 : -0.25, 0))
+  const targetPos = useRef(new THREE.Vector3(0, 0, isMobile ? 3.3 : 2.9))
+  const targetLook = useRef(new THREE.Vector3(0, 0, 0))
   const isAnimating = useRef(false)
   const prevZone = useRef<SensorZone | undefined>(activeZone)
 
@@ -412,29 +436,29 @@ function CameraManager({
       isAnimating.current = true
 
       if (!activeZone || activeZone === 'full') {
-        targetPos.current.set(0, isMobile ? -0.22 : -0.20, isMobile ? 3.5 : 3.1)
-        targetLook.current.set(0, isMobile ? -0.28 : -0.25, 0)
+        targetPos.current.set(0, 0, isMobile ? 3.3 : 2.9)
+        targetLook.current.set(0, 0, 0)
       } else {
         switch (activeZone) {
           case 'chest':
-            targetPos.current.set(0, 0.20, isMobile ? 1.55 : 1.35)
-            targetLook.current.set(0, 0.16, 0)
+            targetPos.current.set(0, 0.50, isMobile ? 1.55 : 1.35)
+            targetLook.current.set(0, 0.50, 0)
             break
           case 'helmet':
-            targetPos.current.set(0, 0.46, isMobile ? 1.25 : 1.10)
-            targetLook.current.set(0, 0.44, 0)
+            targetPos.current.set(0, 0.86, isMobile ? 1.25 : 1.10)
+            targetLook.current.set(0, 0.86, 0)
             break
           case 'plss':
-            targetPos.current.set(0, 0.28, isMobile ? -1.75 : -1.55)
-            targetLook.current.set(0, 0.20, -0.20)
+            targetPos.current.set(0, 0.50, isMobile ? -1.75 : -1.55)
+            targetLook.current.set(0, 0.50, -0.20)
             break
           case 'wrist':
-            targetPos.current.set(-0.85, 0.10, isMobile ? 1.10 : 0.90)
-            targetLook.current.set(-0.60, 0.05, 0.10)
+            targetPos.current.set(-0.55, 0.20, isMobile ? 1.10 : 0.90)
+            targetLook.current.set(-0.45, 0.20, 0.10)
             break
           case 'lcvg':
-            targetPos.current.set(0, -0.30, isMobile ? 2.80 : 2.45)
-            targetLook.current.set(0, -0.35, 0)
+            targetPos.current.set(0, -0.10, isMobile ? 2.60 : 2.30)
+            targetLook.current.set(0, -0.10, 0)
             break
         }
       }
@@ -483,14 +507,14 @@ export default function AstronautScene({
   interactive = false,
 }: AstronautSceneProps) {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
-  const defaultZ = isMobile ? 3.5 : 3.1
-  const defaultY = isMobile ? -0.22 : -0.20
+  const defaultZ = isMobile ? 3.3 : 2.9
+  const defaultY = 0.0
   const controlsRef = useRef<any>(null)
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', touchAction: 'none' }}>
       <Canvas
-        camera={{ position: [0, defaultY, defaultZ], fov: isMobile ? 44 : 40 }}
+        camera={{ position: [0, defaultY, defaultZ], fov: isMobile ? 42 : 38 }}
         dpr={[1, 1.5]}
         gl={{ antialias: true, alpha: true }}
         style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, touchAction: 'none' }}
@@ -529,7 +553,7 @@ export default function AstronautScene({
           zoomSpeed={0.95}
           minDistance={0.5}
           maxDistance={7.0}
-          target={[0, defaultY, 0]}
+          target={[0, 0, 0]}
         />
       </Canvas>
 
@@ -553,9 +577,9 @@ export default function AstronautScene({
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8', marginBottom: '4px', fontSize: '9px', fontWeight: 700, gap: '8px' }}>
             <span style={{ color: '#0284c7' }}>18°C PLSS</span>
-            <span style={{ color: '#10b981' }}>31°C Ноги</span>
-            <span style={{ color: '#eab308' }}>34°C Тело</span>
-            <span style={{ color: '#ef4444' }}>37.5°C Ядро</span>
+            <span style={{ color: '#10b981' }}>31°C Extremities</span>
+            <span style={{ color: '#eab308' }}>34°C Body Torso</span>
+            <span style={{ color: '#ef4444' }}>37.5°C Core Vitals</span>
           </div>
           <div
             style={{
@@ -594,7 +618,7 @@ export default function AstronautScene({
           }}
         >
           <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22d3ee', boxShadow: '0 0 8px #22d3ee' }} />
-          <span>РЕНТГЕН-СКАН · СКЕЛЕТ + 5 БИОСЕНСОРОВ</span>
+          <span>X-RAY SCAN · SKELETAL RIG + 5 BIOSENSORS</span>
         </div>
       )}
     </div>

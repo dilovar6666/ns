@@ -40,121 +40,85 @@ export function EvidenceView() {
   const [filter, setFilter] = useState<string>("all");
   const [search, setSearch] = useState<string>("");
 
-  const isRu = language === "ru";
+  const isRu = false;
 
   const standards: StandardItem[] = [
     {
       id: "nasa-std-3001-vol1",
       category: "nasa",
-      title: isRu ? "NASA STD-3001 Volume 1: Crew Health" : "NASA STD-3001 Volume 1: Crew Health",
-      subtitle: isRu ? "Клинические стандарты здоровья и предполетной подготовки" : "Clinical Crew Health and Preflight Physical Standards",
+      title: "NASA STD-3001 Volume 1: Crew Health",
+      subtitle: "Clinical Crew Health and Preflight Physical Standards",
       organization: "NASA Office of Chief Health & Medical Officer",
       image: "/cosmo-assets/ba923833-5f1d-4dae-9dd6-d6952c8dcfcb.jpg",
       badge: "Mandatory Standard",
-      description: isRu
-        ? "Фундаментальный норматив NASA, определяющий допустимые отклонения биометрических параметров, профилактику сердечно-сосудистой декондиции и протоколы экстренной медицинской помощи на борту."
-        : "The definitive NASA standard establishing allowable biometric physiological deviations, cardiovascular deconditioning prevention, and emergency medical protocols.",
-      clinicalImpact: isRu
-        ? "Устанавливает пороги покоя ЧСС (50–100 bpm), минимальную сатурацию SpO₂ (≥ 95%), и допустимые дозы радиационной нагрузки."
-        : "Defines resting heart rate bounds (50–100 bpm), minimum SpO₂ (≥ 95%), and cumulative ionizing radiation exposure limits.",
-      platformApplication: isRu
-        ? "Используется в алгоритмах детекции тахикардии, гипоксии и автоматической триажной классификации в Dashboard и Alerts."
-        : "Directly powers tachyarrhythmia alarms, desaturation tripwires, and automated triage scoring in Dashboard and Alerts.",
+      description: "The definitive NASA standard establishing allowable biometric physiological deviations, cardiovascular deconditioning prevention, and emergency medical protocols.",
+      clinicalImpact: "Defines resting heart rate bounds (50–100 bpm), minimum SpO₂ (≥ 95%), and cumulative ionizing radiation exposure limits.",
+      platformApplication: "Directly powers tachyarrhythmia alarms, desaturation tripwires, and automated triage scoring in Dashboard and Alerts.",
       url: "https://www.nasa.gov/hhp/standards",
     },
     {
       id: "nasa-std-3001-vol2",
       category: "nasa",
-      title: isRu ? "NASA STD-3001 Volume 2: Human Factors" : "NASA STD-3001 Volume 2: Human Factors & Habitability",
-      subtitle: isRu ? "Обитаемость, параметры атмосферы жилого модуля и скафандра" : "Habitability, Atmospheric Limits, and EVA Suit Parameters",
+      title: "NASA STD-3001 Volume 2: Human Factors & Habitability",
+      subtitle: "Habitability, Atmospheric Limits, and EVA Suit Parameters",
       organization: "NASA Johnson Space Center",
       image: "/cosmo-assets/0d365bce-f1ee-4b68-99e2-98eaed0bf5cc.jpg",
       badge: "Engineering Standard",
-      description: isRu
-        ? "Регламентирует состав воздушной смеси (парциальное давление O₂ и CO₂), акустический комфорт, температурные режимы LCVG и эргономику пользовательских интерфейсов медицинских систем."
-        : "Regulates respiratory air mixture (partial pressures of O₂ and CO₂), acoustic limits, LCVG thermal loops, and medical user interface ergonomics.",
-      clinicalImpact: isRu
-        ? "Ограничение концентрации CO₂ (< 3.0 мм рт. ст.) для предотвращения головных болей у экипажа и синдрома нейроокулярного изменения (SANS)."
-        : "Restricts ambient CO₂ (< 3.0 mmHg) to mitigate hypercapnic cephalalgia and Spaceflight-Associated Neuro-ocular Syndrome (SANS).",
-      platformApplication: isRu
-        ? "Телеметрия скафандра в 3D Viewer и мониторинг кислородно-азотной смеси в жилых модулях станции."
-        : "Powers the 3D Viewer suit partial pressure gauges and habitat air-quality monitoring rules.",
+      description: "Regulates respiratory air mixture (partial pressures of O₂ and CO₂), acoustic limits, LCVG thermal loops, and medical user interface ergonomics.",
+      clinicalImpact: "Restricts ambient CO₂ (< 3.0 mmHg) to mitigate hypercapnic cephalalgia and Spaceflight-Associated Neuro-ocular Syndrome (SANS).",
+      platformApplication: "Powers the 3D Viewer suit partial pressure gauges and habitat air-quality monitoring rules.",
       url: "https://www.nasa.gov/hhp/standards",
     },
     {
       id: "hazard-radiation",
       category: "hazard",
-      title: isRu ? "Фактор риска: Космическая радиация (GCR / SPE)" : "Hazard Factor: Space Radiation (GCR & SPE)",
-      subtitle: isRu ? "Галактические космические лучи и солнечные протонные события" : "Galactic Cosmic Rays and Solar Particle Event Protocols",
+      title: "Hazard Factor: Space Radiation (GCR & SPE)",
+      subtitle: "Galactic Cosmic Rays and Solar Particle Event Protocols",
       organization: "NASA Space Radiation Program Element (SRPE)",
       image: "/cosmo-assets/208b3c2d-afa7-4c68-923d-eab64f784c93.jpg",
       badge: "Critical Hazard",
-      description: isRu
-        ? "За пределами низкой околоземной орбиты экипаж лишается защиты геомагнитного щита. Ионизирующее HZE-излучение вызывает повреждения ДНК, катаракту и острый лучевой синдром при вспышках на Солнце."
-        : "Beyond low Earth orbit, crews lose geomagnetic shielding. High-energy heavy ion (HZE) radiation causes double-strand DNA breaks and acute radiation risks during solar events.",
-      clinicalImpact: isRu
-        ? "Предельная доза для миссий: не более 600 мЗв за карьеру. При фиксации SPE дозиметром экипаж обязан укрыться в радиационном убежище."
-        : "Career permissible exposure limit capped at 600 mSv. Solar flare detections mandate immediate storm-shelter ingress.",
-      platformApplication: isRu
-        ? "Автоматический алерт SPE Warning с триггером протокола немедленной изоляции жилого отсека."
-        : "Automated SPE Warning alert and habitat storm-shelter protocol checklist dispatch.",
+      description: "Beyond low Earth orbit, crews lose geomagnetic shielding. High-energy heavy ion (HZE) radiation causes double-strand DNA breaks and acute radiation risks during solar events.",
+      clinicalImpact: "Career permissible exposure limit capped at 600 mSv. Solar flare detections mandate immediate storm-shelter ingress.",
+      platformApplication: "Automated SPE Warning alert and habitat storm-shelter protocol checklist dispatch.",
       url: "https://www.nasa.gov/hrp",
     },
     {
       id: "hazard-isolation",
       category: "hazard",
-      title: isRu ? "Фактор риска: Изоляция и сон в микрогравитации" : "Hazard Factor: Isolation, Confinement & Circadian Rhythm",
-      subtitle: isRu ? "Психологическая устойчивость и 16 восходов Солнца в сутки" : "Psychological Resilience and 16 Sunrises per Day",
+      title: "Hazard Factor: Isolation, Confinement & Circadian Rhythm",
+      subtitle: "Psychological Resilience and 16 Sunrises per Day",
       organization: "NASA Behavioral Health & Performance (BHP)",
       image: "/cosmo-assets/11a03e3e-a153-4315-9904-1f351cd36f3c.jpg",
       badge: "Behavioral Health",
-      description: isRu
-        ? "Постоянный шум вентиляторов СЖО и 90-минутные витки вокруг Земли подавляют выработку мелатонина. Хронический дефицит фазы глубокого сна (SWS) снижает скорость реакции и когнитивный фокус."
-        : "Constant ECLSS acoustics and 90-minute orbital cycles disrupt endogenous melatonin synthesis, inducing slow-wave sleep deprivation and cognitive fatigue.",
-      clinicalImpact: isRu
-        ? "Минимум 8.0 часов запланированного сна; мониторинг десинхроноза и уровня субъективного стресса."
-        : "Minimum 8.0 hours planned rest; surveillance for circadian desynchrony and subjective isolation distress.",
-      platformApplication: isRu
-        ? "Раздел Mental Health, ежедневный чек-ин по 5 шкалам, отслеживание фаз сна и ИИ-анализ выгорания."
-        : "Powers Mental Health view, 5-factor daily psychometric check-ins, sleep architecture tracking, and AI burnout mitigation.",
+      description: "Constant ECLSS acoustics and 90-minute orbital cycles disrupt endogenous melatonin synthesis, inducing slow-wave sleep deprivation and cognitive fatigue.",
+      clinicalImpact: "Minimum 8.0 hours planned rest; surveillance for circadian desynchrony and subjective isolation distress.",
+      platformApplication: "Powers Mental Health view, 5-factor daily psychometric check-ins, sleep architecture tracking, and AI burnout mitigation.",
       url: "https://www.nasa.gov/hrp",
     },
     {
       id: "hrp-research",
       category: "database",
-      title: isRu ? "NASA Human Research Program (HRP)" : "NASA Human Research Program (HRP)",
-      subtitle: isRu ? "Комплексная программа медико-биологических исследований в космосе" : "Human Health and Performance Exploration Roadmap",
+      title: "NASA Human Research Program (HRP)",
+      subtitle: "Human Health and Performance Exploration Roadmap",
       organization: "NASA Human Exploration Operations",
       image: "/cosmo-assets/85e36523-c37d-43ad-8702-7c8e5495aeff.jpg",
       badge: "Clinical Evidence",
-      description: isRu
-        ? "Централизованная исследовательская база NASA, объединяющая данные близнецового исследования (Twin Study), полеты на МКС и имитационные изоляционные миссии HERA и SIRIUS."
-        : "Flagship NASA initiative integrating findings from the NASA Twins Study, ISS expeditions, and ground isolation analogs (HERA / SIRIUS).",
-      clinicalImpact: isRu
-        ? "Доказана обратимость теломерных изменений и важность ежедневных 2.5 часов тренировок на тренажере ARED."
-        : "Validated telomere length plasticity post-flight and proven 2.5 hr/day resistive exercise countermeasure efficacy (ARED).",
-      platformApplication: isRu
-        ? "Нормирование физической нагрузки (8 000+ шагов / калорийность) в Dashboard и Analytics."
-        : "Informs daily energy expenditure targets (8,000+ step equivalents) and target ranges across Dashboard and Analytics.",
+      description: "Flagship NASA initiative integrating findings from the NASA Twins Study, ISS expeditions, and ground isolation analogs (HERA / SIRIUS).",
+      clinicalImpact: "Validated telomere length plasticity post-flight and proven 2.5 hr/day resistive exercise countermeasure efficacy (ARED).",
+      platformApplication: "Informs daily energy expenditure targets (8,000+ step equivalents) and target ranges across Dashboard and Analytics.",
       url: "https://www.nasa.gov/hrp/",
     },
     {
       id: "osdr-genelab",
       category: "database",
-      title: isRu ? "NASA Open Science Data Repository & GeneLab" : "NASA Open Science Data Repository & GeneLab",
-      subtitle: isRu ? "Открытый репозиторий омиксных данных и биообразцов" : "Multi-Omics Space Biology Open Repository",
+      title: "NASA Open Science Data Repository & GeneLab",
+      subtitle: "Multi-Omics Space Biology Open Repository",
       organization: "NASA Ames Research Center",
       image: "/cosmo-assets/fbbcacc7-e14e-4b50-adea-e8433a3fa66e.jpg",
       badge: "Open Data",
-      description: isRu
-        ? "Крупнейший в мире открытый каталог транскриптомных, протеомных и физиологических данных организмов, подвергшихся космическому полету и гипергравитации."
-        : "World's largest open catalog of transcriptomic, proteomic, and physiological telemetry from spaceflight payloads.",
-      clinicalImpact: isRu
-        ? "Сравнение биомаркеров крови и микроРНК для раннего выявления клеточного стресса и митохондриальной дисфункции."
-        : "Reference baseline for circulating cell-free DNA, microRNA profiles, and mitochondrial dysfunction in microgravity.",
-      platformApplication: isRu
-        ? "Справочная библиотека для модуля клинического ИИ-ассистента (/api/ai/analyze)."
-        : "Serves as reference knowledge base for the Clinical AI Assistant engine.",
+      description: "World's largest open catalog of transcriptomic, proteomic, and physiological telemetry from spaceflight payloads.",
+      clinicalImpact: "Reference baseline for circulating cell-free DNA, microRNA profiles, and mitochondrial dysfunction in microgravity.",
+      platformApplication: "Serves as reference knowledge base for the Clinical AI Assistant engine.",
       url: "https://osdr.nasa.gov/",
     },
   ];
@@ -174,15 +138,13 @@ export function EvidenceView() {
       <header className="tb">
         <div className="up">
           <p className="eyb">
-            {isRu ? "Научно-методическая база и нормативы NASA / ESA" : "Scientific Evidence & Flight Standards"}
+            {"Scientific Evidence & Flight Standards"}
           </p>
           <h1 className="lt disp">
-            {isRu ? "Научные стандарты космической медицины" : "Scientific Evidence & Standards"}
+            {"Scientific Evidence & Standards"}
           </h1>
           <p className="sub">
-            {isRu
-              ? "Клинические протоколы, нормативы NASA STD-3001, классификация факторов риска RIDGE и медицинские базы данных"
-              : "Clinical protocols, NASA STD-3001 baselines, RIDGE hazard frameworks, and multi-omics space repositories"}
+            {"Clinical protocols, NASA STD-3001 baselines, RIDGE hazard frameworks, and multi-omics space repositories"}
           </p>
         </div>
       </header>
@@ -220,14 +182,10 @@ export function EvidenceView() {
             <Shield size={14} /> NASA Human Research Roadmap (HRR)
           </div>
           <h2 style={{ fontSize: "26px", fontWeight: 700, margin: "0 0 12px", letterSpacing: "-0.02em" }}>
-            {isRu
-              ? "Человек — самая хрупкая система космической миссии"
-              : "Human Physiology: The Most Vulnerable Flight System"}
+            {"Human Physiology: The Most Vulnerable Flight System"}
           </h2>
           <p style={{ fontSize: "14px", color: "var(--t2)", lineHeight: 1.65, margin: 0 }}>
-            {isRu
-              ? "В условиях невесомости и радиационного фона организм астронавта испытывает непрерывные адаптационные сдвиги: от перераспределения жидкости к верхней половине туловища до потери плотности костей со скоростью 1–1.5% в месяц. CosmoHealthX применяет строгие медицинские стандарты NASA STD-3001 для непрерывного анализа биосигналов и раннего предупреждения патологий."
-              : "In microgravity and deep-space radiation, human physiology undergoes profound adaptations: cephalad fluid redistribution, 1–1.5% monthly bone demineralization, and neuromuscular deconditioning. CosmoHealthX embeds strict NASA STD-3001 standards to interpret continuous biometrics and deploy preventive countermeasures."}
+            {"In microgravity and deep-space radiation, human physiology undergoes profound adaptations: cephalad fluid redistribution, 1–1.5% monthly bone demineralization, and neuromuscular deconditioning. CosmoHealthX embeds strict NASA STD-3001 standards to interpret continuous biometrics and deploy preventive countermeasures."}
           </p>
         </div>
 
@@ -248,12 +206,10 @@ export function EvidenceView() {
       {/* RIDGE 5 Spaceflight Hazards Framework Strip */}
       <div style={{ marginTop: "24px" }}>
         <h2 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "4px" }}>
-          {isRu ? "5 ключевых факторов риска NASA (RIDGE Framework)" : "NASA's 5 Human Spaceflight Hazards (RIDGE)"}
+          {"NASA's 5 Human Spaceflight Hazards (RIDGE)"}
         </h2>
         <p style={{ fontSize: "13px", color: "var(--t2)", marginBottom: "16px" }}>
-          {isRu
-            ? "Международная классификация рисков для здоровья экипажа при полетах за пределы околоземной орбиты"
-            : "The standard hazards framework defined by NASA Human Research Program for deep-space exploration"}
+          {"The standard hazards framework defined by NASA Human Research Program for deep-space exploration"}
         </p>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px" }}>
@@ -264,9 +220,7 @@ export function EvidenceView() {
               <strong style={{ fontSize: "14px" }}>R · Radiation</strong>
             </div>
             <p style={{ fontSize: "12px", color: "var(--t2)", lineHeight: 1.5, margin: 0 }}>
-              {isRu
-                ? "Галактические лучи (GCR) и солнечные протоны (SPE). Повреждение ДНК, лучевая болезнь."
-                : "Deep space GCR and solar flares. DNA ionization, cataract, and acute radiation sickness."}
+              {"Deep space GCR and solar flares. DNA ionization, cataract, and acute radiation sickness."}
             </p>
           </div>
 
@@ -277,9 +231,7 @@ export function EvidenceView() {
               <strong style={{ fontSize: "14px" }}>I · Isolation</strong>
             </div>
             <p style={{ fontSize: "12px", color: "var(--t2)", lineHeight: 1.5, margin: 0 }}>
-              {isRu
-                ? "Замкнутое пространство, сенсорная депривация, дефицит глубокого сна (SWS), стресс экипажа."
-                : "Confinement, circadian phase shift, slow-wave sleep deficit, cognitive interpersonal tension."}
+              {"Confinement, circadian phase shift, slow-wave sleep deficit, cognitive interpersonal tension."}
             </p>
           </div>
 
@@ -290,9 +242,7 @@ export function EvidenceView() {
               <strong style={{ fontSize: "14px" }}>D · Distance</strong>
             </div>
             <p style={{ fontSize: "12px", color: "var(--t2)", lineHeight: 1.5, margin: 0 }}>
-              {isRu
-                ? "Задержка радиосвязи до 22 минут. Невозможность срочной эвакуации на Землю; автономная медицина."
-                : "Comms latency up to 22 min. Zero emergency medevac options; requires onboard medical autonomy."}
+              {"Comms latency up to 22 min. Zero emergency medevac options; requires onboard medical autonomy."}
             </p>
           </div>
 
@@ -303,9 +253,7 @@ export function EvidenceView() {
               <strong style={{ fontSize: "14px" }}>G · Gravity Fields</strong>
             </div>
             <p style={{ fontSize: "12px", color: "var(--t2)", lineHeight: 1.5, margin: 0 }}>
-              {isRu
-                ? "Атрофия мышц и костей (1.5%/мес), космическая болезнь движения (SMS), ортостатическая нестабильность."
-                : "Microgravity deconditioning, 1.5%/mo bone loss, space motion sickness, orthostatic intolerance."}
+              {"Microgravity deconditioning, 1.5%/mo bone loss, space motion sickness, orthostatic intolerance."}
             </p>
           </div>
 
@@ -316,9 +264,7 @@ export function EvidenceView() {
               <strong style={{ fontSize: "14px" }}>E · Environment</strong>
             </div>
             <p style={{ fontSize: "12px", color: "var(--t2)", lineHeight: 1.5, margin: 0 }}>
-              {isRu
-                ? "Параметры СЖО: CO₂ < 3 mmHg, герметичность, температура скафандра LCVG, токсичные газы."
-                : "ECLSS life support: hypercapnia risk, acoustic fatigue, suit thermal loop regulation."}
+              {"ECLSS life support: hypercapnia risk, acoustic fatigue, suit thermal loop regulation."}
             </p>
           </div>
         </div>
@@ -352,7 +298,7 @@ export function EvidenceView() {
               cursor: "pointer",
             }}
           >
-            {isRu ? "Все стандарты (6)" : "All Standards (6)"}
+            {"All Standards (6)"}
           </button>
           <button
             type="button"
@@ -384,7 +330,7 @@ export function EvidenceView() {
               cursor: "pointer",
             }}
           >
-            {isRu ? "Факторы риска" : "Hazards (RIDGE)"}
+            {"Hazards (RIDGE)"}
           </button>
           <button
             type="button"
@@ -400,7 +346,7 @@ export function EvidenceView() {
               cursor: "pointer",
             }}
           >
-            {isRu ? "Базы данных и HRP" : "Databases & HRP"}
+            {"Databases & HRP"}
           </button>
         </div>
 
@@ -409,7 +355,7 @@ export function EvidenceView() {
           <Search size={15} style={{ position: "absolute", left: "12px", top: "11px", color: "var(--t3)" }} />
           <input
             type="text"
-            placeholder={isRu ? "Поиск по стандартам..." : "Search standards..."}
+            placeholder={"Search standards..."}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="inp"
@@ -502,7 +448,7 @@ export function EvidenceView() {
                       gap: "4px",
                     }}
                   >
-                    <ExternalLink size={12} /> {isRu ? "Источник" : "Source"}
+                    <ExternalLink size={12} /> {"Source"}
                   </a>
                 )}
               </div>
@@ -539,14 +485,14 @@ export function EvidenceView() {
                   marginTop: "6px",
                 }}
               >
-                <strong>{isRu ? "Медицинский норматив: " : "Clinical Guideline: "}</strong>
+                <strong>{"Clinical Guideline: "}</strong>
                 {item.clinicalImpact}
               </div>
 
               {/* Platform Integration Footer */}
               <div style={{ marginTop: "auto", borderTop: "1px solid var(--sep)", paddingTop: "12px" }}>
                 <span style={{ fontSize: "11px", color: "var(--t3)", fontWeight: 700, textTransform: "uppercase" }}>
-                  {isRu ? "Применение в CosmoHealthX:" : "CosmoHealthX Implementation:"}
+                  {"CosmoHealthX Implementation:"}
                 </span>
                 <span style={{ display: "block", fontSize: "13px", color: "var(--t1)", marginTop: "3px", fontWeight: 500 }}>
                   {item.platformApplication}
@@ -569,75 +515,73 @@ export function EvidenceView() {
         }}
       >
         <h2 style={{ fontSize: "18px", fontWeight: 700, margin: "0 0 6px" }}>
-          {isRu ? "Сводная таблица клинических нормативов NASA STD-3001" : "NASA STD-3001 Telemetry Reference Thresholds"}
+          {"NASA STD-3001 Telemetry Reference Thresholds"}
         </h2>
         <p style={{ fontSize: "13px", color: "var(--t2)", margin: "0 0 20px" }}>
-          {isRu
-            ? "Нормативные диапазоны биометрических показателей, используемые в алгоритмах триажа CosmoHealthX"
-            : "Biometric operational ranges and tripwires implemented in CosmoHealthX clinical triage engine"}
+          {"Biometric operational ranges and tripwires implemented in CosmoHealthX clinical triage engine"}
         </p>
 
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", textAlign: "left" }}>
             <thead>
               <tr style={{ borderBottom: "1px solid var(--sep)", color: "var(--t3)" }}>
-                <th style={{ padding: "10px 14px", fontWeight: 700 }}>{isRu ? "Биомаркер" : "Biomarker"}</th>
-                <th style={{ padding: "10px 14px", fontWeight: 700 }}>{isRu ? "Покой (Норма)" : "Nominal Rest"}</th>
-                <th style={{ padding: "10px 14px", fontWeight: 700 }}>{isRu ? "EVA / Нагрузка" : "EVA / Exercise"}</th>
-                <th style={{ padding: "10px 14px", fontWeight: 700 }}>{isRu ? "Внимание (Warning)" : "Warning Limit"}</th>
-                <th style={{ padding: "10px 14px", fontWeight: 700 }}>{isRu ? "Критично (Alarm)" : "Critical Limit"}</th>
-                <th style={{ padding: "10px 14px", fontWeight: 700 }}>{isRu ? "Стандарт" : "Spec"}</th>
+                <th style={{ padding: "10px 14px", fontWeight: 700 }}>{"Biomarker"}</th>
+                <th style={{ padding: "10px 14px", fontWeight: 700 }}>{"Nominal Rest"}</th>
+                <th style={{ padding: "10px 14px", fontWeight: 700 }}>{"EVA / Exercise"}</th>
+                <th style={{ padding: "10px 14px", fontWeight: 700 }}>{"Warning Limit"}</th>
+                <th style={{ padding: "10px 14px", fontWeight: 700 }}>{"Critical Limit"}</th>
+                <th style={{ padding: "10px 14px", fontWeight: 700 }}>{"Spec"}</th>
               </tr>
             </thead>
             <tbody>
               <tr style={{ borderBottom: "1px solid var(--sep)" }}>
                 <td style={{ padding: "12px 14px", fontWeight: 600, display: "flex", alignItems: "center", gap: "8px" }}>
-                  <Heart size={15} style={{ color: "var(--hr)" }} /> {isRu ? "Пульс (ЧСС)" : "Heart Rate"}
+                  <Heart size={15} style={{ color: "var(--hr)" }} /> {"Heart Rate"}
                 </td>
                 <td style={{ padding: "12px 14px" }}>60 – 85 bpm</td>
                 <td style={{ padding: "12px 14px" }}>100 – 150 bpm</td>
-                <td style={{ padding: "12px 14px", color: "var(--wa)" }}>&gt; 100 bpm в покое</td>
+                <td style={{ padding: "12px 14px", color: "var(--wa)" }}>&gt; 100 bpm resting</td>
                 <td style={{ padding: "12px 14px", color: "var(--cr)", fontWeight: 700 }}>&gt; 165 bpm / &lt; 45 bpm</td>
                 <td style={{ padding: "12px 14px", color: "var(--t3)" }}>NASA-STD-3001 Vol 1 §4.2</td>
               </tr>
               <tr style={{ borderBottom: "1px solid var(--sep)" }}>
                 <td style={{ padding: "12px 14px", fontWeight: 600, display: "flex", alignItems: "center", gap: "8px" }}>
-                  <Droplets size={15} style={{ color: "var(--o2)" }} /> {isRu ? "Кислород (SpO₂)" : "Blood Oxygen"}
+                  <Droplets size={15} style={{ color: "var(--o2)" }} /> {"Blood Oxygen"}
                 </td>
                 <td style={{ padding: "12px 14px" }}>96 – 100%</td>
                 <td style={{ padding: "12px 14px" }}>95 – 100%</td>
                 <td style={{ padding: "12px 14px", color: "var(--wa)" }}>92 – 94%</td>
-                <td style={{ padding: "12px 14px", color: "var(--cr)", fontWeight: 700 }}>&lt; 92% (Десатурация)</td>
+                <td style={{ padding: "12px 14px", color: "var(--cr)", fontWeight: 700 }}>&lt; 92% (Desaturation Alert)</td>
                 <td style={{ padding: "12px 14px", color: "var(--t3)" }}>NASA-STD-3001 Vol 2 §6.1</td>
               </tr>
               <tr style={{ borderBottom: "1px solid var(--sep)" }}>
                 <td style={{ padding: "12px 14px", fontWeight: 600, display: "flex", alignItems: "center", gap: "8px" }}>
-                  <Moon size={15} style={{ color: "var(--sl)" }} /> {isRu ? "Сон (SWS фаза)" : "Sleep Duration"}
+                  <Moon size={15} style={{ color: "var(--sl)" }} /> {"Sleep Duration"}
                 </td>
-                <td style={{ padding: "12px 14px" }}>7.5 – 8.5 ч/сут</td>
-                <td style={{ padding: "12px 14px" }}>≥ 7.0 ч/сут</td>
-                <td style={{ padding: "12px 14px", color: "var(--wa)" }}>&lt; 6.0 ч/сут</td>
-                <td style={{ padding: "12px 14px", color: "var(--cr)", fontWeight: 700 }}>&lt; 5.0 ч (Дефицит &gt; 3 сут)</td>
+                <td style={{ padding: "12px 14px" }}>7.5 – 8.5 h/day</td>
+                <td style={{ padding: "12px 14px" }}>≥ 7.0 h/day</td>
+                <td style={{ padding: "12px 14px", color: "var(--wa)" }}>&lt; 6.0 h/day</td>
+                <td style={{ padding: "12px 14px", color: "var(--cr)", fontWeight: 700 }}>&lt; 5.0 h (Sleep Debt &gt; 3 days)</td>
                 <td style={{ padding: "12px 14px", color: "var(--t3)" }}>NASA BHP Fatigue Countermeasures</td>
               </tr>
               <tr style={{ borderBottom: "1px solid var(--sep)" }}>
                 <td style={{ padding: "12px 14px", fontWeight: 600, display: "flex", alignItems: "center", gap: "8px" }}>
-                  <Thermometer size={15} style={{ color: "var(--wa)" }} /> {isRu ? "Температура тела" : "Core Body Temp"}
+                  <Thermometer size={15} style={{ color: "var(--wa)" }} /> {"Core Body Temp"}
                 </td>
                 <td style={{ padding: "12px 14px" }}>36.5 – 37.2 °C</td>
                 <td style={{ padding: "12px 14px" }}>37.0 – 38.0 °C</td>
-                <td style={{ padding: "12px 14px", color: "var(--wa)" }}>&gt; 37.8 °C в покое</td>
-                <td style={{ padding: "12px 14px", color: "var(--cr)", fontWeight: 700 }}>&gt; 38.8 °C (Гипертермия)</td>
+                <td style={{ padding: "12px 14px", color: "var(--wa)" }}>&gt; 37.8 °C resting</td>
+                <td style={{ padding: "12px 14px", color: "var(--cr)", fontWeight: 700 }}>&gt; 38.8 °C (Hyperthermia / Space Fever)</td>
                 <td style={{ padding: "12px 14px", color: "var(--t3)" }}>NASA-STD-3001 Vol 1 §4.3</td>
               </tr>
               <tr>
                 <td style={{ padding: "12px 14px", fontWeight: 600, display: "flex", alignItems: "center", gap: "8px" }}>
-                  <Radiation size={15} style={{ color: "var(--cr)" }} /> {isRu ? "Мощность дозы SPE" : "Radiation Dose Rate"}
+                  <Radiation size={15} style={{ color: "var(--cr)" }} /> {"Radiation Dose Rate"}
                 </td>
-                <td style={{ padding: "12px 14px" }}>0.3 – 0.7 мЗв/сут</td>
-                <td style={{ padding: "12px 14px" }}>&lt; 1.0 мЗв/сут</td>
-                <td style={{ padding: "12px 14px", color: "var(--wa)" }}>&gt; 1.5 мЗв/сут</td>
-                <td style={{ padding: "12px 14px", color: "var(--cr)", fontWeight: 700 }}>&gt; 10 мЗв/ч (SPE шторм)</td>
+                <td style={{ padding: "12px 14px" }}>0.3 – 0.7 mSv/day</td>
+                <td style={{ padding: "12px 14px" }}>&lt; 1.0 mSv/day</td>
+                <td style={{ padding: "12px 14px", color: "var(--wa)" }}>&gt; 1.5 mSv/day</td>
+                <td style={{ padding: "12px 14px", color: "var(--cr)", fontWeight: 700 }}>&gt; 10 mSv/h (SPE Solar Storm)</td>
                 <td style={{ padding: "12px 14px", color: "var(--t3)" }}>NASA SRPE / ALARA Principle</td>
               </tr>
             </tbody>

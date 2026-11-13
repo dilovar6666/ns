@@ -36,10 +36,10 @@ const PERIOD_DAYS: Record<string, number> = {
 type MetricKey = "heart_rate" | "spo2" | "sleep_duration" | "radiation_exposure";
 
 const METRIC_TABS: { key: MetricKey; label: string; unit: string; color: string }[] = [
-  { key: "heart_rate", label: "Пульс (ЧСС)", unit: "bpm", color: "#FF375F" },
-  { key: "spo2", label: "Кислород (SpO₂)", unit: "%", color: "#32ADE6" },
-  { key: "sleep_duration", label: "Сон (Длительность)", unit: "ч", color: "#7D7AFF" },
-  { key: "radiation_exposure", label: "Радиационная доза", unit: "мЗв", color: "#FF9F0A" },
+  { key: "heart_rate", label: "Heart Rate", unit: "bpm", color: "#FF375F" },
+  { key: "spo2", label: "Oxygen Saturation (SpO₂)", unit: "%", color: "#32ADE6" },
+  { key: "sleep_duration", label: "Sleep Duration", unit: "h", color: "#7D7AFF" },
+  { key: "radiation_exposure", label: "Radiation Exposure", unit: "mSv", color: "#FF9F0A" },
 ];
 
 export function AnalyticsView({
@@ -204,10 +204,10 @@ export function AnalyticsView({
       {/* Header */}
       <header className="tb">
         <div className="up">
-          <p className="eyb">Медико-биологический анализ миссии</p>
+          <p className="eyb">Longitudinal Mission Biometric Analytics</p>
           <h1 className="lt disp">Analytics & Trends</h1>
           <p className="sub">
-            Сравнительный анализ телеметрии здоровья за выбранный временной интервал (миссия CHX-01)
+            Comparative longitudinal analysis of crew biometric telemetry over mission timeframes (Mission CHX-01)
           </p>
         </div>
         <div className="tbr up" style={{ animationDelay: "60ms" }}>
@@ -216,7 +216,7 @@ export function AnalyticsView({
               className="inp"
               value={astronaut?.id}
               onChange={(e) => onSelectAstronaut(Number(e.target.value))}
-              aria-label="Выбрать астронавта"
+              aria-label="Select crew member"
             >
               {crew.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -225,7 +225,7 @@ export function AnalyticsView({
               ))}
             </select>
           )}
-          <Link className="ib" to="/alerts" aria-label="Уведомления">
+          <Link className="ib" to="/alerts" aria-label="Alerts">
             <Bell className="ico" />
             {unreadCount > 0 && <span className="dot"></span>}
           </Link>
@@ -234,7 +234,7 @@ export function AnalyticsView({
             to="/profile"
             style={{ width: "40px", height: "40px" }}
           >
-            {astronaut?.name?.slice(0, 2).toUpperCase() || "АН"}
+            {astronaut?.name?.slice(0, 2).toUpperCase() || "AN"}
           </Link>
         </div>
       </header>
@@ -251,12 +251,12 @@ export function AnalyticsView({
               style={{ position: "relative" }}
             >
               {p === "24h"
-                ? "24 часа"
+                ? "24 Hours"
                 : p === "7d"
-                ? "7 дней"
+                ? "7 Days"
                 : p === "30d"
-                ? "30 дней"
-                : "Вся миссия (180 дн)"}
+                ? "30 Days"
+                : "Full Mission (180 Days)"}
             </button>
           ))}
         </div>
@@ -264,7 +264,7 @@ export function AnalyticsView({
         <div className="analytics-export-group">
           {loading && (
             <span className="mono" style={{ fontSize: "12px", color: "var(--prt)" }}>
-              Синхронизация телеметрии...
+              Synchronizing Telemetry...
             </span>
           )}
           <button
@@ -281,16 +281,16 @@ export function AnalyticsView({
             disabled={exporting}
             style={{ fontSize: "14px", padding: "8px 16px" }}
           >
-            <FileText className="ico sm" /> Скачать PDF-отчёт
+            <FileText className="ico sm" /> Export PDF Clinical Report
           </button>
         </div>
       </div>
 
       {/* 4 Summary Aggregate Cards */}
-      <section className="ag4" aria-label="Периодические агрегаты" style={{ opacity: loading ? 0.7 : 1, transition: "opacity 0.2s ease" }}>
+      <section className="ag4" aria-label="Periodic Aggregate Summary" style={{ opacity: loading ? 0.7 : 1, transition: "opacity 0.2s ease" }}>
         {/* Heart Rate Mean */}
         <div className="cd up" style={{ padding: "18px 20px" }}>
-          <div className="cap">Средний пульс в покое</div>
+          <div className="cap">Mean Resting Heart Rate</div>
           <div className="big num" style={{ marginTop: "6px" }}>
             <b>{hrMean}</b>
             <em>bpm</em>
@@ -310,16 +310,16 @@ export function AnalyticsView({
             ) : (
               <TrendingUp className="ico sm" />
             )}
-            {hrChange !== null ? `${hrChange > 0 ? "+" : ""}${hrChange} bpm` : "Базовый замер"} vs пред. период
+            {hrChange !== null ? `${hrChange > 0 ? "+" : ""}${hrChange} bpm` : "Baseline Sample"} vs prior period
           </div>
           <div style={{ marginTop: "6px", fontSize: "11px", color: "var(--t3)" }}>
-            Диапазон: {hrMin} — {hrMax} bpm
+            Range: {hrMin} — {hrMax} bpm
           </div>
         </div>
 
         {/* SpO2 Mean */}
         <div className="cd up" style={{ padding: "18px 20px" }}>
-          <div className="cap">Средняя сатурация SpO₂</div>
+          <div className="cap">Mean Oxygen Saturation (SpO₂)</div>
           <div className="big num" style={{ marginTop: "6px" }}>
             <b>{spo2Mean}</b>
             <em>%</em>
@@ -335,19 +335,19 @@ export function AnalyticsView({
             }}
           >
             <CheckCircle className="ico sm" />
-            {spo2Min >= 95 ? "Стабильно в норме (>95%)" : "Фиксировались эпизоды"}
+            {spo2Min >= 95 ? "Consistently Nominal (>95%)" : "Episodes Recorded"}
           </div>
           <div style={{ marginTop: "6px", fontSize: "11px", color: "var(--t3)" }}>
-            Минимум за период: {spo2Min}%
+            Period Minimum: {spo2Min}%
           </div>
         </div>
 
         {/* Sleep Efficiency */}
         <div className="cd up" style={{ padding: "18px 20px" }}>
-          <div className="cap">Сон (среднее / качество)</div>
+          <div className="cap">Sleep Architecture (Mean / Efficiency)</div>
           <div className="big num" style={{ marginTop: "6px" }}>
             <b>{sleepMean}</b>
-            <em>ч/сут</em>
+            <em>h/day</em>
           </div>
           <div
             className="cap num"
@@ -364,19 +364,19 @@ export function AnalyticsView({
             ) : (
               <TrendingDown className="ico sm" />
             )}
-            Индекс качества: {sleepScore}% (SWS {sleepScore > 80 ? "норма" : "сдвиг"})
+            Quality Index: {sleepScore}% (SWS {sleepScore > 80 ? "nominal" : "phase shift"})
           </div>
           <div style={{ marginTop: "6px", fontSize: "11px", color: "var(--t3)" }}>
-            {sleepChange !== null ? `${sleepChange > 0 ? "+" : ""}${sleepChange} ч` : "Базовый уровень"} vs пред. период
+            {sleepChange !== null ? `${sleepChange > 0 ? "+" : ""}${sleepChange} ` : " "} vs prior period
           </div>
         </div>
 
         {/* Radiation / Energy */}
         <div className="cd up" style={{ padding: "18px 20px" }}>
-          <div className="cap">Радиационная доза (ALARA)</div>
+          <div className="cap">Ionizing Radiation Exposure (ALARA)</div>
           <div className="big num" style={{ marginTop: "6px" }}>
             <b>{radMean}</b>
-            <em>мЗв/сут</em>
+            <em>mSv/day</em>
           </div>
           <div
             className="cap num"
@@ -388,10 +388,10 @@ export function AnalyticsView({
               color: "var(--ok)",
             }}
           >
-            <ShieldCheck className="ico sm" /> Суммарно за период: {totalRad} мЗв
+            <ShieldCheck className="ico sm" /> Period Cumulative: {totalRad} mSv
           </div>
           <div style={{ marginTop: "6px", fontSize: "11px", color: "var(--t3)" }}>
-            Расход энергии: ~{energyKcal} ккал/сут
+            Metabolic Load: ~{energyKcal} kcal/day
           </div>
         </div>
       </section>
@@ -400,11 +400,9 @@ export function AnalyticsView({
       <section className="cd up" style={{ marginTop: "24px", padding: "24px 28px" }}>
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "16px", marginBottom: "16px" }}>
           <div>
-            <h2 className="h2" style={{ margin: 0 }}>
-              Хронологический тренд телеметрии ({period === "24h" ? "24 часа" : period === "7d" ? "7 дней" : period === "30d" ? "30 дней" : "180 дней"})
-            </h2>
+            <h2 className="h2" style={{ margin: 0 }}>Longitudinal Telemetry Trend ({period === "24h" ? "24 Hours" : period === "7d" ? "7 Days" : period === "30d" ? "30 Days" : "180 Days"})</h2>
             <p className="cap" style={{ marginTop: "4px" }}>
-              Динамический временной ряд измерений с борта орбитального комплекса CHX-01
+              Dynamic high-density biometric telemetry stream from Expedition CHX-01 habitat
             </p>
           </div>
 
@@ -522,7 +520,7 @@ export function AnalyticsView({
             </svg>
           ) : (
             <div style={{ height: "180px", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--t3)" }}>
-              Загрузка точек телеметрии...
+              Loading telemetry data points...
             </div>
           )}
 
@@ -563,7 +561,7 @@ export function AnalyticsView({
         {/* Left: Metric Comparison Progress Rows */}
         <div className="cd up" style={{ padding: "24px 28px" }}>
           <h2 className="h2" style={{ marginBottom: "16px" }}>
-            Сравнение с предшествующим периодом (Period Comparison)
+            Comparison with Prior Mission Period (Delta Analysis)
           </h2>
 
           {/* Heart rate comparison */}
@@ -574,12 +572,12 @@ export function AnalyticsView({
               <div className="cmp">
                 <div>
                   <span style={{ fontWeight: 600, display: "block" }}>Heart Rate</span>
-                  <span className="cap">{hrMean} bpm средн.</span>
+                  <span className="cap">{hrMean} bpm mean</span>
                 </div>
                 <div className="bb">
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "var(--t3)" }}>
-                    <span>Предыдущий: {prev} bpm</span>
-                    <span>Текущий: {hrMean} bpm</span>
+                    <span>Prior: {prev} bpm</span>
+                    <span>Current: {hrMean} bpm</span>
                   </div>
                   <i style={{ width: `${Math.min(100, Math.max(15, (hrMean / 110) * 100))}%`, background: "var(--m-hr)" }} />
                 </div>
@@ -598,12 +596,12 @@ export function AnalyticsView({
               <div className="cmp">
                 <div>
                   <span style={{ fontWeight: 600, display: "block" }}>SpO₂ Saturation</span>
-                  <span className="cap">{spo2Mean}% средн.</span>
+                  <span className="cap">{spo2Mean}% mean</span>
                 </div>
                 <div className="bb">
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "var(--t3)" }}>
-                    <span>Предыдущий: {prev}%</span>
-                    <span>Текущий: {spo2Mean}%</span>
+                    <span>Prior: {prev}%</span>
+                    <span>Current: {spo2Mean}%</span>
                   </div>
                   <i style={{ width: `${Math.min(100, Math.max(15, (spo2Mean / 100) * 100))}%`, background: "var(--m-spo2)" }} />
                 </div>
@@ -622,12 +620,12 @@ export function AnalyticsView({
               <div className="cmp">
                 <div>
                   <span style={{ fontWeight: 600, display: "block" }}>Sleep Duration</span>
-                  <span className="cap">{sleepMean} ч средн.</span>
+                  <span className="cap">{sleepMean}  mean</span>
                 </div>
                 <div className="bb">
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "var(--t3)" }}>
-                    <span>Предыдущий: {prev} ч</span>
-                    <span>Текущий: {sleepMean} ч</span>
+                    <span>Prior: {prev} h</span>
+                    <span>Current: {sleepMean} h</span>
                   </div>
                   <i style={{ width: `${Math.min(100, Math.max(15, (sleepMean / 9) * 100))}%`, background: "var(--m-sleep)" }} />
                 </div>
@@ -646,12 +644,12 @@ export function AnalyticsView({
               <div className="cmp">
                 <div>
                   <span style={{ fontWeight: 600, display: "block" }}>Radiation Dose</span>
-                  <span className="cap">{radMean} мЗв/сут</span>
+                  <span className="cap">{radMean} mSv/day</span>
                 </div>
                 <div className="bb">
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "var(--t3)" }}>
-                    <span>Предыдущий: {prev} мЗв</span>
-                    <span>Текущий: {radMean} мЗв</span>
+                    <span>Prior: {prev} mSv</span>
+                    <span>Current: {radMean} mSv</span>
                   </div>
                   <i style={{ width: `${Math.min(100, Math.max(15, (radMean / 1.0) * 100))}%`, background: "var(--cr)" }} />
                 </div>
@@ -680,10 +678,10 @@ export function AnalyticsView({
                 </span>
                 <div>
                   <span style={{ fontWeight: 600, display: "block", fontSize: "15px" }}>
-                    Суточный циркадный ритм ЧСС в норме
+                    24-Hour Circadian Heart Rate Dynamics Nominal
                   </span>
                   <p style={{ color: "var(--t2)", marginTop: "4px" }}>
-                    За последние 24 часа зафиксирован ночной покой 58 bpm и пиковый отклик 104 bpm во время дневной силовой тренировки ARED. Наджелудочковых нарушений ритма не выявлено.
+                    Resting nocturnal baseline of 58 bpm and peak diurnal exertion of 104 bpm recorded during treadmill session.  ARED.     .
                   </p>
                 </div>
               </div>
@@ -694,10 +692,10 @@ export function AnalyticsView({
                 </span>
                 <div>
                   <span style={{ fontWeight: 600, display: "block", fontSize: "15px" }}>
-                    Фазы сна прошедшей ночи (7.4 ч)
+                    Nocturnal Sleep Phases & Architecture (7.4 h)
                   </span>
                   <p style={{ color: "var(--t2)", marginTop: "4px" }}>
-                    Завершено 4 полных циркадных цикла. Фаза медленноволнового сна (SWS) составила 22%, что свидетельствует о полноценном когнитивном восстановлении.
+                    Completed 4 full circadian cycles. Slow-wave sleep (SWS) at 22%, confirming sufficient neurocognitive restoration.    .
                   </p>
                 </div>
               </div>
@@ -708,10 +706,10 @@ export function AnalyticsView({
                 </span>
                 <div>
                   <span style={{ fontWeight: 600, display: "block", fontSize: "15px" }}>
-                    Суточный радиационный мониторинг
+                    24-Hour Radiation Dosimetry Monitoring
                   </span>
                   <p style={{ color: "var(--t2)", marginTop: "4px" }}>
-                    Дозиметр зафиксировал 0.61 мЗв. Геомагнитная обстановка на орбите спокойная, вспышек класса M/X не наблюдается.
+                    Active dosimeter registered 0.61 mSv. Orbital space weather nominal, no solar flares detected. .
                   </p>
                 </div>
               </div>
@@ -726,10 +724,10 @@ export function AnalyticsView({
                 </span>
                 <div>
                   <span style={{ fontWeight: 600, display: "block", fontSize: "15px" }}>
-                    Недельная кардиоваскулярная адаптация
+                    7-Day Cardiovascular Microgravity Adaptation
                   </span>
                   <p style={{ color: "var(--t2)", marginTop: "4px" }}>
-                    Смещение центрального объема крови стабилизировалось на 42-й день полета. Базальный сердечный выброс и вариабельность пульса (HRV 55 ms) соответствуют физиологической норме невесомости.
+                    Cephalad fluid shift stabilized at Day 42. Resting cardiac output and stroke volume within target baseline.    (HRV 55 ms)    .
                   </p>
                 </div>
               </div>
@@ -740,10 +738,10 @@ export function AnalyticsView({
                 </span>
                 <div>
                   <span style={{ fontWeight: 600, display: "block", fontSize: "15px" }}>
-                    Циркадный сдвиг фазы сна (-24 минуты)
+                    Circadian Phase Shift Detected (-24 minutes)
                   </span>
                   <p style={{ color: "var(--t2)", marginTop: "4px" }}>
-                    Фиксируется сокращение фазы глубокого медленноволнового сна (SWS) после ночных сеансов связи с ЦУП. Рекомендуется корректировка освещения каюты спектром 480 нм.
+                    Minor SWS deep sleep phase delay noted following late-night Earth Ku-Band communication passes.      480 .
                   </p>
                 </div>
               </div>
@@ -754,10 +752,10 @@ export function AnalyticsView({
                 </span>
                 <div>
                   <span style={{ fontWeight: 600, display: "block", fontSize: "15px" }}>
-                    Соблюдение контрмер остеопении: 100%
+                    Countermeasure Compliance (Bone & Muscle): 100%
                   </span>
                   <p style={{ color: "var(--t2)", marginTop: "4px" }}>
-                    Ежедневные протоколы тренировок на тренажере ARED и беговой дорожке T2 выполнены в полном объеме. Минеральная плотность костей таза и бедер стабильна.
+                    Resistance workouts on ARED and T2 treadmill fully executed. Postural bone mineral density preserved.      .
                   </p>
                 </div>
               </div>
@@ -772,10 +770,10 @@ export function AnalyticsView({
                 </span>
                 <div>
                   <span style={{ fontWeight: 600, display: "block", fontSize: "15px" }}>
-                    Месячный тренд адаптации к невесомости
+                    30-Day Zero-G Adaptation Trajectory
                   </span>
                   <p style={{ color: "var(--t2)", marginTop: "4px" }}>
-                    Острая фаза космической адаптации (SAS) завершена. Базовый пульс снизился на 0.7 bpm по сравнению с предстартовыми значениями, сосудистый тонус в норме.
+                    Acute space adaptation syndrome (SAS) fully resolved. Resting HR stabilized at baseline.  ,   nominal.
                   </p>
                 </div>
               </div>
@@ -786,10 +784,10 @@ export function AnalyticsView({
                 </span>
                 <div>
                   <span style={{ fontWeight: 600, display: "block", fontSize: "15px" }}>
-                    Месячная доза радиации: ~18.6 мЗв
+                    30-Day Cumulative Radiation Dose: ~18.6 mSv
                   </span>
                   <p style={{ color: "var(--t2)", marginTop: "4px" }}>
-                    Включает прохождение солнечной вспышки SPE (класс M-4.2) на 10-й день. Экипаж своевременно укрылся в радиационном убежище, лимит ALARA не превышен.
+                    Includes SPE class M-4.2 storm shelter exposure on Day 10. Crew dose strictly within ALARA career limits.    ,  ALARA  .
                   </p>
                 </div>
               </div>
@@ -800,10 +798,10 @@ export function AnalyticsView({
                 </span>
                 <div>
                   <span style={{ fontWeight: 600, display: "block", fontSize: "15px" }}>
-                    Нейрокогнитивная стабильность
+                    Neurocognitive Stability & Alertness
                   </span>
                   <p style={{ color: "var(--t2)", marginTop: "4px" }}>
-                    30-дневная динамика тестов PVT-Space показывает сохранение времени психомоторной реакции на уровне 218 мс. Утомляемость оператора контролируется.
+                    30-day PVT-Space psychomotor reaction time maintained at 218 ms. Operator fatigue remains within nominal operational boundaries.
                   </p>
                 </div>
               </div>
@@ -818,10 +816,10 @@ export function AnalyticsView({
                 </span>
                 <div>
                   <span style={{ fontWeight: 600, display: "block", fontSize: "15px" }}>
-                    Полный профиль экспедиции CHX-01
+                    Expedition CHX-01 Longitudinal Profile
                   </span>
                   <p style={{ color: "var(--t2)", marginTop: "4px" }}>
-                    Экипаж находится на 42-м дне из 180. Индекс физиологической готовности составляет 96%. Текущая динамика позволяет безопасно завершить полетную программу.
+                    Crew is currently at Day 42 of 180. Physiological flight readiness index is 96%. Telemetry dynamics indicate robust trajectory for full mission completion.
                   </p>
                 </div>
               </div>
@@ -832,10 +830,10 @@ export function AnalyticsView({
                 </span>
                 <div>
                   <span style={{ fontWeight: 600, display: "block", fontSize: "15px" }}>
-                    Кумулятивный прогноз радиационного бюджета
+                    Cumulative Radiation Budget Forecast
                   </span>
                   <p style={{ color: "var(--t2)", marginTop: "4px" }}>
-                    Прогнозируемая суммарная доза за 180 дней составит ~110 мЗв, что не превышает 36% от карьерного предела NASA STD-3001 для миссий на низкой околоземной орбите.
+                    Projected 180-day mission cumulative dose is ~110 mSv, well below 36% of NASA STD-3001 career limits for LEO spaceflight.
                   </p>
                 </div>
               </div>
@@ -846,10 +844,10 @@ export function AnalyticsView({
                 </span>
                 <div>
                   <span style={{ fontWeight: 600, display: "block", fontSize: "15px" }}>
-                    Психологическая сплоченность экипажа
+                    Crew Interpersonal Cohesion & Resilience
                   </span>
                   <p style={{ color: "var(--t2)", marginTop: "4px" }}>
-                    Индекс групповой совместимости 92%. За весь период миссии инцидентов межличностных конфликтов или критического стресса не зарегистрировано.
+                    Group cohesion index at 92%. Zero interpersonal friction or acute stress incidents recorded across mission elapsed time.
                   </p>
                 </div>
               </div>

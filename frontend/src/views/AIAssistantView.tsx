@@ -47,25 +47,25 @@ export function AIAssistantView({ astronaut, crew, metrics }: Props) {
 
   const modePrompts: Record<Mode, string[]> = {
     clinical: [
-      "Оценить физиологический ответ сердечно-сосудистой системы во время EVA",
-      "Проверить циркадный сдвиг сна и когнитивный риск при выполнении стыковки",
-      "Оценить динамику ЧСС и вариабельности пульса (HRV) за последние 7 дней",
-      "Рекомендации по коррекции синдрома космической адаптации (SAS)",
+      "Assess cardiovascular response during peak workload EVA",
+      "Check circadian sleep debt and cognitive risk during docking ops",
+      "Evaluate HR and HRV dynamics across flight milestones over past 7 Days",
+      "Countermeasures for Space Adaptation Syndrome (SAS) (SAS)",
     ],
     eva: [
-      "Проверить статус PLSS и расход кислорода перед завтрашним выходом",
-      "Анализ перепада давления в скафандре и риск декомпрессионной болезни DCS",
-      "Рекомендации по контуру охлаждения LCVG при пиковых нагрузках",
+      "Check Status PLSS and O2 consumption ahead of scheduled EVA",
+      "Suit delta-P analysis and decompression sickness risk DCS",
+      "LCVG cooling loop recommendations LCVG under peak EVA exertion",
     ],
     radiation: [
-      "Оценить накопленную эквивалентную дозу радиации за 42 дня миссии",
-      "Протокол действий при регистрации солнечной вспышки SPE класса M-4.2",
-      "Эффективность защитных экранов служебного модуля «Звезда»",
+      "Evaluate cumulative equivalent radiation dose past 42 mission days",
+      "Contingency protocol upon detection of solar particle event SPE class M-4.2",
+      "Radiation storm shelter shielding efficiency (Zvezda / Service Module)",
     ],
     mental: [
-      "Оценить уровень стресса и концентрации по последним чек-инам",
-      "Рекомендации по коррекции циркадного освещения и спектру 2200K",
-      "Анализ дефицита фазы медленного сна (SWS) у экипажа",
+      "Evaluate stress and cognitive focus from recent check-ins",
+      "Recommendations for circadian lighting adjustments and spectrum 2200K",
+      "Slow-wave sleep deficit analysis (SWS) for crew",
     ],
   };
 
@@ -99,7 +99,7 @@ export function AIAssistantView({ astronaut, crew, metrics }: Props) {
         confidence: 0.95,
         risk_level: "low",
         recommendation:
-          "Показатели ЧСС (72 bpm) и артериального давления в норме адаптации к невесомости. Признаков ишемии или десатурации SpO2 не выявлено. Наблюдается умеренный сдвиг фазы сна (-32 мин). Рекомендовано: прием 0.3 мг мелатонина за 45 мин до отбоя и световая стимуляция 480 нм после подъема.",
+          "HR Metrics (72 bpm) and hemodynamics within zero-g adaptation baseline. No ischemia or desaturation detected. SpO2 Moderate circadian phase shift (-32 min). Recommended: 0.3 mg melatonin 45m before sleep and 480nm phototherapy post-wake..",
         guidelines_cited: [
           "NASA STD-3001 Vol 1: Space Flight Human-System Standard",
           "ESA Human Spaceflight Medical Protocol HRP-104",
@@ -125,7 +125,7 @@ export function AIAssistantView({ astronaut, crew, metrics }: Props) {
           <div className="up">
             <div className="ai-tag-row">
               <span className="ai-tag-mission">
-                Автономный клинический интеллект CHX-01
+                Autonomous Clinical Intelligence CHX-01
               </span>
               <span className="ai-tag-gemini">
                 ● Google Gemini 3.5 Flash-Lite Active
@@ -133,26 +133,26 @@ export function AIAssistantView({ astronaut, crew, metrics }: Props) {
             </div>
             <h1 className="lt disp" style={{ margin: "4px 0 6px" }}>AI Health Assistant & 3D Diagnostics</h1>
             <p className="sub" style={{ margin: 0, maxWidth: "780px", color: "var(--t2)" }}>
-              Мультимодальный анализ телеметрии биосенсоров, виртуальный 3D-аватар астронавта и принятие решений на основе стандартов NASA STD-3001.
+              Multimodal telemetry synthesis, virtual 3D-astronaut avatar, and evidence-based clinical guidance NASA STD-3001.
             </p>
           </div>
 
           <div className="ai-status-card-bar">
             <div>
               <div style={{ color: "var(--t3)", fontSize: "10px", textTransform: "uppercase", fontWeight: 700 }}>
-                Субъект анализа
+                Analysis Subject
               </div>
               <div style={{ fontWeight: 700, color: "var(--tx)", fontSize: "13px" }}>
-                {astronaut?.name || "Алекс Нова (CMO)"}
+                {astronaut?.name || "Alex Nova (CMO)"}
               </div>
             </div>
             <div style={{ width: "1px", height: "24px", background: "var(--sep)" }} />
             <div>
               <div style={{ color: "var(--t3)", fontSize: "10px", textTransform: "uppercase", fontWeight: 700 }}>
-                Задержка ЦУП
+                Earth Latency
               </div>
               <div style={{ fontWeight: 700, color: "#10b981", display: "flex", alignItems: "center", gap: "4px", fontSize: "13px" }}>
-                <Radio size={12} className="pulse" /> 120 мс (Ku-Band)
+                <Radio size={12} className="pulse" /> 120 ms (Ku-Band)
               </div>
             </div>
           </div>
@@ -181,7 +181,7 @@ export function AIAssistantView({ astronaut, crew, metrics }: Props) {
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--cy)", boxShadow: "0 0 10px var(--cy)" }} />
               <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--cy)", letterSpacing: "0.5px" }}>
-                3D АВАТАР АСТРОНАВТА
+                3D ASTRONAUT AVATAR
               </span>
             </div>
 
@@ -191,7 +191,7 @@ export function AIAssistantView({ astronaut, crew, metrics }: Props) {
               className="ai-scan-btn"
             >
               <Cpu size={14} className={scannerActive ? "spin" : ""} />
-              <span>{scannerActive ? "Сканирование..." : "Биометрический скан"}</span>
+              <span>{scannerActive ? "Scanning..." : "Biometric Scan"}</span>
             </button>
           </div>
 
@@ -217,7 +217,7 @@ export function AIAssistantView({ astronaut, crew, metrics }: Props) {
             <Suspense
               fallback={
                 <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--t3)" }}>
-                  Загрузка 3D-модели...
+                  Loading 3D Model...
                 </div>
               }
             >
@@ -244,17 +244,17 @@ export function AIAssistantView({ astronaut, crew, metrics }: Props) {
             <Bot size={18} style={{ color: "var(--cy)", flexShrink: 0 }} />
             <div style={{ fontSize: "11px", color: "#e2e8f0", lineHeight: "1.35" }}>
               {loading
-                ? "«Идет обработка телеметрии и сопоставление со стандартами NASA STD-3001...»"
+                ? "Processing telemetry against clinical thresholds NASA STD-3001..."
                 : result
-                ? "«Диагностика завершена. Рекомендации сформированы ниже.»"
-                : "«Все системы жизнеобеспечения PLSS активны. Задайте клинический вопрос о здоровье экипажа.»"}
+                ? "Diagnostic run completed. Recommendations summarized below."
+                : "All life support and telemetry systems PLSS nominal. Enter clinical query regarding crew status."}
             </div>
           </div>
 
           {/* Live Telemetry Pill Cards below 3D model */}
           <div className="ai-status-grid">
             <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid var(--sep)", padding: "8px 10px", borderRadius: "10px" }}>
-              <div style={{ fontSize: "10px", color: "var(--t3)", textTransform: "uppercase" }}>Пульс</div>
+              <div style={{ fontSize: "10px", color: "var(--t3)", textTransform: "uppercase" }}>Heart Rate</div>
               <div style={{ fontSize: "16px", fontWeight: 800, color: "var(--hr)" }}>{hr} <span style={{ fontSize: "10px", fontWeight: 400 }}>bpm</span></div>
             </div>
 
@@ -264,13 +264,13 @@ export function AIAssistantView({ astronaut, crew, metrics }: Props) {
             </div>
 
             <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid var(--sep)", padding: "8px 10px", borderRadius: "10px" }}>
-              <div style={{ fontSize: "10px", color: "var(--t3)", textTransform: "uppercase" }}>Сон (сут)</div>
-              <div style={{ fontSize: "16px", fontWeight: 800, color: "var(--pr)" }}>{sleepVal} <span style={{ fontSize: "10px", fontWeight: 400 }}>ч</span></div>
+              <div style={{ fontSize: "10px", color: "var(--t3)", textTransform: "uppercase" }}>Sleep (24h)</div>
+              <div style={{ fontSize: "16px", fontWeight: 800, color: "var(--pr)" }}>{sleepVal} <span style={{ fontSize: "10px", fontWeight: 400 }}>h</span></div>
             </div>
 
             <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid var(--sep)", padding: "8px 10px", borderRadius: "10px" }}>
-              <div style={{ fontSize: "10px", color: "var(--t3)", textTransform: "uppercase" }}>Радиация</div>
-              <div style={{ fontSize: "16px", fontWeight: 800, color: "#f59e0b" }}>{radVal} <span style={{ fontSize: "10px", fontWeight: 400 }}>мЗв</span></div>
+              <div style={{ fontSize: "10px", color: "var(--t3)", textTransform: "uppercase" }}>Radiation</div>
+              <div style={{ fontSize: "16px", fontWeight: 800, color: "#f59e0b" }}>{radVal} <span style={{ fontSize: "10px", fontWeight: 400 }}>mSv</span></div>
             </div>
           </div>
         </div>
@@ -280,10 +280,10 @@ export function AIAssistantView({ astronaut, crew, metrics }: Props) {
           {/* Mode Switcher */}
           <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
             {[
-              { id: "clinical", label: "Клинический диагност", icon: Heart },
-              { id: "eva", label: "Скафандр & EVA", icon: Zap },
-              { id: "radiation", label: "Радиационная безопасность", icon: Flame },
-              { id: "mental", label: "Психология & Сон", icon: Sparkles },
+              { id: "clinical", label: "Clinical Diagnostics", icon: Heart },
+              { id: "eva", label: "EVA Suit & EVA", icon: Zap },
+              { id: "radiation", label: "Radiation Safety", icon: Flame },
+              { id: "mental", label: "Behavioral Health & Sleep Architecture", icon: Sparkles },
             ].map((m) => {
               const isSelected = activeMode === m.id;
               const IconC = m.icon;
@@ -325,7 +325,7 @@ export function AIAssistantView({ astronaut, crew, metrics }: Props) {
             }}
           >
             <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--t2)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "10px" }}>
-              Быстрые запросы по телеметрии ({activeMode.toUpperCase()}):
+              Rapid Telemetry Queries ({activeMode.toUpperCase()}):
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -368,7 +368,7 @@ export function AIAssistantView({ astronaut, crew, metrics }: Props) {
             >
               <div style={{ position: "relative" }}>
                 <textarea
-                  placeholder="Задайте клинический вопрос бортовому ИИ о здоровье экипажа или протоколах..."
+                  placeholder="Ask the onboard AI a clinical question about crew biometrics or protocols..."
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   rows={3}
@@ -403,7 +403,7 @@ export function AIAssistantView({ astronaut, crew, metrics }: Props) {
                   }}
                 >
                   <Send size={14} />
-                  <span>{loading ? "Анализ..." : "Спросить"}</span>
+                  <span>{loading ? "Analyzing..." : "Ask Copilot"}</span>
                 </button>
               </div>
             </form>
@@ -439,10 +439,10 @@ export function AIAssistantView({ astronaut, crew, metrics }: Props) {
                   </div>
                   <div>
                     <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 700 }}>
-                      Клиническое заключение CosmoHealthX AI
+                      Clinical Assessment CosmoHealthX AI
                     </h3>
                     <div style={{ fontSize: "12px", color: "var(--t3)" }}>
-                      Модель: Google Gemini 3.5 Flash-Lite · Субъект: {astronaut?.name || "Алекс Нова"}
+                      Model: Google Gemini 3.5 Flash-Lite · Subject: {astronaut?.name || "Alex Nova"}
                     </div>
                   </div>
                 </div>
@@ -469,7 +469,7 @@ export function AIAssistantView({ astronaut, crew, metrics }: Props) {
                       border: "1px solid currentColor",
                     }}
                   >
-                    РИСК: {result.risk_level.toUpperCase()}
+                    RISK: {result.risk_level.toUpperCase()}
                   </span>
 
                   <span
@@ -482,7 +482,7 @@ export function AIAssistantView({ astronaut, crew, metrics }: Props) {
                       color: "var(--t1)",
                     }}
                   >
-                    Точность: {Math.round(result.confidence * 100)}%
+                    Confidence: {Math.round(result.confidence * 100)}%
                   </span>
                 </div>
               </div>
@@ -508,7 +508,7 @@ export function AIAssistantView({ astronaut, crew, metrics }: Props) {
               {result.guidelines_cited && result.guidelines_cited.length > 0 && (
                 <div>
                   <div style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--t3)", marginBottom: "8px" }}>
-                    Использованные нормативные стандарты космической медицины:
+                    NASA Spaceflight Medical Standards Applied:
                   </div>
 
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>

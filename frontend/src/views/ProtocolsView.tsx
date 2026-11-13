@@ -34,69 +34,69 @@ type Props = {
 function getProtocolMeta(title: string) {
   const t = title.toLowerCase();
 
-  if (t.includes("тахикард") || t.includes("med-01")) {
+  if (t.includes("tachycard") || t.includes("med-01")) {
     return {
       code: "SOP-MED-01",
       category: "cardio",
       urgency: "CRITICAL",
       urgencyColor: "#ef4444",
       urgencyBg: "rgba(239, 68, 68, 0.15)",
-      equipment: ["Скафандр EMU/Orlan", "Контур LCVG", "Анализатор i-STAT", "Метопролол 25 мг"],
+      equipment: ["EMU / xEMU Space Suit", "LCVG Cooling Loop", "i-STAT Analyzer", "Metoprolol 25mg"],
       icon: Heart,
     };
   }
-  if (t.includes("радиацион") || t.includes("rad-02") || t.includes("spe")) {
+  if (t.includes("radiat") || t.includes("rad-02") || t.includes("spe")) {
     return {
       code: "SOP-RAD-02",
       category: "radiation",
       urgency: "CRITICAL",
       urgencyColor: "#f59e0b",
       urgencyBg: "rgba(245, 158, 11, 0.15)",
-      equipment: ["Дозиметр TEPC", "Водяной экран 400 л", "Антиоксиданты (Амифостин)", "LiF TLD датчики"],
+      equipment: ["TEPC Dosimeter", "Water Shielding 400L", "Antioxidants (Amifostine)", "LiF TLD Badges"],
       icon: Flame,
     };
   }
-  if (t.includes("декомпресси") || t.includes("dcs-03")) {
+  if (t.includes("decompress") || t.includes("dcs-03")) {
     return {
       code: "SOP-DCS-03",
       category: "dcs",
       urgency: "CRITICAL",
       urgencyColor: "#ef4444",
       urgencyBg: "rgba(239, 68, 68, 0.15)",
-      equipment: ["Гипербарическая маска 100% O2", "УЗИ Butterfly iQ+", "Физраствор 0.9% NaCl 500 мл"],
+      equipment: ["Hyperbaric Mask 100% O2", "Ultrasound Butterfly iQ+", "Normal Saline 0.9% NaCl 500ml"],
       icon: AlertTriangle,
     };
   }
-  if (t.includes("болезнь движения") || t.includes("sas-04")) {
+  if (t.includes("motion") || t.includes("adaptation") || t.includes("sas-04")) {
     return {
       code: "SOP-SAS-04",
       category: "neuro",
       urgency: "MEDIUM",
       urgencyColor: "#06b6d4",
       urgencyBg: "rgba(6, 182, 212, 0.15)",
-      equipment: ["Компрессионный пояс", "Прометазин 25 мг в/м", "Электролиты CosmoHydrate ORS", "HRV монитор"],
+      equipment: ["Compression Countermeasure Belt", "Promethazine 25mg IM", "CosmoHydrate ORS Electrolytes", "Continuous HRV Monitor"],
       icon: Activity,
     };
   }
-  if (t.includes("сна") || t.includes("slp-05")) {
+  if (t.includes("sleep") || t.includes("slp-05")) {
     return {
       code: "SOP-SLP-05",
       category: "sleep",
       urgency: "LOW",
       urgencyColor: "#8b5cf6",
       urgencyBg: "rgba(139, 92, 246, 0.15)",
-      equipment: ["Светопанели 2200K", "Мелатонин 3 мг", "ANC шумоподавление", "Аудиосессия 0.5-4 Гц"],
+      equipment: ["Circadian LED 2200K", "Melatonin 3mg", "Active Acoustic ANC", "Delta Bimodal Audio 0.5-4Hz"],
       icon: Zap,
     };
   }
-  if (t.includes("аммиак") || t.includes("tox-06")) {
+  if (t.includes("ammonia") || t.includes("tox-06")) {
     return {
       code: "SOP-TOX-06",
       category: "tox",
       urgency: "CRITICAL",
       urgencyColor: "#ef4444",
       urgencyBg: "rgba(239, 68, 68, 0.15)",
-      equipment: ["Маски PBBA (автономный O2)", "Скрубберы CDRA", "Спектрометр MCA", "Глазной солевой душ"],
+      equipment: ["PBBA Emergency Masks (O2)", "CDRA Carbon Dioxide Scrubbers", "MCA Mass Spectrometer", "Saline Eye Irrigation Station"],
       icon: Shield,
     };
   }
@@ -106,7 +106,7 @@ function getProtocolMeta(title: string) {
     urgency: "MEDIUM",
     urgencyColor: "#94a3b8",
     urgencyBg: "rgba(148, 163, 184, 0.15)",
-    equipment: ["Бортовая аптечка CHX-01", "Пульсоксиметр", "Связь с ЦУП"],
+    equipment: ["CHX-01 Flight Medical Kit", "Pulse Oximeter", "Ku-Band Ground Clinical Link"],
     icon: Stethoscope,
   };
 }
@@ -146,8 +146,8 @@ export function ProtocolsView({ astronaut }: Props) {
         body: JSON.stringify({
           astronaut_id: astronaut?.id || 1,
           completed_steps: completedStepIds.length > 0 ? completedStepIds : (activeProtocol.steps?.map((s) => s.id) || []),
-          executed_by: astronaut?.name || "Д-р Майя Чен (Chief Medical Officer)",
-          notes: "Все шаги стандартной операционной процедуры (SOP) выполнены и подтверждены телеметрией.",
+          executed_by: astronaut?.name || "Dr. Maya Chen (CMO)",
+          notes: "All steps of Standard Operating Procedure (SOP) executed and verified with biometrics.",
         }),
       });
     },
@@ -155,14 +155,14 @@ export function ProtocolsView({ astronaut }: Props) {
       queryClient.invalidateQueries({ queryKey: ["executions", activeProtocol?.id] });
       queryClient.invalidateQueries({ queryKey: ["timeline"] });
       setToastMsg({
-        text: `Протокол «${activeProtocol?.title}» успешно выполнен и занесен в бортовой журнал миссии.`,
+        text: `Protocol "${activeProtocol?.title}" successfully executed and committed to flight log.`,
         type: "ok",
       });
       setTimeout(() => setToastMsg(null), 4000);
     },
     onError: (err: any) => {
       setToastMsg({
-        text: `Ошибка: ${err.message || "Сбой фиксации выполнения"}`,
+        text: `Error: ${err.message || "Failed to commit log"}`,
         type: "err",
       });
       setTimeout(() => setToastMsg(null), 4000);
@@ -213,14 +213,14 @@ export function ProtocolsView({ astronaut }: Props) {
                 SOP · NASA STD-3001
               </span>
               <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "12px", background: "rgba(16, 185, 129, 0.15)", color: "#10b981", fontWeight: 700 }}>
-                ● Авторизовано ЦУП
+                ● NASA Authorized SOP
               </span>
             </div>
 
             <h1 className="protocols-title">Medical Emergency Protocols</h1>
 
             <p className="protocols-desc">
-              Пошаговые алгоритмы действий экипажа при острой патологии, вспышках радиации SPE и аварийных сценариях.
+              Step-by-step contingency algorithms for acute medical events, solar particle radiation storms, and mission emergencies.
             </p>
           </div>
 
@@ -228,14 +228,14 @@ export function ProtocolsView({ astronaut }: Props) {
           <div className="protocols-readiness-strip">
             <div>
               <div style={{ color: "var(--t3)", fontSize: "10px", textTransform: "uppercase", fontWeight: 700 }}>
-                Аптечка CHX-01
+                CHX-01 Med Kit
               </div>
-              <div style={{ fontWeight: 700, color: "#10b981", fontSize: "13px" }}>Готовность 100%</div>
+              <div style={{ fontWeight: 700, color: "#10b981", fontSize: "13px" }}>100% Operational</div>
             </div>
             <div style={{ width: "1px", height: "24px", background: "var(--sep)" }} />
             <div>
               <div style={{ color: "var(--t3)", fontSize: "10px", textTransform: "uppercase", fontWeight: 700 }}>
-                Телеконсилиум ЦУП
+                Flight Surgeon Teleconsult
               </div>
               <div style={{ fontWeight: 700, color: "var(--cy)", display: "flex", alignItems: "center", gap: "4px", fontSize: "13px" }}>
                 <Radio size={12} className="pulse" /> Ku-Band Live
@@ -272,13 +272,13 @@ export function ProtocolsView({ astronaut }: Props) {
       {/* Category Tabs: Smooth Horizontal Scrollable Bar on all screens */}
       <div className="protocols-categories-scroll">
         {[
-          { id: "all", label: "Все протоколы", count: protocols.length },
-          { id: "cardio", label: "Кардиология & EVA", count: protocols.filter((p) => getProtocolMeta(p.title).category === "cardio").length },
-          { id: "radiation", label: "Радиация & SPE", count: protocols.filter((p) => getProtocolMeta(p.title).category === "radiation").length },
-          { id: "dcs", label: "Декомпрессия (DCS)", count: protocols.filter((p) => getProtocolMeta(p.title).category === "dcs").length },
-          { id: "neuro", label: "Адаптация & SAS", count: protocols.filter((p) => getProtocolMeta(p.title).category === "neuro").length },
-          { id: "sleep", label: "Сон & Циркадный цикл", count: protocols.filter((p) => getProtocolMeta(p.title).category === "sleep").length },
-          { id: "tox", label: "Токсикология (NH3)", count: protocols.filter((p) => getProtocolMeta(p.title).category === "tox").length },
+          { id: "all", label: "All Protocols", count: protocols.length },
+          { id: "cardio", label: "Cardiology & EVA", count: protocols.filter((p) => getProtocolMeta(p.title).category === "cardio").length },
+          { id: "radiation", label: "Radiation & SPE", count: protocols.filter((p) => getProtocolMeta(p.title).category === "radiation").length },
+          { id: "dcs", label: "Decompression (DCS)", count: protocols.filter((p) => getProtocolMeta(p.title).category === "dcs").length },
+          { id: "neuro", label: "Neurovestibular (SAS)", count: protocols.filter((p) => getProtocolMeta(p.title).category === "neuro").length },
+          { id: "sleep", label: "Sleep & Circadian", count: protocols.filter((p) => getProtocolMeta(p.title).category === "sleep").length },
+          { id: "tox", label: "Toxicology (NH3)", count: protocols.filter((p) => getProtocolMeta(p.title).category === "tox").length },
         ].map((tab) => {
           const isSelected = activeCategory === tab.id;
           return (
@@ -319,7 +319,7 @@ export function ProtocolsView({ astronaut }: Props) {
           onClick={() => setMobileTab("list")}
         >
           <ClipboardList size={14} />
-          <span>Все протоколы ({filteredProtocols.length})</span>
+          <span>All Protocols ({filteredProtocols.length})</span>
         </button>
         <button
           type="button"
@@ -327,7 +327,7 @@ export function ProtocolsView({ astronaut }: Props) {
           onClick={() => setMobileTab("active")}
         >
           <Zap size={14} />
-          <span>Чек-лист: {currentMeta?.code || "SOP"}</span>
+          <span>Checklist: {currentMeta?.code || "SOP"}</span>
         </button>
       </div>
 
@@ -341,11 +341,11 @@ export function ProtocolsView({ astronaut }: Props) {
           {isLoading ? (
             <div className="cd" style={{ textAlign: "center", padding: "40px 20px" }}>
               <Activity className="spin" size={24} style={{ color: "var(--pr)", margin: "0 auto 8px" }} />
-              <p className="cap">Загрузка клинических алгоритмов...</p>
+              <p className="cap">Loading clinical procedures...</p>
             </div>
           ) : filteredProtocols.length === 0 ? (
             <div className="cd empty" style={{ padding: "30px 20px", textAlign: "center" }}>
-              <p className="cap">В выбранной категории нет доступных протоколов.</p>
+              <p className="cap">No protocols found in selected category.</p>
             </div>
           ) : (
             filteredProtocols.map((p) => {
@@ -393,7 +393,7 @@ export function ProtocolsView({ astronaut }: Props) {
                     </div>
 
                     <span style={{ fontSize: "11px", color: "var(--t3)", fontWeight: 600 }}>
-                      {p.steps?.length || 0} этапов
+                      {p.steps?.length || 0} steps
                     </span>
                   </div>
 
@@ -435,11 +435,11 @@ export function ProtocolsView({ astronaut }: Props) {
                   {/* Action Link Row */}
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed var(--sep)", paddingTop: "8px", fontSize: "12px" }}>
                     <span style={{ color: "var(--pr)", fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
-                      Открыть алгоритм SOP <ChevronRight size={14} />
+                      Launch SOP Checklist <ChevronRight size={14} />
                     </span>
                     {isSelected && (
                       <span style={{ fontSize: "10px", color: "#10b981", fontWeight: 700 }}>
-                        ● Активен
+                        ● Active
                       </span>
                     )}
                   </div>
@@ -483,7 +483,7 @@ export function ProtocolsView({ astronaut }: Props) {
               }}
             >
               <ArrowLeft size={14} />
-              <span>← Назад ко всем протоколам</span>
+              <span>← Back to All Protocols</span>
             </button>
 
             {/* Active Header */}
@@ -501,7 +501,7 @@ export function ProtocolsView({ astronaut }: Props) {
                       border: `1px solid ${currentMeta.urgencyColor}44`,
                     }}
                   >
-                    ПРИОРИТЕТ: {currentMeta.urgency}
+                    PRIORITY: {currentMeta.urgency}
                   </span>
                   <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--pr)" }}>
                     {currentMeta.code}
@@ -553,7 +553,7 @@ export function ProtocolsView({ astronaut }: Props) {
               }}
             >
               <div style={{ fontSize: "10px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--t3)", marginBottom: "6px" }}>
-                Необходимое клиническое оснащение и препараты:
+                Required Medical Hardware & Pharmaceuticals:
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
                 {currentMeta.equipment.map((item, idx) => (
@@ -579,7 +579,7 @@ export function ProtocolsView({ astronaut }: Props) {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px", flexWrap: "wrap", gap: "8px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                 <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--tx)" }}>
-                  Выполнение: {completedCount} из {totalSteps} шагов
+                  Progress: {completedCount} of {totalSteps} steps completed
                 </span>
                 <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--pr)" }}>
                   ({progressPercent}%)
@@ -599,7 +599,7 @@ export function ProtocolsView({ astronaut }: Props) {
                     fontWeight: 600,
                   }}
                 >
-                  Отметить все
+                  Select All
                 </button>
                 <span style={{ color: "var(--sep)" }}>·</span>
                 <button
@@ -614,7 +614,7 @@ export function ProtocolsView({ astronaut }: Props) {
                     fontWeight: 600,
                   }}
                 >
-                  Сбросить
+                  Reset
                 </button>
               </div>
             </div>
@@ -693,7 +693,7 @@ export function ProtocolsView({ astronaut }: Props) {
             {/* Bottom Actions */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px", paddingTop: "16px", borderTop: "1px solid var(--sep)" }}>
               <div style={{ fontSize: "12px", color: "var(--t3)" }}>
-                Исполнитель: <strong style={{ color: "var(--tx)" }}>{astronaut?.name || "Д-р Майя Чен (CMO)"}</strong>
+                Clinician: <strong style={{ color: "var(--tx)" }}>{astronaut?.name || "Dr. Maya Chen (CMO)"}</strong>
               </div>
 
               <button
@@ -713,7 +713,7 @@ export function ProtocolsView({ astronaut }: Props) {
               >
                 <FileCheck size={16} />
                 <span>
-                  {executeMutation.isPending ? "Фиксация в ЦУП..." : "Зафиксировать выполнение в журнал"}
+                  {executeMutation.isPending ? "Committing to Log..." : "Log Completed Protocol Execution"}
                 </span>
               </button>
             </div>
@@ -724,7 +724,7 @@ export function ProtocolsView({ astronaut }: Props) {
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
                   <Clock size={15} style={{ color: "var(--pr)" }} />
                   <span style={{ fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                    Журнал выполненных активаций:
+                    Protocol Execution Audit Log:
                   </span>
                 </div>
 
@@ -745,16 +745,16 @@ export function ProtocolsView({ astronaut }: Props) {
                     >
                       <div>
                         <div style={{ fontWeight: 700, color: "var(--tx)" }}>
-                          {ex.executed_by || "Экипаж CHX-01"}
+                          {ex.executed_by || "Expedition CHX-01 Crew"}
                         </div>
                         <div style={{ fontSize: "11px", color: "var(--t3)", marginTop: "2px" }}>
-                          {ex.notes || "Все шаги алгоритма выполнены. Показатели стабилизированы."}
+                          {ex.notes || "All procedure steps executed. Astronaut vitals stabilized."}
                         </div>
                       </div>
 
                       <div style={{ textAlign: "right" }}>
                         <span style={{ fontSize: "10px", padding: "2px 6px", borderRadius: "6px", background: "rgba(16, 185, 129, 0.15)", color: "#10b981", fontWeight: 700 }}>
-                          УСПЕШНО
+                          COMPLETED
                         </span>
                         <div style={{ fontSize: "10px", color: "var(--t3)", marginTop: "2px" }}>
                           {new Date(ex.executed_at).toLocaleString("ru-RU", {

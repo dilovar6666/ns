@@ -148,9 +148,9 @@ export function DashboardView({
     }
   > = {
     heart_rate: {
-      name: language === "ru" ? "Пульс (ЧСС)" : "Heart Rate",
+      name: "Heart Rate",
       unit: "bpm",
-      nominalText: language === "ru" ? "Норма: 60-100 bpm" : "Nominal: 60-100 bpm",
+      nominalText: language === "ru" ? "Nominal: 60-100 bpm" : "Nominal: 60-100 bpm",
       value: hrVal,
       minVal: hrStat?.min ? Math.round(hrStat.min) : 58,
       maxVal: hrStat?.max ? Math.round(hrStat.max) : 78,
@@ -158,9 +158,9 @@ export function DashboardView({
       normBand: [60, 100],
     },
     spo2: {
-      name: language === "ru" ? "Кислород (SpO₂)" : "Oxygen Saturation",
+      name: language === "ru" ? "Oxygen Saturation (SpO₂)" : "Oxygen Saturation",
       unit: "%",
-      nominalText: language === "ru" ? "Норма: 95-100%" : "Nominal: 95-100%",
+      nominalText: language === "ru" ? "Nominal: 95-100%" : "Nominal: 95-100%",
       value: spo2Val,
       minVal: spo2Stat?.min ? Number(spo2Stat.min.toFixed(1)) : 97.2,
       maxVal: spo2Stat?.max ? Number(spo2Stat.max.toFixed(1)) : 99.4,
@@ -168,9 +168,9 @@ export function DashboardView({
       normBand: [95, 100],
     },
     sleep_duration: {
-      name: language === "ru" ? "Длительность сна" : "Sleep Duration",
-      unit: language === "ru" ? "ч" : "h",
-      nominalText: language === "ru" ? "Цель: 7.0-9.0 ч/сут" : "Goal: 7.0-9.0 h/day",
+      name: "Sleep Duration",
+      unit: "h",
+      nominalText: "Goal: 7.0-9.0 h/day",
       value: sleepVal,
       minVal: sleepStat?.min ? Number(sleepStat.min.toFixed(1)) : 6.2,
       maxVal: sleepStat?.max ? Number(sleepStat.max.toFixed(1)) : 8.4,
@@ -178,9 +178,9 @@ export function DashboardView({
       normBand: [7.0, 9.0],
     },
     activity: {
-      name: language === "ru" ? "Физическая активность" : "Physical Activity",
-      unit: language === "ru" ? "шагов" : "steps",
-      nominalText: language === "ru" ? "Цель: 10 000 шагов" : "Goal: 10,000 steps",
+      name: "Physical Activity",
+      unit: "steps",
+      nominalText: "Goal: 10,000 steps",
       value: Math.round(actVal).toLocaleString(),
       minVal: actStat?.min ? Math.round(actStat.min * 105) : 5200,
       maxVal: actStat?.max ? Math.round(actStat.max * 105) : 11500,
@@ -306,25 +306,25 @@ export function DashboardView({
     const items = [
       {
         name: "Heart Rate",
-        status: hrOk ? (language === "ru" ? "В норме" : "Nominal") : language === "ru" ? "Вне нормы" : "Out of range",
+        status: hrOk ? "Nominal" : "Out of range",
         ok: hrOk,
         level: hrOk ? "ok" : "wa",
       },
       {
         name: "Oxygen Saturation",
-        status: spo2Ok ? (language === "ru" ? "В норме" : "Nominal") : language === "ru" ? "Гипоксия" : "Hypoxia warning",
+        status: spo2Ok ? "Nominal" : "Hypoxia warning",
         ok: spo2Ok,
         level: spo2Ok ? "ok" : "cr",
       },
       {
         name: "Physical Activity",
-        status: actOk ? (language === "ru" ? "В норме" : "Nominal") : language === "ru" ? "Ниже нормы" : "Below target",
+        status: actOk ? "Nominal" : "Below target",
         ok: actOk,
         level: actOk ? "ok" : "wa",
       },
       {
         name: "Sleep Architecture",
-        status: sleepOk ? (language === "ru" ? "В норме" : "Nominal") : language === "ru" ? "Требует внимания" : "Attention required",
+        status: sleepOk ? "Nominal" : "Attention required",
         ok: sleepOk,
         level: sleepOk ? "ok" : "wa",
       },
@@ -345,14 +345,14 @@ export function DashboardView({
       {/* Top Header */}
       <header className="tb tbx">
         <div className="up">
-          <p className="eyb">Демо-миссия CHX-01 · День 42 из 180</p>
+          <p className="eyb">Mission CHX-01 · Day 42 of 180</p>
           <h1 className="lt disp">
-            Здравствуйте, {astronaut?.name || "Алекс"}
+            Welcome back, {astronaut?.name || "Alex"}
           </h1>
           <p className="sub">
             <span className="live"></span>
-            {statusItems.inRange} из 5 биомаркеров в целевом диапазоне
-            {statusItems.inRange < 5 ? (sleepLatest < 7.0 ? ", сон требует внимания" : ", требуется наблюдение") : ", все показатели в норме"}
+            {statusItems.inRange} of 5 biometrics within nominal target bounds
+            {statusItems.inRange < 5 ? (sleepLatest < 7.0 ? ", sleep deficit requires attention" : ", clinical observation advised") : ", all indicators nominal"}
           </p>
         </div>
         <div className="tbr up" style={{ animationDelay: "60ms" }}>
@@ -362,7 +362,7 @@ export function DashboardView({
               className="inp"
               value={astronaut?.id}
               onChange={(e) => onSelectAstronaut(Number(e.target.value))}
-              aria-label="Выбрать астронавта"
+              aria-label="Select crew member"
               style={{ fontWeight: 600 }}
             >
               {crew.map((c) => (
@@ -375,7 +375,7 @@ export function DashboardView({
           <Link
             className="ib"
             to="/alerts"
-            aria-label={`Уведомления: ${unreadCount} непрочитанных`}
+            aria-label={`Alerts: ${unreadCount} unread`}
           >
             <Bell className="ico" />
             {unreadCount > 0 && <span className="dot"></span>}
@@ -383,20 +383,20 @@ export function DashboardView({
           <Link
             className="av"
             to="/profile"
-            aria-label={`Профиль: ${astronaut?.name || "Алекс Нова"}`}
+            aria-label={`Profile: ${astronaut?.name || "Alex Nova"}`}
             style={{ width: "40px", height: "40px" }}
           >
-            {astronaut?.name?.slice(0, 2).toUpperCase() || "АН"}
+            {astronaut?.name?.slice(0, 2).toUpperCase() || "AN"}
           </Link>
         </div>
       </header>
 
       <p className="cap" style={{ margin: "-8px 0 12px" }}>
-        Нажмите на показатель, чтобы открыть его детальный график и аналитику
+        Select a vital card to inspect full high-resolution telemetry and clinical trends
       </p>
 
       {/* 4 Metric Cards */}
-      <section className="mrow" aria-label="Ключевые показатели">
+      <section className="mrow" aria-label="Core Biometric Vitals">
         {/* Heart Rate */}
         <button
           className={`mc up ${selectedMetricKey === "heart_rate" ? "on" : ""}`}
@@ -412,7 +412,7 @@ export function DashboardView({
               Heart Rate
             </span>
             <span className="cap num">
-              {period === "24h" ? "14:32" : period === "7d" ? "7 дней" : "30 дней"}
+              {period === "24h" ? "14:32" : period === "7d" ? "7 Days" : "30 Days"}
             </span>
           </span>
           <span className="mb">
@@ -456,7 +456,7 @@ export function DashboardView({
               Oxygen Saturation
             </span>
             <span className="cap num">
-              {period === "24h" ? "14:30" : period === "7d" ? "7 дней" : "30 дней"}
+              {period === "24h" ? "14:30" : period === "7d" ? "7 Days" : "30 Days"}
             </span>
           </span>
           <span className="mb">
@@ -501,13 +501,13 @@ export function DashboardView({
             </span>
             <span className={`st ${sleepVal < 7.0 ? "wa" : "ok"}`} style={{ fontSize: "12px" }}>
               <i></i>
-              {sleepVal < 7.0 ? "Внимание" : "В норме"}
+              {sleepVal < 7.0 ? "Caution" : "Nominal"}
             </span>
           </span>
           <span className="mb">
             <span className="mv num">
               <b>{typeof sleepVal === "number" ? sleepVal.toFixed(1) : sleepVal}</b>
-              <em>ч</em>
+              <em>h</em>
             </span>
             <span className="spk" aria-hidden="true">
               {sparklineData.sleep_duration.map((val, i) => {
@@ -548,13 +548,13 @@ export function DashboardView({
               Physical Activity
             </span>
             <span className="cap num">
-              {period === "24h" ? "14:00" : period === "7d" ? "7 дней" : "30 дней"}
+              {period === "24h" ? "14:00" : period === "7d" ? "7 Days" : "30 Days"}
             </span>
           </span>
           <span className="mb">
             <span className="mv num">
               <b>{Math.round(actVal).toLocaleString()}</b>
-              <em>шагов</em>
+              <em>steps</em>
             </span>
             <span className="spk" aria-hidden="true">
               {sparklineData.activity.map((val, i) => {
@@ -636,10 +636,10 @@ export function DashboardView({
               <div className="cap" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <span>
                   {period === "24h"
-                    ? (language === "ru" ? "Текущее значение (24 часа)" : "Current reading (24h)")
+                    ? "Current reading (24h)"
                     : period === "7d"
-                    ? (language === "ru" ? "Среднее за 7 дней" : "7-day average")
-                    : (language === "ru" ? "Среднее за 30 дней" : "30-day average")}
+                    ? "7-day average"
+                    : "30-day average"}
                 </span>
                 {activeInfo.change !== null && (
                   <span
@@ -662,7 +662,7 @@ export function DashboardView({
                 <em>{activeInfo.unit}</em>
               </div>
               <div className="cap num" style={{ marginTop: "4px", color: "var(--t3)", fontSize: "12px" }}>
-                {activeInfo.nominalText} · Мин: <b>{activeInfo.minVal}</b> / Макс: <b>{activeInfo.maxVal}</b> {activeInfo.unit}
+                {activeInfo.nominalText} · Min: <b>{activeInfo.minVal}</b> / Max: <b>{activeInfo.maxVal}</b> {activeInfo.unit}
               </div>
             </div>
             <Link
@@ -670,7 +670,7 @@ export function DashboardView({
               to="/monitoring"
               style={{ fontSize: "14px", padding: "8px 16px" }}
             >
-              Подробнее в мониторинге <ChevronRight className="ico sm" />
+              Deep Telemetry Diagnostics <ChevronRight className="ico sm" />
             </Link>
           </div>
 
@@ -837,7 +837,7 @@ export function DashboardView({
                   marginRight: "6px",
                 }}
               />
-              Целевой физиологический диапазон
+              Target Physiological Range
             </span>
             <span>
               <i
@@ -848,10 +848,10 @@ export function DashboardView({
                   marginRight: "6px",
                 }}
               />
-              Порог предупреждения
+              Warning Threshold
             </span>
             <span style={{ marginLeft: "auto", fontSize: "12px", color: "var(--t3)" }}>
-              {loading ? "Синхронизация..." : `Точек телеметрии: ${chartConfig.points.length}`}
+              {loading ? "Syncing..." : `Telemetry Points: ${chartConfig.points.length}`}
             </span>
           </div>
         </div>
@@ -879,7 +879,7 @@ export function DashboardView({
                 color: statusItems.inRange >= 4 ? "var(--ok)" : "var(--wa)",
               }}
             >
-              {statusItems.inRange >= 4 ? "НОРМА" : "ВНИМАНИЕ"}
+              {statusItems.inRange >= 4 ? "NOMINAL" : "ATTENTION"}
             </span>
           </div>
 
@@ -891,7 +891,7 @@ export function DashboardView({
               height="180"
               viewBox="0 0 180 180"
               role="img"
-              aria-label={`${statusItems.inRange} из 5 показателей в пределах нормы`}
+              aria-label={`${statusItems.inRange} of 5 biometrics within nominal limits`}
             >
               <circle
                 cx="90"
@@ -932,7 +932,7 @@ export function DashboardView({
                 textAnchor="middle"
                 style={{ fontSize: "13px", fontWeight: 600, fill: "var(--t3)" }}
               >
-                в диапазоне
+                in range
               </text>
             </svg>
           </div>
@@ -970,7 +970,7 @@ export function DashboardView({
           <div className="ch" style={{ marginBottom: "8px", width: "100%", justifyContent: "space-between" }}>
             <h2 className="h2" style={{ margin: 0 }}>Recent Activity</h2>
             <Link className="btn bt" to="/monitoring">
-              Вся история
+              Full History
             </Link>
           </div>
 
@@ -983,14 +983,14 @@ export function DashboardView({
                 Heart Rate Telemetry
               </span>
               <span className="cap" style={{ display: "block", marginTop: "1px", fontSize: "12px", color: "var(--t3)" }}>
-                Синхронизировано с биосенсора
+                Synchronized from biosensor
               </span>
             </span>
             <span style={{ textAlign: "right", whiteSpace: "nowrap", flexShrink: 0 }}>
               <b className="num" style={{ display: "block", fontSize: "15px", fontWeight: 700, color: "var(--t1)" }}>
                 {Math.round(hrLatest)} bpm
               </b>
-              <span className="cap num" style={{ fontSize: "11px", color: "var(--t3)" }}>Сегодня, 14:32</span>
+              <span className="cap num" style={{ fontSize: "11px", color: "var(--t3)" }}>Today, 14:32</span>
             </span>
           </div>
 
@@ -1003,14 +1003,14 @@ export function DashboardView({
                 SpO₂ Saturation
               </span>
               <span className="cap" style={{ display: "block", marginTop: "1px", fontSize: "12px", color: "var(--t3)" }}>
-                Носимый пульсоксиметр
+                Wearable pulse oximeter
               </span>
             </span>
             <span style={{ textAlign: "right", whiteSpace: "nowrap", flexShrink: 0 }}>
               <b className="num" style={{ display: "block", fontSize: "15px", fontWeight: 700, color: "var(--t1)" }}>
                 {Math.round(spo2Latest)} %
               </b>
-              <span className="cap num" style={{ fontSize: "11px", color: "var(--t3)" }}>Сегодня, 14:30</span>
+              <span className="cap num" style={{ fontSize: "11px", color: "var(--t3)" }}>Today, 14:30</span>
             </span>
           </div>
 
@@ -1023,14 +1023,14 @@ export function DashboardView({
                 EVA Treadmill Session
               </span>
               <span className="cap" style={{ display: "block", marginTop: "1px", fontSize: "12px", color: "var(--t3)" }}>
-                Протокол сохранения костной ткани
+                Bone mineral density regimen
               </span>
             </span>
             <span style={{ textAlign: "right", whiteSpace: "nowrap", flexShrink: 0 }}>
               <b className="num" style={{ display: "block", fontSize: "15px", fontWeight: 700, color: "var(--t1)" }}>
-                45 мин
+                45 min
               </b>
-              <span className="cap num" style={{ fontSize: "11px", color: "var(--t3)" }}>Сегодня, 11:15</span>
+              <span className="cap num" style={{ fontSize: "11px", color: "var(--t3)" }}>Today, 11:15</span>
             </span>
           </div>
         </div>
@@ -1044,13 +1044,13 @@ export function DashboardView({
           <div className="ch" style={{ marginBottom: "8px", width: "100%", justifyContent: "space-between" }}>
             <h2 className="h2" style={{ margin: 0 }}>Recent Alerts</h2>
             <Link className="btn bt" to="/alerts">
-              Все ({notifications.length})
+              All ({notifications.length})
             </Link>
           </div>
 
           {recentAlerts.length === 0 ? (
             <div className="cap" style={{ padding: "20px 0", textAlign: "center" }}>
-              Нет активных предупреждений
+              No active clinical warnings
             </div>
           ) : (
             recentAlerts.map((n) => (
@@ -1103,7 +1103,7 @@ export function DashboardView({
                     onClick={() => onMarkNotificationRead(n.id)}
                     style={{ fontSize: "12px", padding: "4px 8px", flexShrink: 0 }}
                   >
-                    Прочитано
+                    Read
                   </button>
                 )}
               </div>

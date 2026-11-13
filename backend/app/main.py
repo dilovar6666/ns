@@ -17,6 +17,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from .database import Base, engine, get_db
+from .pdf_generator import generate_medical_dossier_pdf
 from .models import Astronaut, MentalCheckin, Metric, Mission, MissionEvent, Notification, Protocol, ProtocolExecution, ProtocolStep, User
 from .schemas import AIInput, AstronautInput, AstronautOut, AuthResponse, AvatarUpdateInput, CheckinInput, LoginRequest, MetricInput, MissionEventInput, ProtocolExecutionInput, ProtocolInput, RegisterRequest, UserOut
 from .seed import seed
@@ -88,78 +89,78 @@ def seed_rich_protocols(db: Session):
         return
     protocols_data = [
         {
-            "title": "SOP-MED-01: Купирование острой тахикардии и аритмии при нагрузках EVA",
-            "description": "Экстренный протокол действий при стойком повышении ЧСС > 140 уд/мин, желудочковой экстрасистолии или гипертермии скафандра во время внекорабельной деятельности.",
+            "title": "SOP-MED-01: Management of Acute Tachycardia and Arrhythmia during EVA",
+            "description": "Emergency clinical countermeasures for persistent HR > 140 bpm, ventricular ectopic beats, or suit hyperthermia during extravehicular operations.",
             "source_url": "https://www.nasa.gov/hrp/elements/cardiovascular",
             "steps": [
-                "Немедленная остановка активной работы за бортом (EVA Hold) и переход на стационарный страховочный фал.",
-                "Перевод контура жидкостного охлаждения скафандра (LCVG) на режим максимальной мощности (100% flow).",
-                "Подача 100% кислорода в шлем под повышенным давлением (34 кПа) для предотвращения гипоксии.",
-                "Выполнение вагусного дыхательного маневра (Вальсальвы) и передача телеметрии ЭКГ в ЦУП.",
-                "При сохранении тахикардии свыше 5 минут — приказ на экстренное шлюзование и возврат в модуль Quest.",
-                "В шлюзовом отсеке: экспресс-анализ тропонинов i-STAT, введение β-блокатора Метопролол 25 мг по согласованию с ЦУП.",
+                "Immediate cessation of extravehicular activity (EVA Hold) and tethering to primary structural station point.",
+                "Shift Liquid Cooling and Ventilation Garment (LCVG) loop to maximum cooling capacity (100% flow).",
+                "Deliver 100% O2 to helmet at elevated partial pressure (34 kPa) to prevent acute hypoxia.",
+                "Perform vagal Valsalva maneuver and transmit 12-lead ECG telemetry packet to Mission Control.",
+                "If tachycardia persists > 5 min, initiate emergency ingress and return to Quest Airlock module.",
+                "In airlock: run rapid i-STAT troponin biomarker assay; administer Metoprolol 25 mg upon CMO approval.",
             ],
         },
         {
-            "title": "SOP-RAD-02: Радиационный шторм (Solar Particle Event SPE Level-3 Alert)",
-            "description": "Алгоритм экстренной защиты экипажа при регистрации солнечной вспышки класса X/M и превышении мощности дозы космической радиации свыше 2.0 мЗв/ч.",
+            "title": "SOP-RAD-02: Solar Particle Event Shelter & Radiation Protection (SPE Alert)",
+            "description": "Emergency crew radiation protection algorithm upon detection of solar flare X/M class with ambient dose rate exceeding 2.0 mSv/h.",
             "source_url": "https://www.nasa.gov/hrp/elements/radiation",
             "steps": [
-                "Объявление тревоги Radiation Alert Level-3 по громкой связи жилых модулей станции.",
-                "Экстренная эвакуация экипажа в радиационное убежище служебного модуля с максимальной водяной защитой.",
-                "Развертывание дополнительных водяных экранов (400 л) и водородсодержащих полимерных матов.",
-                "Активация персональных тканеэквивалентных дозиметров TEPC и непрерывный замер поглощенной дозы.",
-                "Пероральный прием радиопротекторного антиоксидантного комплекса (Амифостин / α-токоферол + селен).",
-                "Сохранение режима укрытия до официального разрешения ЦУП (падение радиационного фона < 0.3 мЗв/ч).",
+                "Broadcast Radiation Alert Level-3 emergency tone across all station habitat modules.",
+                "Evacuate crew to central radiation storm shelter surrounded by maximum polyethylene and water shielding.",
+                "Deploy auxiliary 400 L water bladders and high-hydrogen polymer acoustic/radiation barrier mats.",
+                "Activate personal tissue-equivalent proportional counters (TEPC) for continuous real-time dosimetry.",
+                "Administer oral radioprotective antioxidant regimen (Amifostine / alpha-tocopherol + selenium).",
+                "Maintain storm shelter sequester until Mission Control CMO authorization (flux < 0.3 mSv/h).",
             ],
         },
         {
-            "title": "SOP-DCS-03: Декомпрессионная болезнь и газовая эмболия (DCS Protocol)",
-            "description": "Неотложная помощь при суставных болях (bends), респираторном дистрессе или микропузырьковой эмболии после декомпрессии скафандра.",
+            "title": "SOP-DCS-03: Decompression Sickness & Venous Gas Emboli (DCS Protocol)",
+            "description": "Emergency clinical response for joint bends, respiratory chokes, or venous nitrogen bubbles following suit depressurization or airlock egress.",
             "source_url": "https://www.nasa.gov/hrp/elements/exploration-eva",
             "steps": [
-                "Немедленная изоляция и герметизация шлюзового отсека, подъем давления на 20 кПа выше нормы.",
-                "Перевод пострадавшего на непрерывное дыхание 100% чистым кислородом через герметичную маску.",
-                "Горизонтальная укладка в физиологическом нейтральном положении, исключающем сгибание конечностей.",
-                "Ультразвуковая допплерография крупных вен и легочной артерии датчиком Butterfly iQ+ на микропузырьки.",
-                "Инфузионная терапия: 500 мл раствора 0.9% NaCl со скоростью 150 мл/час для снижения вязкости крови.",
-                "Оценка неврологического статуса по шкале Глазго каждые 15 минут до полной ремиссии симптомов.",
+                "Isolate and seal airlock compartment; elevate atmospheric pressure to +20 kPa above baseline.",
+                "Place astronaut on continuous 100% normobaric hyperoxic O2 via sealed aviator-grade mask.",
+                "Position patient supine in neutral zero-gravity posture, avoiding joint flexion.",
+                "Perform Butterfly iQ+ Doppler vascular ultrasound of femoral and subclavian veins for bubble detection.",
+                "IV infusion: 500 mL normal saline 0.9% NaCl at 150 mL/h to optimize intravascular microcirculation.",
+                "Serial Glasgow Coma Scale and peripheral neurologic assessments every 15 minutes until resolution.",
             ],
         },
         {
-            "title": "SOP-SAS-04: Острая космическая болезнь движения (Space Adaptation Syndrome)",
-            "description": "Купирование тяжелого нейровегетативного синдрома дезадаптации к невесомости, тошноты и пространственной дезориентации.",
+            "title": "SOP-SAS-04: Acute Space Motion Sickness & Neurovestibular Adaptation (SAS)",
+            "description": "Clinical countermeasures for acute sensorimotor conflict, nausea, and fluid redistribution during initial 72 hours of microgravity exposure.",
             "source_url": "https://www.nasa.gov/hrp/elements/sensorimotor",
             "steps": [
-                "Фиксация космонавта ремнями в каюте, минимизация движений головой и зрительная опора на фиксированную точку.",
-                "Надевание компрессионного пояса и манжет на ноги для уменьшения вестибулярно-вегетативного рефлекса.",
-                "Внутримышечное введение Прометазина (Promethazine) 25 мг в дельтовидную мышцу.",
-                "Дробное питье регидратационного раствора CosmoHydrate ORS (50 мл каждые 15 минут).",
-                "Контроль частоты сердечных сокращений и вариабельности пульса (HRV RMSSD) через нагрудный сенсор.",
+                "Secure astronaut in crew quarters, restrict rapid head yaw/pitch, and anchor visual gaze to stationary cue.",
+                "Apply lower-body compression cuffs to counteract upward fluid shift and mitigate vestibular overload.",
+                "Intramuscular administration of Promethazine 25 mg in deltoid muscle.",
+                "Administer balanced electrolyte rehydration solution CosmoHydrate ORS (50 mL every 15 min).",
+                "Continuous heart rate and autonomic tone monitoring (HRV RMSSD) via chest biosensor array.",
             ],
         },
         {
-            "title": "SOP-SLP-05: Острая циркадная десинхронизация и дефицит глубокого сна",
-            "description": "Терапия выраженного сокращения фазы медленного сна (SWS < 10%), хронической усталости и когнитивного спада.",
+            "title": "SOP-SLP-05: Circadian Desynchronization & Slow-Wave Sleep Deficit",
+            "description": "Intervention protocol for pronounced slow-wave sleep deficit (SWS < 10%), cumulative fatigue, and cognitive performance decline.",
             "source_url": "https://www.nasa.gov/hrp/elements/behavioral-health-and-performance",
             "steps": [
-                "Переключение спектра светодиодных панелей каютного модуля на режим низкоинтенсивного света 2200K (без синего пика).",
-                "Активация режима шумоподавления (ANC) вентиляционных систем жилого отсека (уровень шума < 45 dBA).",
-                "Прием микродозы Мелатонина 3 мг за 40 минут до отбоя по согласованному суточному расписанию.",
-                "Запуск аудиосессии бинауральной стимуляции дельта/тета ритмов (0.5–4 Гц) длительностью 25 минут.",
-                "Утренний сеанс светотерапии синим спектром 480 нм (10 000 люкс) в течение 30 минут для перезапуска ритмов.",
+                "Switch crew quarter lighting panels to narrow-band low-intensity red spectrum (660 nm / 2200K zero-blue).",
+                "Engage active noise cancellation (ANC) across ECLSS ventilation ducting (ambient noise < 45 dBA).",
+                "Administer Melatonin 3 mg microdose 40 minutes prior to scheduled sleep onset per flight schedule.",
+                "Initiate 25-minute binaural delta-theta entrainment audio session (0.5–4.0 Hz) via bone conduction.",
+                "Morning 30-minute blue-enriched light therapy session (480 nm, 10,000 lux) immediately post-wake.",
             ],
         },
         {
-            "title": "SOP-TOX-06: Экстренная деконтаминация атмосферы при утечке аммиака (NH3 Spike)",
-            "description": "Аварийный протокол защиты органов дыхания при разгерметизации внешнего контура терморегулирования и проникновении токсичных паров.",
+            "title": "SOP-TOX-06: Emergency Atmospheric Decontamination & Ammonia Leak (NH3 Spike)",
+            "description": "Emergency respiratory protection procedure upon breach of External Active Thermal Control Loop and hazardous toxic gas ingress.",
             "source_url": "https://www.nasa.gov/hrp",
             "steps": [
-                "Немедленное надевание индивидуальных дыхательных масок PBBA с автономной подачей кислорода.",
-                "Немедленная изоляция пораженного отсека и закрытие межагрегатных быстродействующих люков.",
-                "Включение угольных фильтров и скрубберов атмосферы (CDRA) в режим максимальной адсорбции.",
-                "Экспресс-замер концентрации аммиака и монооксида углерода спектрометром MCA (порог тревоги > 2 ppm).",
-                "Осмотр экипажа на предмет химических ожогов слизистых и промывание глаз стерильным солевым раствором.",
+                "Immediate donning of Personal Breathing Bag Apparatus (PBBA) with isolated oxygen supply.",
+                "Rapid compartment isolation and hermetic latching of inter-module pressure hatches.",
+                "Set Carbon Dioxide and Trace Contaminant Removal Assemblies (CDRA/TCCS) to maximum adsorption.",
+                "Conduct rapid gas chromatography verification with Major Constituent Analyzer (alarm threshold > 2 ppm).",
+                "Examine crew for mucosal chemical irritation; irrigate eyes with sterile normal saline solution.",
             ],
         },
     ]
@@ -271,7 +272,7 @@ def get_current_user_optional(authorization: str | None = Header(default=None), 
 def check_admin_or_cmo(user: User | None, x_demo_role: str = "astronaut") -> bool:
     if user:
         r = user.role.lower()
-        if any(keyword in r for keyword in ["surgeon", "cmo", "врач", "commander", "командир", "admin", "officer"]):
+        if any(keyword in r for keyword in ["surgeon", "cmo", "commander", "admin", "officer"]):
             return True
     r_demo = (x_demo_role or "").lower()
     if r_demo in ["admin", "flight_surgeon", "commander", "cmo", "medical_officer"]:
@@ -300,18 +301,18 @@ def status():
 def register(body: RegisterRequest, db: Session = Depends(get_db)):
     existing = db.scalar(select(User).where(User.email == body.email.strip().lower()))
     if existing:
-        raise HTTPException(400, "Пользователь с таким email уже зарегистрирован")
+        raise HTTPException(400, "User with this email already exists")
 
     role_requested = body.role.strip() or "Crew Member"
     r_low = role_requested.lower()
-    is_privileged = any(k in r_low for k in ["surgeon", "cmo", "врач", "commander", "командир", "admin"])
+    is_privileged = any(k in r_low for k in ["surgeon", "cmo", "commander", "admin"])
 
     if is_privileged:
         code = (body.access_code or "").strip().upper()
         if code not in ADMIN_ACCESS_CODES:
             raise HTTPException(
                 403,
-                "Для регистрации с привилегированной ролью (Врач ЦУП / CMO или Командир) требуется действующий код допуска NASA. Введите ключ допуска (например, NASA-CMO-2026 / NASA-CMD-2026) или зарегистрируйтесь с ролью Космонавт (Crew Member)."
+                "A valid NASA Security Clearance Code (e.g. NASA-CMO-2026 or NASA-CMD-2026) is required to register with a privileged role (Flight Surgeon or Commander)."
             )
 
     user = User(
@@ -385,10 +386,10 @@ def login(body: LoginRequest, db: Session = Depends(get_db)):
             db.commit()
             db.refresh(user)
         else:
-            raise HTTPException(401, "Неверный логин или пароль")
+            raise HTTPException(401, "Invalid email or password")
 
     if not verify_password(body.password, user.password_hash) and body.password not in ["cosmo123", "demo", "admin"]:
-        raise HTTPException(401, "Неверный логин или пароль")
+        raise HTTPException(401, "Invalid email or password")
 
     token = f"chx_{secrets.token_urlsafe(32)}"
     SESSIONS[token] = user.id
@@ -400,21 +401,21 @@ def logout(authorization: str | None = Header(default=None)):
     if authorization:
         token = authorization.replace("Bearer ", "").strip()
         SESSIONS.pop(token, None)
-    return {"status": "ok", "message": "Сессия успешно завершена"}
+    return {"status": "ok", "message": "Session closed successfully"}
 
 
 @app.get("/api/auth/me", response_model=UserOut)
 def me(authorization: str | None = Header(default=None), db: Session = Depends(get_db)):
     if not authorization:
-        raise HTTPException(401, "Требуется авторизация (отсутствует токен)")
+        raise HTTPException(401, "Authorization required (token missing)")
 
     token = authorization.replace("Bearer ", "").strip()
     user_id = SESSIONS.get(token)
     if not user_id:
-        raise HTTPException(401, "Сессия недействительна или истекла")
+        raise HTTPException(401, "Session expired or invalid")
     user = db.get(User, user_id)
     if not user:
-        raise HTTPException(404, "Пользователь не найден")
+        raise HTTPException(404, "User not found")
     return UserOut.model_validate(user)
 
 
@@ -442,7 +443,7 @@ def add_astronaut(
 ):
     user = get_current_user_optional(authorization, db)
     if not check_admin_or_cmo(user, x_demo_role):
-        raise HTTPException(403, "Добавление астронавтов разрешено только Врачу ЦУП (CMO) или Командиру экспедиции.")
+        raise HTTPException(403, "Adding crew members is restricted to Flight Surgeon (CMO) or Expedition Commander.")
 
     if not db.get(Mission, data.mission_id):
         raise HTTPException(400, "Unknown mission")
@@ -472,7 +473,7 @@ def edit_astronaut(
         is_self = True
 
     if not (is_admin or is_self):
-        raise HTTPException(403, "У вас нет прав на редактирование данных этого астронавта (требуется роль Врача ЦУП, Командира или доступ к своему профилю)")
+        raise HTTPException(403, "Unauthorized: Modifying astronaut telemetry requires Flight Surgeon (CMO) or Commander clearance.")
 
     for key, value in data.model_dump(exclude_unset=True).items():
         if value is not None or key in ["avatar_url", "notes", "emergency_contact"]:
@@ -502,12 +503,12 @@ def delete_astronaut(
 
     is_admin = check_admin_or_cmo(user, x_demo_role)
     if not is_admin:
-        raise HTTPException(403, "Отстранение или удаление членов экипажа разрешено только Врачу ЦУП (CMO) или Командиру экспедиции.")
+        raise HTTPException(403, "Unauthorized: Suspending or removing crew members requires Flight Surgeon (CMO) or Commander clearance.")
 
     person.active = False
     db.add(MissionEvent(
-        title=f"Отстранение члена экипажа: {person.name} ({person.callsign})",
-        detail=f"Член экипажа был отозван из активного состава миссии решением медицинского штаба ЦУП.",
+        title=f"Crew member suspended: {person.name} ({person.callsign})",
+        detail=f"Crew member was reassigned from active flight status by Mission Control Medical Staff.",
         kind="alarm"
     ))
     db.commit()
@@ -531,7 +532,7 @@ def update_avatar(
         is_self = True
 
     if not (is_admin or is_self):
-        raise HTTPException(403, "Недостаточно прав для смены аватара")
+        raise HTTPException(403, "Unauthorized: Insufficient clearance to modify crew avatar")
 
     person.avatar_url = data.avatar_url
     if user:
@@ -652,7 +653,7 @@ def save_execution(protocol_id: int, payload: ProtocolExecutionInput, db: Sessio
         raise HTTPException(404, "Protocol not found")
     astro_id = payload.astronaut_id or db.scalar(select(Astronaut.id).limit(1)) or 1
     person = db.get(Astronaut, astro_id)
-    executor_name = payload.executed_by or (person.name if person else "Д-р Майя Чен (CMO)")
+    executor_name = payload.executed_by or (person.name if person else "Dr. Maya Chen (CMO)")
 
     allowed = {step.id for step in protocol.steps}
     steps_to_save = [s for s in payload.completed_steps if s in allowed]
@@ -662,7 +663,7 @@ def save_execution(protocol_id: int, payload: ProtocolExecutionInput, db: Sessio
     execution_meta = {
         "steps": steps_to_save,
         "executed_by": executor_name,
-        "notes": payload.notes or "Все шаги стандартной операционной процедуры (SOP) выполнены в полном объеме.",
+        "notes": payload.notes or "All Standard Operating Procedure (SOP) steps executed in full compliance with NASA STD-3001.",
     }
     execution = ProtocolExecution(
         protocol_id=protocol_id,
@@ -671,8 +672,8 @@ def save_execution(protocol_id: int, payload: ProtocolExecutionInput, db: Sessio
     )
     db.add(execution)
     db.add(MissionEvent(
-        title=f"Протокол выполнен: {protocol.title}",
-        detail=f"Исполнитель: {executor_name}. Выполнено {len(steps_to_save)} из {len(protocol.steps)} шагов алгоритма.",
+        title=f"Protocol executed: {protocol.title}",
+        detail=f"Operator: {executor_name}. Completed {len(steps_to_save)} of {len(protocol.steps)} procedural steps.",
         kind="medical",
     ))
     db.commit()
@@ -695,15 +696,15 @@ def protocol_executions(protocol_id: int, astronaut_id: Optional[int] = None, db
             parsed = {}
         if isinstance(parsed, dict):
             completed_steps = parsed.get("steps", [])
-            executed_by = parsed.get("executed_by", "Алекс Нова")
+            executed_by = parsed.get("executed_by", "Alex Nova")
             notes = parsed.get("notes", "")
         elif isinstance(parsed, list):
             completed_steps = parsed
-            executed_by = "Д-р Майя Чен"
+            executed_by = "Dr. Maya Chen"
             notes = ""
         else:
             completed_steps = []
-            executed_by = "Д-р Майя Чен"
+            executed_by = "Dr. Maya Chen"
             notes = ""
         results.append({
             "id": row.id,
@@ -759,44 +760,19 @@ def report(person_id: int, days: int = 7, db: Session = Depends(get_db)):
 
 @app.get("/api/reports/{person_id}/pdf")
 def report_pdf(person_id: int, days: int = 7, db: Session = Depends(get_db)):
-    data = report(person_id, days, db)
-    buffer = io.BytesIO()
-    pdf = canvas.Canvas(buffer, pagesize=A4)
-    pdf.setTitle("CosmoHealthX demo health report")
-    pdf.setFont("Helvetica-Bold", 18)
-    pdf.drawString(48, 790, "CosmoHealthX | Demo Health Report")
-    pdf.setFont("Helvetica", 11)
-    pdf.drawString(48, 765, f"Astronaut: {data['astronaut']} | Period: {days} days")
-    pdf.drawString(48, 748, "Synthetic demonstration data. Not for clinical use.")
-    pdf.drawString(48, 731, f"Crew: {data['crew_count']} | Notifications in period: {data['notifications_count']}")
-    y = 716
-    for key, item in data["metrics"].items():
-        delta = item["change_vs_previous"]
-        comparison = f" | change {delta:+g}" if delta is not None else " | no previous period"
-        pdf.drawString(48, y, f"{key}: mean {item['mean']} {item['unit']} | min {item['min']} | max {item['max']} | n={item['count']}{comparison}")
-        y -= 22
-    pdf.drawString(48, 408, f"Check-ins: {data['checkins']['count']} | Mean mood: {data['checkins']['mean_mood'] or 'n/a'} | Mean stress: {data['checkins']['mean_stress'] or 'n/a'}")
-    values = [point["value"] for point in data["series"] if point["key"] == "heart_rate"]
-    if values:
-        pdf.setFont("Helvetica-Bold", 12)
-        pdf.drawString(48, 370, "Heart rate observations (bpm)")
-        pdf.setStrokeColorRGB(0.15, 0.45, 0.55)
-        pdf.line(48, 170, 548, 170)
-        pdf.line(48, 170, 48, 340)
-        low, high = min(values), max(values)
-        span = high - low or 1
-        pdf.setStrokeColorRGB(0.05, 0.65, 0.78)
-        for index in range(1, len(values)):
-            x1 = 48 + (index - 1) * 500 / max(1, len(values) - 1)
-            x2 = 48 + index * 500 / max(1, len(values) - 1)
-            y1 = 180 + (values[index - 1] - low) * 150 / span
-            y2 = 180 + (values[index] - low) * 150 / span
-            pdf.line(x1, y1, x2, y2)
-        pdf.setFont("Helvetica", 9)
-        pdf.drawString(48, 152, f"Min {low:g} bpm")
-        pdf.drawRightString(548, 152, f"Max {high:g} bpm")
-    pdf.save()
-    return Response(buffer.getvalue(), media_type="application/pdf", headers={"Content-Disposition": 'attachment; filename="cosmohealthx-report.pdf"'})
+    if not 1 <= days <= 10000:
+        raise HTTPException(422, "Invalid period")
+    person = person_or_404(db, person_id)
+    mission = db.get(Mission, person.mission_id) if person.mission_id else None
+    data = report_data(db, person_id, days)
+    pdf_bytes = generate_medical_dossier_pdf(person, mission, data, days)
+    safe_callsign = (person.callsign or "astro").lower().replace(" ", "-")
+    filename = f"cosmohealthx-dossier-{safe_callsign}-{days}d.pdf"
+    return Response(
+        pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'inline; filename="{filename}"'}
+    )
 
 
 @app.post("/api/ai/analyze")
@@ -814,18 +790,17 @@ async def analyze(data: AIInput, db: Session = Depends(get_db)):
     checkins = db.scalars(select(MentalCheckin).where(MentalCheckin.astronaut_id == astro_id).order_by(MentalCheckin.created_at.desc()).limit(5)).all()
 
     context = {
-        "astronaut": {"name": person.name if person else "Алекс Нова", "specialty": person.specialty if person else "Commander"},
+        "astronaut": {"name": person.name if person else "Alex Nova", "specialty": person.specialty if person else "Commander"},
         "mission_day": 42,
         "recent_metrics": [{"key": r.key, "value": r.value, "unit": r.unit} for r in recent[:12]],
         "checkins": [{"mood": c.mood, "stress": c.stress, "sleep": c.sleep} for c in checkins],
     }
 
     system_prompt = (
-        "Ты — CosmoHealthX AI, продвинутый бортовой медицинский интеллект космической станции экспедиции CHX-01. "
-        "Отвечай профессионально, научно обоснованно и структурированно на русском языке. "
-        "Используй международные нормативы космической медицины NASA STD-3001, ESA HRP и фактическую телеметрию биосенсоров экипажа. "
-        "Анализируй физиологические риски (пульс, кислород SpO2, вариабельность HRV, сон, радиация, скафандры EVA). "
-        f"Телеметрия биосенсоров: {json.dumps(context, ensure_ascii=False)}"
+        "You are CosmoHealthX AI, an advanced onboard flight surgeon and biomedical telemetry intelligence for Expedition CHX-01. "
+        "Respond professionally, scientifically structured, and concise in English in accordance with NASA STD-3001 and ESA HRP spaceflight medical standards. "
+        "Analyze physiological hazards (heart rate, SpO2, HRV autonomic tone, deep sleep, ionizing radiation, and EMU suit metrics). "
+        f"Crew Telemetry Context: {json.dumps(context, ensure_ascii=False)}"
     )
 
     answer = ""
@@ -833,21 +808,21 @@ async def analyze(data: AIInput, db: Session = Depends(get_db)):
         async with httpx.AsyncClient(timeout=25) as client:
             response = await client.post(
                 f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}",
-                json={"contents": [{"parts": [{"text": f"{system_prompt}\n\nКлинический запрос: {query_text}"}]}]},
+                json={"contents": [{"parts": [{"text": f"{system_prompt}\n\nClinical Query: {query_text}"}]}]},
             )
             response.raise_for_status()
             answer = response.json()["candidates"][0]["content"]["parts"][0]["text"]
     except Exception as exc:
         answer = (
-            f"Телеметрия биосенсоров космонавта {person.name if person else 'Алекс Нова'} (ЧСС: 72 bpm, SpO₂: 98%, вариабельность HRV: 54 мс): "
-            f"Показатели находятся в пределах допустимых физиологических норм NASA STD-3001. "
-            f"По вашему запросу «{query_text}»: признаков критической десатурации или перегрузки сердечно-сосудистой системы не зафиксировано. "
-            f"Рекомендовано соблюдение суточного питьевого режима (2.1 л/сутки) и продолжение мониторинга в штатном режиме."
+            f"Biosensor telemetry for {person.name if person else 'Alex Nova'} (HR: 72 bpm, SpO₂: 98%, HRV: 54 ms, Core Temp: 36.6 °C): "
+            f"All physiological parameters remain within nominal limits of NASA STD-3001. "
+            f"Clinical assessment for query '{query_text}': no signs of acute cardiac arrhythmia, desaturation, or decompression stress detected. "
+            f"Recommended countermeasure: maintain hydration regimen (2.1 L/day) and proceed with standard mission operations."
         )
 
     # Determine risk level based on query keywords
-    ql = query_text.toLowerCase() if hasattr(query_text, 'toLowerCase') else query_text.lower()
-    risk = "high" if any(w in ql for w in ["тахикард", "радиаци", "spe", "авария", "декомпресси"]) else ("medium" if any(w in ql for w in ["сон", "усталост", "стресс", "давлен"]) else "low")
+    ql = query_text.lower()
+    risk = "high" if any(w in ql for w in ["tachycardia", "arrhythmia", "radiation", "spe", "decompression", "dcs", "ammonia"]) else ("medium" if any(w in ql for w in ["sleep", "fatigue", "stress", "pressure"]) else "low")
 
     return {
         "status": "complete",

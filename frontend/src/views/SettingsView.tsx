@@ -91,9 +91,9 @@ export function SettingsView({ theme, onThemeChange }: Props) {
       await syncQueue();
       const status = await queueStatus();
       setOfflineCount(status.pending);
-      showToast(language === "ru" ? "Синхронизация с бортовой шиной завершена успешно." : "Telemetry bus synchronization completed successfully.");
+      showToast("Telemetry bus synchronization completed successfully.");
     } catch {
-      showToast(language === "ru" ? "Автономный режим активен: данные сохранены локально." : "Autonomous mode active: data queued locally.");
+      showToast("Autonomous mode active: data queued locally.");
     } finally {
       setSyncing(false);
     }
@@ -101,7 +101,7 @@ export function SettingsView({ theme, onThemeChange }: Props) {
 
   const handleClearCache = () => {
     localStorage.removeItem("cosmo_cache");
-    showToast(language === "ru" ? "Локальный кэш телеметрии успешно очищен." : "Local telemetry cache cleared.");
+    showToast("Local telemetry cache cleared.");
   };
 
   return (
@@ -177,12 +177,12 @@ export function SettingsView({ theme, onThemeChange }: Props) {
                 value={language}
                 onChange={(e) => {
                   setLanguage(e.target.value as Language);
-                  showToast(e.target.value === "ru" ? "Язык переключён на Русский" : "Language switched to English");
+                  
                 }}
                 style={{ fontWeight: 600, minWidth: "140px" }}
               >
-                <option value="ru">Русский (RU)</option>
-                <option value="en">English (US)</option>
+                
+                
               </select>
             </div>
 

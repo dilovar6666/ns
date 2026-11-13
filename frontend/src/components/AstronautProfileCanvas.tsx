@@ -1,29 +1,42 @@
-import React, { Suspense, useRef, useMemo } from "react";
+import React, { Suspense, useRef, useMemo, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, useGLTF } from "@react-three/drei";
+import { OrbitControls, useGLTF, useAnimations } from "@react-three/drei";
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils.js";
 import type { Group } from "three";
 
 function HelmetOnlyModel() {
   const group = useRef<Group>(null);
-  const { scene } = useGLTF("/models/astronaut.glb");
+  const { scene, animations } = useGLTF("/models/astronaut.glb");
   const clone = useMemo(() => {
     const cloned = SkeletonUtils.clone(scene);
-    cloned.scale.set(1, 1, 1);
+    cloned.scale.set(0.8, 0.8, 0.8);
     return cloned;
   }, [scene]);
+
+  const { actions } = useAnimations(animations, group);
+
+  useEffect(() => {
+    // Play idle animation so the astronaut stands naturally with arms down at sides instead of T-pose
+    const action = actions.idle || actions.floating;
+    if (action) {
+      action.reset().play();
+    }
+    return () => {
+      action?.stop();
+    };
+  }, [actions]);
 
   // Subtle natural floating & breathing movement
   useFrame((state) => {
     if (group.current) {
-      group.current.position.y = -2.06 + Math.sin(state.clock.elapsedTime * 1.4) * 0.015;
+      group.current.position.y = -1.65 + Math.sin(state.clock.elapsedTime * 1.4) * 0.012;
       group.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.45) * 0.12;
     }
   });
 
   return (
-    // Position -2.06m places the astronaut's head/helmet center precisely at [0, 0, 0]
-    <group ref={group} position={[0, -2.06, 0]}>
+    // Position -1.65m places the 0.8-scaled astronaut's head/helmet center precisely at [0, 0, 0]
+    <group ref={group} position={[0, -1.65, 0]}>
       <primitive object={clone} />
     </group>
   );
@@ -31,8 +44,8 @@ function HelmetOnlyModel() {
 
 export function AstronautProfileCanvas() {
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-  const cameraZ = isMobile ? 0.98 : 0.86;
-  const cameraFov = isMobile ? 32 : 29;
+  const cameraZ = isMobile ? 1.08 : 0.96;
+  const cameraFov = isMobile ? 32 : 30;
 
   return (
     <div

@@ -41,7 +41,7 @@ export function LoginView() {
     e.preventDefault();
     setError(null);
     if (!email.trim() || !password.trim()) {
-      setError("Пожалуйста, введите служебный email и пароль");
+      setError("Please enter your mission email and password");
       return;
     }
 
@@ -51,7 +51,7 @@ export function LoginView() {
       const from = (location.state as any)?.from?.pathname || "/dashboard";
       navigate(from, { replace: true });
     } catch (err: any) {
-      setError(err.message || "Ошибка авторизации в ЦУП");
+      setError(err.message || "Mission Control authorization error");
     } finally {
       setLoading(false);
     }
@@ -65,7 +65,7 @@ export function LoginView() {
       const from = (location.state as any)?.from?.pathname || "/dashboard";
       navigate(from, { replace: true });
     } catch (err: any) {
-      setError(err.message || "Ошибка быстрого входа");
+      setError(err.message || "Demo login error");
     } finally {
       setLoading(false);
     }
@@ -80,7 +80,7 @@ export function LoginView() {
       <header className="auth-header">
         <Link to="/" className="auth-back-link">
           <ArrowLeft size={16} />
-          <span>На главную страницу</span>
+          <span>Back to Home Page</span>
         </Link>
         <Link to="/" className="auth-brand">
           <img src="/cosmo-logo.png" alt="CosmoHealth" className="auth-logo-img" />
@@ -101,19 +101,19 @@ export function LoginView() {
             <div className="auth-icon-wrap">
               <ShieldCheck size={28} className="auth-shield-icon" />
             </div>
-            <h1 className="auth-title">Вход в CosmoHealthX</h1>
+            <h1 className="auth-title">Sign In to CosmoHealthX</h1>
             <p className="auth-subtitle">
-              Автономная телемедицинская платформа космической экспедиции CHX-01
+              Autonomous space exploration telemedicine platform CHX-01
             </p>
           </div>
 
           {/* Quick Navigation Tabs */}
           <div className="auth-tab-switch">
             <button type="button" className="auth-tab-btn active">
-              Вход
+              Sign In
             </button>
             <Link to="/register" className="auth-tab-btn">
-              Регистрация
+              Register
             </Link>
           </div>
 
@@ -129,7 +129,7 @@ export function LoginView() {
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="auth-field">
               <label htmlFor="login-email" className="auth-label">
-                Служебный email / позывной
+                Mission Email / Callsign
               </label>
               <div className="auth-input-box">
                 <Mail size={18} className="auth-input-ico" />
@@ -148,7 +148,7 @@ export function LoginView() {
             <div className="auth-field">
               <div className="auth-label-row">
                 <label htmlFor="login-password" className="auth-label">
-                  Пароль доступа
+                  Access Password
                 </label>
                 <span className="auth-hint">demo: cosmo123</span>
               </div>
@@ -167,7 +167,7 @@ export function LoginView() {
                   type="button"
                   className="auth-eye-btn"
                   onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -181,7 +181,7 @@ export function LoginView() {
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
                 />
-                <span>Запомнить сессию на этом терминале</span>
+                <span>Remember session on this console</span>
               </label>
             </div>
 
@@ -193,11 +193,11 @@ export function LoginView() {
               {loading ? (
                 <span className="auth-spinner-wrap">
                   <span className="auth-spinner" />
-                  <span>Авторизация в ЦУП...</span>
+                  <span>Authenticating with Mission Control...</span>
                 </span>
               ) : (
                 <>
-                  <span>Войти в платформу</span>
+                  <span>Sign In to Platform</span>
                   <ArrowRight size={18} />
                 </>
               )}
@@ -208,7 +208,7 @@ export function LoginView() {
           <div className="auth-demo-divider">
             <span className="auth-demo-divider-text">
               <Sparkles size={14} style={{ color: "#38bdf8", marginRight: "6px" }} />
-              Быстрый вход для жюри и экспертов NASA Space Apps
+              Quick Demo Access for NASA Space Apps Judges & Evaluation
             </span>
           </div>
 
@@ -226,7 +226,7 @@ export function LoginView() {
                 >
                   <div className="auth-demo-head">
                     <span className="auth-demo-badge">
-                      {isCMO ? "CMO Врач" : isCDR ? "CDR Командир" : "CREW Бортинженер"}
+                      {isCMO ? "CMO Flight Surgeon" : isCDR ? "CDR Mission Commander" : "CREW Flight Engineer"}
                     </span>
                     <span className="auth-demo-callsign">{preset.callsign}</span>
                   </div>
@@ -239,9 +239,9 @@ export function LoginView() {
 
           {/* Footer of Card */}
           <div className="auth-card-footer">
-            <span>Впервые в системе CosmoHealthX?</span>
+            <span>New to CosmoHealthX?</span>
             <Link to="/register" className="auth-link-highlight">
-              Создать учетную запись →
+              Register Mission Account →
             </Link>
           </div>
         </div>
@@ -250,7 +250,7 @@ export function LoginView() {
         <div className="auth-footer-notice">
           <CheckCircle2 size={14} style={{ color: "#10b981", flexShrink: 0 }} />
           <span>
-            Защищенный шлюз телеметрии с проверкой роли оператора по стандартам NASA STD-3001. Все соединения шифруются по протоколу TLS 1.3 / AES-256.
+            Secured telemetry gateway with role verification per NASA STD-3001. All connections encrypted with TLS 1.3 / AES-256.
           </span>
         </div>
       </main>

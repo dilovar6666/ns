@@ -30,46 +30,46 @@ function getEventIllustration(ev: Event): { src: string; caption: string } | nul
   const t = ev.title?.toLowerCase() || "";
   const d = ev.detail?.toLowerCase() || "";
 
-  if (k === "eva" || t.includes("eva") || d.includes("spacewalk") || d.includes("выход")) {
+  if (k === "eva" || t.includes("eva") || d.includes("spacewalk") ) {
     return {
       src: "/cosmo-assets/ba923833-5f1d-4dae-9dd6-d6952c8dcfcb.jpg",
-      caption: "Выход в открытый космос (EVA) за бортом орбитального комплекса",
+      caption: "Extravehicular Activity (EVA) on exterior orbital truss",
     };
   }
-  if (k === "alarm" || t.includes("spe") || t.includes("solar") || d.includes("радиаци") || d.includes("shelter")) {
+  if (k === "alarm" || t.includes("spe") || t.includes("solar")  || d.includes("shelter")) {
     return {
       src: "/cosmo-assets/208b3c2d-afa7-4c68-923d-eab64f784c93.jpg",
-      caption: "Солнечная активность класса M-4.2 — датчики радиационного фона",
+      caption: "Solar Particle Event (SPE) class M-4.2 — Radiation Dosimeter Array",
     };
   }
-  if (t.includes("sleep") || t.includes("psychological") || d.includes("circadian") || d.includes("сон")) {
+  if (t.includes("sleep") || t.includes("psychological") || d.includes("circadian") ) {
     return {
       src: "/cosmo-assets/11a03e3e-a153-4315-9904-1f351cd36f3c.jpg",
-      caption: "Модуль обзора Купола — циркадный биоритм и анализ сна",
+      caption: "Cupola Observation Module — Circadian Biorhythm & Sleep Architecture",
     };
   }
   if (k === "science" || t.includes("genelab") || d.includes("biospecimen") || d.includes("glovebox")) {
     return {
       src: "/cosmo-assets/35fb7de0-00f0-49aa-962c-d1d2eb3441df.jpg",
-      caption: "Биолаборатория Glovebox и криохранилище MELFI (-80°C)",
+      caption: "Life Science Glovebox & MELFI Cryogenic Freezer (-80°C)",
     };
   }
-  if (k === "orbit" || t.includes("docking") || d.includes("стыковк")) {
+  if (k === "orbit" || t.includes("docking") ) {
     return {
       src: "/cosmo-assets/fbbcacc7-e14e-4b50-adea-e8433a3fa66e.jpg",
-      caption: "Автоматическое сближение и захват стыковочного узла",
+      caption: "Automated Proximity Rendezvous & Docking Mechanism Capture",
     };
   }
-  if (t.includes("launch") || t.includes("старт") || d.includes("falcon")) {
+  if (t.includes("launch")  || d.includes("falcon")) {
     return {
       src: "/cosmo-assets/0d365bce-f1ee-4b68-99e2-98eaed0bf5cc.jpg",
-      caption: "Старт ракеты-носителя со стартовой площадки LC-39A",
+      caption: "Launch Vehicle Ascent from Launch Complex LC-39A",
     };
   }
   if (k === "medical" || t.includes("orthostatic") || t.includes("scan")) {
     return {
       src: "/cosmo-assets/0018b717-a6c5-46e2-80da-e25263a42a90.jpg",
-      caption: "Ультразвуковой и кардиологический осмотр в невесомости",
+      caption: "Zero-G Ultrasound Examination & Hemodynamic Assessment",
     };
   }
   return null;
@@ -82,49 +82,49 @@ function getTelemetryCallout(ev: Event): { text: string; crew: string } {
 
   if (k === "eva") {
     return {
-      text: "PLSS телеметрия: пик ЧСС 138 bpm · О2 расход: 1.15 л/мин · Давление: 29.6 кПа",
-      crew: "Алекс Нова (EV1), Ибрагим Рахман (EV2)",
+      text: "PLSS telemetry: Peak HR 138 bpm · O2 consumption: 1.15 L/min · Suit Pressure: 29.6 kPa",
+      crew: "Alex Nova (EV1), Ibrahim Rahman (EV2)",
     };
   }
   if (k === "alarm") {
     return {
-      text: "Дозиметрия: пик дозы 4.8 мЗв/ч · Укрытие в модуле с защитным водяным экраном",
-      crew: "Весь экипаж миссии CHX-01",
+      text: "Dosimetry: Peak dose rate 4.8 mSv/h · Crew sequestered in storm shelter with water shielding",
+      crew: "All Expedition CHX-01 Crew",
     };
   }
   if (k === "medical") {
     if (t.includes("sleep")) {
       return {
-        text: "Актиграфия: дефицит глубокого сна SWS 14% · Спектр освещения смещен в теплый диапазон",
-        crew: "Алекс Нова, контроль: Д-р Майя Чен",
+        text: "Actigraphy: SWS deep sleep deficit 14% · Habitat LED shifted to warm 2200K circadian spectrum",
+        crew: "Alex Nova, monitoring: Dr. Maya Chen (CMO)",
       };
     }
     return {
-      text: "Гемодинамика: сдвиг жидкости в цефалическом направлении в норме · Синдром SANS не выявлен",
-      crew: "Д-р Майя Чен",
+      text: "Hemodynamics: Cephalad fluid shift within nominal bounds · No SANS optical edema detected",
+      crew: "Dr. Maya Chen (CMO)",
     };
   }
   if (k === "science") {
     return {
-      text: "GeneLab ID: GL-884 · 32 пробы венозной крови заморожены при -80°C",
-      crew: "Ибрагим Рахман, Майя Чен",
+      text: "GeneLab ID: GL-884 · 32 whole-blood specimens cryopreserved at -80°C in MELFI unit",
+      crew: "Ibrahim Rahman, Dr. Maya Chen",
     };
   }
   if (k === "orbit") {
     return {
-      text: "Навигация: Δv = 1.4 м/с · Герметичность шлюза 101.3 кПа подтверждена",
-      crew: "Алекс Нова (Командир)",
+      text: "Navigation: Δv = 1.4 m/s · Vestibule seal at 101.3 kPa verified nominal",
+      crew: "Alex Nova (Mission Commander)",
     };
   }
   if (k === "mission") {
     return {
-      text: "Траектория выведения: Апогей 408 км · Наклонение 51.6° · Перегрузка: max 3.4g",
-      crew: "Экипаж CHX-01",
+      text: "Ascent Trajectory: Apogee 408 km · Inclination 51.6° · Peak acceleration: 3.4g",
+      crew: "Expedition CHX-01 Crew",
     };
   }
   return {
-    text: "Телеметрия биосенсоров передана в ЦУП без аномалий",
-    crew: "Бортовой ИИ / Автономный модуль",
+    text: "Biosensor telemetry downlinked to Mission Control without anomalies",
+    crew: "Clinical AI Copilot / Autonomous Core",
   };
 }
 
@@ -164,19 +164,19 @@ export function TimelineView() {
   const getEventBadge = (kind: string) => {
     switch (kind?.toLowerCase()) {
       case "eva":
-        return { label: "EVA · Выход", color: "#3b82f6", bg: "rgba(59, 130, 246, 0.15)", icon: Rocket };
+        return { label: "EVA Spacewalk", color: "#3b82f6", bg: "rgba(59, 130, 246, 0.15)", icon: Rocket };
       case "medical":
-        return { label: "Медицина", color: "#10b981", bg: "rgba(16, 185, 129, 0.15)", icon: Heart };
+        return { label: "Medical", color: "#10b981", bg: "rgba(16, 185, 129, 0.15)", icon: Heart };
       case "alarm":
-        return { label: "Алерт / Радиация", color: "#ef4444", bg: "rgba(239, 68, 68, 0.18)", icon: AlertTriangle };
+        return { label: "Alert / SPE Radiation", color: "#ef4444", bg: "rgba(239, 68, 68, 0.18)", icon: AlertTriangle };
       case "science":
-        return { label: "Эксперимент", color: "#a855f7", bg: "rgba(168, 85, 247, 0.15)", icon: FlaskConical };
+        return { label: "Science Experiment", color: "#a855f7", bg: "rgba(168, 85, 247, 0.15)", icon: FlaskConical };
       case "orbit":
-        return { label: "Орбита", color: "#06b6d4", bg: "rgba(6, 182, 212, 0.15)", icon: Orbit };
+        return { label: "Orbital Mechanics", color: "#06b6d4", bg: "rgba(6, 182, 212, 0.15)", icon: Orbit };
       case "mission":
-        return { label: "Миссия", color: "#f59e0b", bg: "rgba(245, 158, 11, 0.15)", icon: Compass };
+        return { label: "Mission Operations", color: "#f59e0b", bg: "rgba(245, 158, 11, 0.15)", icon: Compass };
       default:
-        return { label: "Событие", color: "#94a3b8", bg: "rgba(148, 163, 184, 0.15)", icon: Activity };
+        return { label: "Mission Event", color: "#94a3b8", bg: "rgba(148, 163, 184, 0.15)", icon: Activity };
     }
   };
 
@@ -214,15 +214,15 @@ export function TimelineView() {
           <div className="up">
             <div className="timeline-tag-row">
               <span className="timeline-tag-mission">
-                Бортовой журнал и хронология полета
+                MISSION LOG & FLIGHT CHRONOLOGY
               </span>
               <span className="timeline-tag-badge">
-                ● Активная телеметрия
+                ● Active Telemetry
               </span>
             </div>
             <h1 className="lt disp" style={{ margin: "0 0 6px" }}>Mission Timeline & Flight Log</h1>
             <p className="sub" style={{ margin: 0, maxWidth: "720px", color: "var(--t2)" }}>
-              Хронология ключевых этапов экспедиции CHX-01, выходы в открытый космос (EVA), радиационные события SPE и динамика клинического состояния экипажа.
+              Chronology of key Expedition CHX-01 flight milestones, extravehicular activities (EVA), solar particle events (SPE), and crew physiological adaptation log.
             </p>
           </div>
 
@@ -231,7 +231,7 @@ export function TimelineView() {
             className="timeline-add-btn"
           >
             <Plus size={16} />
-            <span>Добавить событие</span>
+            <span>+ Log Mission Event</span>
           </button>
         </div>
       </header>
@@ -250,49 +250,49 @@ export function TimelineView() {
         <div className="timeline-telemetry-grid">
           <div className="timeline-telemetry-tile">
             <div className="timeline-telemetry-label">
-              Текущая орбита
+              CURRENT ORBIT
             </div>
             <div className="timeline-telemetry-val" style={{ color: "var(--pr)" }}>
-              408.4 <span style={{ fontSize: "14px", fontWeight: 500, color: "var(--t2)" }}>км LEO</span>
+              408.4 <span style={{ fontSize: "14px", fontWeight: 500, color: "var(--t2)" }}>km LEO</span>
             </div>
             <div className="timeline-telemetry-sub">
-              Апогей 415 км · Перигей 402 км
+              Apogee 415 km · Perigee 402 km
             </div>
           </div>
 
           <div className="timeline-telemetry-tile">
             <div className="timeline-telemetry-label">
-              Орбитальная скорость
+              ORBITAL VELOCITY
             </div>
             <div className="timeline-telemetry-val" style={{ color: "var(--cy)" }}>
-              7.66 <span style={{ fontSize: "14px", fontWeight: 500, color: "var(--t2)" }}>км/с</span>
+              7.66 <span style={{ fontSize: "14px", fontWeight: 500, color: "var(--t2)" }}>km/s</span>
             </div>
             <div className="timeline-telemetry-sub">
-              27 576 км/ч · Виток #672
+              27,576 km/h · Orbit #672
             </div>
           </div>
 
           <div className="timeline-telemetry-tile">
             <div className="timeline-telemetry-label">
-              Прогресс миссии (MET)
+              MISSION ELAPSED TIME (MET)
             </div>
             <div className="timeline-telemetry-val" style={{ color: "var(--tx)" }}>
-              День 42 <span style={{ fontSize: "14px", fontWeight: 500, color: "var(--t2)" }}>из 180</span>
+              Day 42 <span style={{ fontSize: "14px", fontWeight: 500, color: "var(--t2)" }}>of 180</span>
             </div>
             <div className="timeline-telemetry-sub">
-              23.3% программы CHX-01
+              23.3% of mission completed
             </div>
           </div>
 
           <div className="timeline-telemetry-tile">
             <div className="timeline-telemetry-label">
-              Канал связи ЦУП
+              KU-BAND GROUND LINK
             </div>
             <div className="timeline-telemetry-val" style={{ color: "#10b981", display: "flex", alignItems: "center", gap: "6px" }}>
               <Radio size={18} className="pulse" /> Ku-Band
             </div>
             <div className="timeline-telemetry-sub">
-              120 мс · 0 потерь
+              120 ms · 0% loss
             </div>
           </div>
         </div>
@@ -301,10 +301,10 @@ export function TimelineView() {
         <div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", flexWrap: "wrap", gap: "6px" }}>
             <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--t1)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-              Фазы экспедиции CHX-01
+              EXPEDITION CHX-01 FLIGHT PHASES
             </span>
             <span style={{ fontSize: "12px", color: "var(--t2)" }}>
-              Текущая: <strong style={{ color: "var(--pr)" }}>Фаза III — Серия EVA</strong>
+              Current: <strong style={{ color: "var(--pr)" }}>Phase III — EVA Series</strong>
             </span>
           </div>
 
@@ -312,51 +312,51 @@ export function TimelineView() {
             {/* Phase 1 */}
             <div style={{ background: "var(--s2)", padding: "12px 14px", borderRadius: "12px", border: "1px solid rgba(16, 185, 129, 0.3)" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontSize: "11px", color: "#10b981", fontWeight: 700 }}>ФАЗА 1 (ДЕНЬ 1)</span>
+                <span style={{ fontSize: "11px", color: "#10b981", fontWeight: 700 }}>PHASE 1 (DAY 1)</span>
                 <CheckCircle2 size={14} color="#10b981" />
               </div>
-              <div style={{ fontSize: "13px", fontWeight: 700, margin: "4px 0 2px" }}>Старт и выведение</div>
-              <div style={{ fontSize: "11px", color: "var(--t3)" }}>LC-39A · Орбита 408 км</div>
+              <div style={{ fontSize: "13px", fontWeight: 700, margin: "4px 0 2px" }}>Ascent & Orbital Insertion</div>
+              <div style={{ fontSize: "11px", color: "var(--t3)" }}>LC-39A · Orbit 408 km</div>
             </div>
 
             {/* Phase 2 */}
             <div style={{ background: "var(--s2)", padding: "12px 14px", borderRadius: "12px", border: "1px solid rgba(16, 185, 129, 0.3)" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontSize: "11px", color: "#10b981", fontWeight: 700 }}>ФАЗА 2 (ДНИ 2–14)</span>
+                <span style={{ fontSize: "11px", color: "#10b981", fontWeight: 700 }}>PHASE 2 (DAYS 2–14)</span>
                 <CheckCircle2 size={14} color="#10b981" />
               </div>
-              <div style={{ fontSize: "13px", fontWeight: 700, margin: "4px 0 2px" }}>Стыковка и адаптация</div>
-              <div style={{ fontSize: "11px", color: "var(--t3)" }}>Герметизация шлюзов</div>
+              <div style={{ fontSize: "13px", fontWeight: 700, margin: "4px 0 2px" }}>Docking & Zero-G Adaptation</div>
+              <div style={{ fontSize: "11px", color: "var(--t3)" }}>Vestibule Pressurization</div>
             </div>
 
             {/* Phase 3 - Current */}
             <div style={{ background: "rgba(59, 130, 246, 0.12)", padding: "12px 14px", borderRadius: "12px", border: "1px solid var(--pr)" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontSize: "11px", color: "var(--pr)", fontWeight: 800 }}>ФАЗА 3 (ДНИ 15–60) · СЕЙЧАС</span>
+                <span style={{ fontSize: "11px", color: "var(--pr)", fontWeight: 800 }}>PHASE 3 (DAYS 15–60) · ACTIVE NOW</span>
                 <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--pr)", boxShadow: "0 0 8px var(--pr)" }} />
               </div>
-              <div style={{ fontSize: "13px", fontWeight: 800, margin: "4px 0 2px", color: "var(--pr)" }}>Наука и серия EVA</div>
-              <div style={{ fontSize: "11px", color: "var(--t2)" }}>EVA-1 завершен · EVA-2 подготовка</div>
+              <div style={{ fontSize: "13px", fontWeight: 800, margin: "4px 0 2px", color: "var(--pr)" }}>Orbital Science & EVA Series</div>
+              <div style={{ fontSize: "11px", color: "var(--t2)" }}>EVA-1 complete · EVA-2 ingress prep</div>
             </div>
 
             {/* Phase 4 */}
             <div style={{ background: "var(--s2)", padding: "12px 14px", borderRadius: "12px", border: "1px solid var(--sep)", opacity: 0.65 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontSize: "11px", color: "var(--t3)", fontWeight: 600 }}>ФАЗА 4 (ДНИ 61–150)</span>
+                <span style={{ fontSize: "11px", color: "var(--t3)", fontWeight: 600 }}>PHASE 4 (DAYS 61–150)</span>
                 <Clock size={14} color="var(--t3)" />
               </div>
-              <div style={{ fontSize: "13px", fontWeight: 600, margin: "4px 0 2px" }}>Длительная невесомость</div>
-              <div style={{ fontSize: "11px", color: "var(--t3)" }}>Омика GeneLab & Кости</div>
+              <div style={{ fontSize: "13px", fontWeight: 600, margin: "4px 0 2px" }}>Long-Duration Microgravity</div>
+              <div style={{ fontSize: "11px", color: "var(--t3)" }}>GeneLab Multi-Omics & Bone Health</div>
             </div>
 
             {/* Phase 5 */}
             <div style={{ background: "var(--s2)", padding: "12px 14px", borderRadius: "12px", border: "1px solid var(--sep)", opacity: 0.65 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontSize: "11px", color: "var(--t3)", fontWeight: 600 }}>ФАЗА 5 (ДНИ 151–180)</span>
+                <span style={{ fontSize: "11px", color: "var(--t3)", fontWeight: 600 }}>PHASE 5 (DAYS 151–180)</span>
                 <Clock size={14} color="var(--t3)" />
               </div>
-              <div style={{ fontSize: "13px", fontWeight: 600, margin: "4px 0 2px" }}>Расстыковка & Посадка</div>
-              <div style={{ fontSize: "11px", color: "var(--t3)" }}>Реабилитационный протокол</div>
+              <div style={{ fontSize: "13px", fontWeight: 600, margin: "4px 0 2px" }}>Undocking, Deorbit & Landing</div>
+              <div style={{ fontSize: "11px", color: "var(--t3)" }}>Post-Flight Reconditioning</div>
             </div>
           </div>
         </div>
@@ -376,12 +376,12 @@ export function TimelineView() {
         {/* Category Pills */}
         <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
           {[
-            { id: "all", label: "Все события", count: events.length },
-            { id: "eva", label: "EVA & Скафандры", count: events.filter((e) => e.kind === "eva").length },
-            { id: "medical", label: "Медицина & Сон", count: events.filter((e) => e.kind === "medical" || e.kind === "checkin").length },
-            { id: "alarm", label: "Алерты & SPE", count: events.filter((e) => e.kind === "alarm").length },
-            { id: "science", label: "Эксперименты", count: events.filter((e) => e.kind === "science").length },
-            { id: "orbit", label: "Орбита & Полет", count: events.filter((e) => e.kind === "orbit" || e.kind === "mission").length },
+            { id: "all", label: "All Events", count: events.length },
+            { id: "eva", label: "EVA & Space Suits", count: events.filter((e) => e.kind === "eva").length },
+            { id: "medical", label: "Medical & Sleep Architecture", count: events.filter((e) => e.kind === "medical" || e.kind === "checkin").length },
+            { id: "alarm", label: "Alerts & SPE", count: events.filter((e) => e.kind === "alarm").length },
+            { id: "science", label: "Science & Omics", count: events.filter((e) => e.kind === "science").length },
+            { id: "orbit", label: "Orbit & Flight", count: events.filter((e) => e.kind === "orbit" || e.kind === "mission").length },
           ].map((cat) => {
             const isSelected = activeFilter === cat.id;
             return (
@@ -425,7 +425,7 @@ export function TimelineView() {
           <Search size={15} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--t3)" }} />
           <input
             type="text"
-            placeholder="Поиск по событиям или записям..."
+            placeholder="Search mission log entries, anomalies, or crew..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
@@ -454,21 +454,21 @@ export function TimelineView() {
       {isLoading ? (
         <div className="cd" style={{ textAlign: "center", padding: "80px 20px" }}>
           <Activity className="spin" size={32} style={{ color: "var(--pr)", margin: "0 auto 12px" }} />
-          <p className="sub">Загрузка хронологии полета и данных телеметрии...</p>
+          <p className="sub">Loading flight timeline and telemetry log...</p>
         </div>
       ) : filteredEvents.length === 0 ? (
         <div className="cd empty" style={{ textAlign: "center", padding: "60px 20px" }}>
           <Compass size={40} style={{ color: "var(--t3)", margin: "0 auto 12px" }} />
-          <h2 className="h2" style={{ margin: "0 0 6px" }}>События не найдены</h2>
+          <h2 className="h2" style={{ margin: "0 0 6px" }}>No Mission Events Found</h2>
           <p className="cap" style={{ maxWidth: "420px", margin: "0 auto" }}>
-            По заданному фильтру или поисковому запросу ничего не обнаружено. Сбросьте фильтры или добавьте новую запись.
+            No events match active filter or query. Reset filters or log a new mission event.
           </p>
           <button
             onClick={() => { setActiveFilter("all"); setSearchQuery(""); }}
             className="btn sec"
             style={{ marginTop: "16px" }}
           >
-            Сбросить фильтры
+            Reset Filters
           </button>
         </div>
       ) : (
@@ -494,7 +494,7 @@ export function TimelineView() {
 
             // Calculate formatted date and MET day estimation
             const eventDate = new Date(ev.occurred_at);
-            const formattedDate = eventDate.toLocaleString("ru-RU", {
+            const formattedDate = eventDate.toLocaleString("en-US", {
               day: "numeric",
               month: "long",
               year: "numeric",
@@ -613,7 +613,7 @@ export function TimelineView() {
                       >
                         <span>{photo.caption}</span>
                         <span style={{ fontSize: "11px", opacity: 0.8, textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                          Бортовая фотофиксация
+                          Flight Imaging Telemetry
                         </span>
                       </div>
                     </div>
@@ -638,7 +638,7 @@ export function TimelineView() {
                     </div>
 
                     <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--t3)" }}>
-                      <span style={{ fontWeight: 600 }}>Экипаж:</span>
+                      <span style={{ fontWeight: 600 }}>Crew:</span>
                       <span style={{ color: "var(--tx)", fontWeight: 500 }}>{telemetry.crew}</span>
                     </div>
                   </div>
@@ -680,7 +680,7 @@ export function TimelineView() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <Rocket size={20} style={{ color: "var(--pr)" }} />
-                <h2 style={{ margin: 0, fontSize: "18px", fontWeight: 700 }}>Запись в бортовой журнал</h2>
+                <h2 style={{ margin: 0, fontSize: "18px", fontWeight: 700 }}>Add Entry to Mission Log</h2>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -693,16 +693,16 @@ export function TimelineView() {
             <form onSubmit={handleAddSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
               <div>
                 <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "var(--t2)", marginBottom: "6px" }}>
-                  Категория события
+                  Event Category
                 </label>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px" }}>
                   {[
-                    { id: "eva", label: "EVA · Выход" },
-                    { id: "medical", label: "Медицина" },
-                    { id: "alarm", label: "Алерт / SPE" },
-                    { id: "science", label: "Эксперимент" },
-                    { id: "orbit", label: "Орбита" },
-                    { id: "mission", label: "Миссия" },
+                    { id: "eva", label: "EVA Spacewalk" },
+                    { id: "medical", label: "Medical" },
+                    { id: "alarm", label: "Alert / Radiation SPE" },
+                    { id: "science", label: "Science & Lab" },
+                    { id: "orbit", label: "Orbital Mechanics" },
+                    { id: "mission", label: "Mission Ops" },
                   ].map((cat) => (
                     <button
                       key={cat.id}
@@ -727,11 +727,11 @@ export function TimelineView() {
 
               <div>
                 <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "var(--t2)", marginBottom: "6px" }}>
-                  Заголовок записи
+                  Event Title
                 </label>
                 <input
                   type="text"
-                  placeholder="Например: Завершена калибровка ультразвукового датчика"
+                  placeholder="e.g. Ultrasound transducer calibration completed"
                   value={newEventTitle}
                   onChange={(e) => setNewEventTitle(e.target.value)}
                   required
@@ -750,11 +750,11 @@ export function TimelineView() {
 
               <div>
                 <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "var(--t2)", marginBottom: "6px" }}>
-                  Подробное описание и клинические отметки
+                  Detailed Description & Clinical Observations
                 </label>
                 <textarea
                   rows={4}
-                  placeholder="Опишите ход операции, показания биосенсоров экипажа или возникшие нештатные ситуации..."
+                  placeholder="Describe procedural progress, astronaut sensor readings, or operational anomalies..."
                   value={newEventDetail}
                   onChange={(e) => setNewEventDetail(e.target.value)}
                   required
@@ -779,7 +779,7 @@ export function TimelineView() {
                   className="btn sec"
                   style={{ padding: "10px 16px", borderRadius: "10px" }}
                 >
-                  Отмена
+                  Cancel
                 </button>
                 <button
                   type="submit"
@@ -787,7 +787,7 @@ export function TimelineView() {
                   className="btn pri"
                   style={{ padding: "10px 20px", borderRadius: "10px", display: "flex", alignItems: "center", gap: "6px" }}
                 >
-                  {createEventMutation.isPending ? "Сохранение..." : "Опубликовать в журнал"}
+                  {createEventMutation.isPending ? "Committing..." : "Commit to Flight Log"}
                 </button>
               </div>
             </form>

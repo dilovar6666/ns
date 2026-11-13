@@ -33,6 +33,8 @@ import {
   Sun,
   Moon,
   Globe,
+  PanelLeftClose,
+  PanelLeft,
 } from "lucide-react";
 import { api, latest } from "./api";
 import type { Astronaut, Metric, Notification } from "./api";
@@ -83,6 +85,25 @@ export default function App() {
   // Selected astronaut state
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Collapsible sidebar state (persisted in localStorage)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("cosmohealth_sidebar_collapsed") === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("cosmohealth_sidebar_collapsed", String(next));
+      } catch {}
+      return next;
+    });
+  };
 
   // Close mobile drawer on route change
   useEffect(() => {
@@ -185,27 +206,43 @@ export default function App() {
   }
 
   return (
-    <div className={`cx app ${theme}`}>
+    <div className={`cx app ${theme} ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
       <AuthModal />
       {/* Sidebar Navigation */}
-      <aside className="side" aria-label="Главное меню">
-        {/* Brand Logo */}
-        <Link className="brand" to="/" title="На главную" style={{ padding: "6px 8px", display: "flex", alignItems: "center" }}>
-          <img src="/cosmo-logo.png" alt="CosmoHealth" className="brand-logo-img" />
-        </Link>
+      <aside className={`side ${sidebarCollapsed ? "collapsed" : ""}`} aria-label="Main Navigation Menu">
+        {/* Brand Logo & Collapse Toggle Row */}
+        <div className="side-brand-row">
+          {!sidebarCollapsed && (
+            <Link className="brand" to="/" title="Back to Home" style={{ padding: "4px 6px", display: "flex", alignItems: "center" }}>
+              <img src="/cosmo-logo.png" alt="CosmoHealth" className="brand-logo-img" />
+            </Link>
+          )}
+          <button
+            type="button"
+            className="side-collapse-btn"
+            onClick={toggleSidebar}
+            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {sidebarCollapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
+          </button>
+        </div>
 
         {/* Primary Navigation Items */}
-        <nav className="nav" aria-label="Разделы">
-          {/* SECTION 1: Личный терминал космонавта */}
-          <div style={{ padding: "0 12px", marginTop: "4px", marginBottom: "4px" }}>
-            <span style={{ fontSize: "10px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.8px", color: "var(--t3)" }}>
-              {language === "ru" ? "Терминал экипажа" : "Crew Terminal"}
-            </span>
-          </div>
+        <nav className="nav" aria-label="Platform Sections">
+          {/* SECTION 1: Crew Terminal */}
+          {!sidebarCollapsed && (
+            <div style={{ padding: "0 12px", marginTop: "4px", marginBottom: "4px" }}>
+              <span style={{ fontSize: "10px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.8px", color: "var(--t3)" }}>
+                Crew Terminal
+              </span>
+            </div>
+          )}
 
           <NavLink
             to="/dashboard"
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
+            title={sidebarCollapsed ? t.navDashboard : undefined}
           >
             <LayoutDashboard className="ico" />
             <span className="nl">{t.navDashboard}</span>
@@ -215,6 +252,7 @@ export default function App() {
           <NavLink
             to="/monitoring"
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
+            title={sidebarCollapsed ? t.navMonitoring : undefined}
           >
             <Activity className="ico" />
             <span className="nl">{t.navMonitoring}</span>
@@ -224,6 +262,7 @@ export default function App() {
           <NavLink
             to="/profile"
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
+            title={sidebarCollapsed ? t.navProfile : undefined}
           >
             <User className="ico" />
             <span className="nl">{t.navProfile}</span>
@@ -233,6 +272,7 @@ export default function App() {
           <NavLink
             to="/mental"
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
+            title={sidebarCollapsed ? t.navMental : undefined}
           >
             <Brain className="ico" />
             <span className="nl">{t.navMental}</span>
@@ -242,6 +282,7 @@ export default function App() {
           <NavLink
             to="/3d"
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
+            title={sidebarCollapsed ? t.nav3DViewer : undefined}
           >
             <Box className="ico" />
             <span className="nl">{t.nav3DViewer}</span>
@@ -251,6 +292,7 @@ export default function App() {
           <NavLink
             to="/ai"
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
+            title={sidebarCollapsed ? t.navAIAssistant : undefined}
           >
             <Bot className="ico" />
             <span className="nl">{t.navAIAssistant}</span>
@@ -260,6 +302,7 @@ export default function App() {
           <NavLink
             to="/timeline"
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
+            title={sidebarCollapsed ? t.navTimeline : undefined}
           >
             <Calendar className="ico" />
             <span className="nl">{t.navTimeline}</span>
@@ -269,6 +312,7 @@ export default function App() {
           <NavLink
             to="/alerts"
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
+            title={sidebarCollapsed ? t.navAlerts : undefined}
           >
             <Bell className="ico" />
             <span className="nl">{t.navAlerts}</span>
@@ -279,6 +323,7 @@ export default function App() {
           <NavLink
             to="/evidence"
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
+            title={sidebarCollapsed ? t.navEvidence : undefined}
           >
             <BookOpen className="ico" />
             <span className="nl">{t.navEvidence}</span>
@@ -288,47 +333,52 @@ export default function App() {
           <NavLink
             to="/settings"
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
+            title={sidebarCollapsed ? t.navSettings : undefined}
           >
             <Settings className="ico" />
             <span className="nl">{t.navSettings}</span>
             <span className="ns">{t.navSettingsSub}</span>
           </NavLink>
 
-          {/* SECTION 2: Медицинский контроль ЦУП и Командование */}
-          <div style={{ height: "1px", background: "var(--sep)", margin: "10px 0 8px" }} />
-          <div style={{ padding: "0 12px", marginBottom: "6px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: "10px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.8px", color: "var(--t3)" }}>
-              {language === "ru" ? "Контроль ЦУП & Командование" : "Flight Surgeon & Ops"}
-            </span>
-            <span
-              style={{
-                fontSize: "9px",
-                fontWeight: 800,
-                padding: "1px 5px",
-                borderRadius: "4px",
-                background: isFlightSurgeon ? "rgba(16, 185, 129, 0.2)" : isCommander ? "rgba(59, 130, 246, 0.2)" : "rgba(245, 158, 11, 0.2)",
-                color: isFlightSurgeon ? "#10b981" : isCommander ? "var(--pr)" : "#f59e0b",
-              }}
-            >
-              {isFlightSurgeon ? "CMO" : isCommander ? "CDR" : "CREW"}
-            </span>
-          </div>
+          {/* SECTION 2: Flight Surgeon & Mission Operations */}
+          <div style={{ height: "1px", background: "var(--sep)", margin: sidebarCollapsed ? "6px 0" : "10px 0 8px" }} />
+          {!sidebarCollapsed && (
+            <div style={{ padding: "0 12px", marginBottom: "6px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: "10px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.8px", color: "var(--t3)" }}>
+                Flight Surgeon & Ops
+              </span>
+              <span
+                style={{
+                  fontSize: "9px",
+                  fontWeight: 800,
+                  padding: "1px 5px",
+                  borderRadius: "4px",
+                  background: isFlightSurgeon ? "rgba(16, 185, 129, 0.2)" : isCommander ? "rgba(59, 130, 246, 0.2)" : "rgba(245, 158, 11, 0.2)",
+                  color: isFlightSurgeon ? "#10b981" : isCommander ? "var(--pr)" : "#f59e0b",
+                }}
+              >
+                {isFlightSurgeon ? "CMO" : isCommander ? "CDR" : "CREW"}
+              </span>
+            </div>
+          )}
 
           <NavLink
             to="/crew"
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
+            title={sidebarCollapsed ? t.navCrew : undefined}
           >
             <Users className="ico" />
             <span className="nl" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <span>{t.navCrew}</span>
               {isAstronaut && <Lock size={12} style={{ color: "#f59e0b", marginLeft: "4px" }} />}
             </span>
-            <span className="ns">{isAstronaut ? (language === "ru" ? "Ограничено (Врач ЦУП)" : "Restricted (Surgeon)") : t.navCrewSub}</span>
+            <span className="ns">{isAstronaut ? "Restricted (Surgeon)" : t.navCrewSub}</span>
           </NavLink>
 
           <NavLink
             to="/protocols"
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
+            title={sidebarCollapsed ? t.navProtocols : undefined}
           >
             <ClipboardList className="ico" />
             <span className="nl">{t.navProtocols}</span>
@@ -338,6 +388,7 @@ export default function App() {
           <NavLink
             to="/analytics"
             className={({ isActive }) => `ni ${isActive ? "on" : ""}`}
+            title={sidebarCollapsed ? t.navAnalytics : undefined}
           >
             <BarChart3 className="ico" />
             <span className="nl">{t.navAnalytics}</span>
@@ -347,119 +398,165 @@ export default function App() {
 
         {/* Sidebar Footer Widget */}
         <div className="sfoot">
-          {/* Quick Language Toggle */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 4px 10px" }}>
-            <span style={{ fontSize: "11px", color: "var(--t3)", fontWeight: 600 }}>{language === "ru" ? "Язык:" : "Lang:"}</span>
-            <div style={{ display: "inline-flex", background: "rgba(0,0,0,0.25)", padding: "2px", borderRadius: "8px", border: "1px solid var(--sep)" }}>
-              <button
-                type="button"
-                onClick={() => setLanguage("ru")}
-                style={{
-                  background: language === "ru" ? "var(--pr)" : "transparent",
-                  color: language === "ru" ? "#000" : "var(--t2)",
-                  border: "none",
-                  padding: "2px 8px",
-                  borderRadius: "6px",
-                  fontSize: "11px",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                }}
-              >
-                RU
-              </button>
-              <button
-                type="button"
-                onClick={() => setLanguage("en")}
-                style={{
-                  background: language === "en" ? "var(--pr)" : "transparent",
-                  color: language === "en" ? "#000" : "var(--t2)",
-                  border: "none",
-                  padding: "2px 8px",
-                  borderRadius: "6px",
-                  fontSize: "11px",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                }}
-              >
-                EN
-              </button>
-            </div>
-          </div>
-
           {/* Verified Authenticated Role Badge */}
-          <div style={{ background: "rgba(0,0,0,0.25)", border: "1px solid var(--sep)", borderRadius: "12px", padding: "10px 12px", marginBottom: "10px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-              <span style={{ fontSize: "10px", fontWeight: 800, textTransform: "uppercase", color: "var(--t3)", letterSpacing: "0.5px" }}>
-                {language === "ru" ? "Верификация доступа:" : "Access Clearance:"}
-              </span>
-              <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: isFlightSurgeon ? "#10b981" : isCommander ? "var(--pr)" : "#f59e0b", boxShadow: isFlightSurgeon ? "0 0 8px #10b981" : "none" }} />
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <div style={{ fontSize: "14px" }}>
-                {isFlightSurgeon ? "👨‍⚕️" : isCommander ? "🛸" : "🚀"}
-              </div>
-              <div style={{ overflow: "hidden" }}>
-                <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--tx)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>
-                  {user?.role || (isFlightSurgeon ? "Flight Surgeon" : isCommander ? "Commander" : "Astronaut")}
-                </div>
-                <div style={{ fontSize: "10px", color: "var(--t3)", textTransform: "uppercase", letterSpacing: "0.4px" }}>
-                  NASA STD-3001 · RBAC Active
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="miss">
-            <div className="cap">CHX-01 · NASA STD-3001</div>
-            <div className="num" style={{ marginTop: "4px", fontSize: "16px", fontWeight: 700 }}>
-              {t.missionDay} 42 <span className="t3" style={{ fontSize: "13px", fontWeight: 600 }}>{t.ofDay} 180</span>
-            </div>
-            <div className="bar" style={{ marginTop: "8px" }}>
-              <i style={{ width: "23.3%" }} />
-            </div>
-          </div>
-
-          <div className="uprof" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+          {sidebarCollapsed ? (
             <div
-              className="me"
-              onClick={() => openAuthModal("login")}
-              style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: 0 }}
-              title="Нажмите для входа или смены профиля"
-            >
-              <span className="av">
-                {user ? user.full_name.slice(0, 2).toUpperCase() : currentAstronaut?.name?.slice(0, 2).toUpperCase() || "MC"}
-              </span>
-              <span style={{ minWidth: 0 }}>
-                <span
-                  style={{
-                    display: "block",
-                    fontSize: "13px",
-                    fontWeight: 600,
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  {user ? user.full_name : currentAstronaut?.name || "Dr. Maya Chen"}
-                </span>
-                <span className="cap" style={{ display: "block", fontSize: "10px" }}>
-                  {user ? user.role : currentAstronaut?.callsign || "Flight Surgeon"}
-                </span>
-              </span>
-            </div>
-            <button
-              className="lo"
-              onClick={() => {
-                logout();
-                navigate("/login", { replace: true });
+              className="rbac-collapsed-chip"
+              title={`${user?.role || (isFlightSurgeon ? "Flight Surgeon" : isCommander ? "Commander" : "Astronaut")} · Access Clearance Active`}
+              style={{
+                width: "44px",
+                height: "44px",
+                borderRadius: "12px",
+                background: "rgba(0,0,0,0.25)",
+                border: "1px solid var(--sep)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                position: "relative",
+                margin: "0 auto",
+                fontSize: "18px",
+                cursor: "default",
               }}
-              title={t.signOut}
-              aria-label={t.signOut}
-              style={{ background: "transparent", border: "none", cursor: "pointer", padding: "6px", color: "var(--t2)", borderRadius: "6px" }}
             >
-              <LogOut className="ico" size={17} />
-            </button>
-          </div>
+              {isFlightSurgeon ? "👨‍⚕️" : isCommander ? "🛸" : "🚀"}
+              <span
+                style={{
+                  position: "absolute",
+                  top: "6px",
+                  right: "6px",
+                  width: "6px",
+                  height: "6px",
+                  borderRadius: "50%",
+                  background: isFlightSurgeon ? "#10b981" : isCommander ? "var(--pr)" : "#f59e0b",
+                  boxShadow: isFlightSurgeon ? "0 0 6px #10b981" : "none",
+                }}
+              />
+            </div>
+          ) : (
+            <div style={{ background: "rgba(0,0,0,0.25)", border: "1px solid var(--sep)", borderRadius: "12px", padding: "10px 12px", marginBottom: "10px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                <span style={{ fontSize: "10px", fontWeight: 800, textTransform: "uppercase", color: "var(--t3)", letterSpacing: "0.5px" }}>
+                  "Access Clearance:"
+                </span>
+                <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: isFlightSurgeon ? "#10b981" : isCommander ? "var(--pr)" : "#f59e0b", boxShadow: isFlightSurgeon ? "0 0 8px #10b981" : "none" }} />
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <div style={{ fontSize: "14px" }}>
+                  {isFlightSurgeon ? "👨‍⚕️" : isCommander ? "🛸" : "🚀"}
+                </div>
+                <div style={{ overflow: "hidden" }}>
+                  <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--tx)", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>
+                    {user?.role || (isFlightSurgeon ? "Flight Surgeon" : isCommander ? "Commander" : "Astronaut")}
+                  </div>
+                  <div style={{ fontSize: "10px", color: "var(--t3)", textTransform: "uppercase", letterSpacing: "0.4px" }}>
+                    NASA STD-3001 · RBAC Active
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {sidebarCollapsed ? (
+            <div
+              className="miss-collapsed"
+              title={`${t.missionDay} 42 of 180 (23.3%)`}
+              style={{
+                width: "44px",
+                padding: "8px 4px",
+                borderRadius: "12px",
+                background: "var(--s2)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "4px",
+                margin: "0 auto",
+                boxSizing: "border-box",
+              }}
+            >
+              <span style={{ fontSize: "10px", fontWeight: 800, color: "var(--t3)" }}>D42</span>
+              <div style={{ width: "100%", height: "4px", borderRadius: "2px", background: "var(--s3)", overflow: "hidden" }}>
+                <div style={{ width: "23.3%", height: "100%", background: "#22d3ee" }} />
+              </div>
+            </div>
+          ) : (
+            <div className="miss">
+              <div className="cap">CHX-01 · NASA STD-3001</div>
+              <div className="num" style={{ marginTop: "4px", fontSize: "16px", fontWeight: 700 }}>
+                {t.missionDay} 42 <span className="t3" style={{ fontSize: "13px", fontWeight: 600 }}>{t.ofDay} 180</span>
+              </div>
+              <div className="bar" style={{ marginTop: "8px" }}>
+                <i style={{ width: "23.3%" }} />
+              </div>
+            </div>
+          )}
+
+          {sidebarCollapsed ? (
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", width: "100%" }}>
+              <div
+                onClick={() => openAuthModal("login")}
+                style={{ cursor: "pointer" }}
+                title={`${user ? user.full_name : currentAstronaut?.name || "Dr. Maya Chen"} (${user ? user.role : currentAstronaut?.callsign || "Flight Surgeon"})`}
+              >
+                <span className="av">
+                  {user ? user.full_name.slice(0, 2).toUpperCase() : currentAstronaut?.name?.slice(0, 2).toUpperCase() || "MC"}
+                </span>
+              </div>
+              <button
+                className="lo"
+                onClick={() => {
+                  logout();
+                  navigate("/login", { replace: true });
+                }}
+                title={t.signOut}
+                aria-label={t.signOut}
+                style={{ background: "transparent", border: "none", cursor: "pointer", padding: "6px", color: "var(--t2)", borderRadius: "6px" }}
+              >
+                <LogOut className="ico" size={17} />
+              </button>
+            </div>
+          ) : (
+            <div className="uprof" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+              <div
+                className="me"
+                onClick={() => openAuthModal("login")}
+                style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: 0 }}
+                title="Click to switch profile or manage credentials"
+              >
+                <span className="av">
+                  {user ? user.full_name.slice(0, 2).toUpperCase() : currentAstronaut?.name?.slice(0, 2).toUpperCase() || "MC"}
+                </span>
+                <span style={{ minWidth: 0 }}>
+                  <span
+                    style={{
+                      display: "block",
+                      fontSize: "13px",
+                      fontWeight: 600,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {user ? user.full_name : currentAstronaut?.name || "Dr. Maya Chen"}
+                  </span>
+                  <span className="cap" style={{ display: "block", fontSize: "10px" }}>
+                    {user ? user.role : currentAstronaut?.callsign || "Flight Surgeon"}
+                  </span>
+                </span>
+              </div>
+              <button
+                className="lo"
+                onClick={() => {
+                  logout();
+                  navigate("/login", { replace: true });
+                }}
+                title={t.signOut}
+                aria-label={t.signOut}
+                style={{ background: "transparent", border: "none", cursor: "pointer", padding: "6px", color: "var(--t2)", borderRadius: "6px" }}
+              >
+                <LogOut className="ico" size={17} />
+              </button>
+            </div>
+          )}
         </div>
       </aside>
 
@@ -613,13 +710,13 @@ export default function App() {
       </main>
 
       {/* Mobile Bottom Navigation Bar (G-2) */}
-      <nav className="mbar" aria-label="Мобильная навигация">
+      <nav className="mbar" aria-label="Mobile Navigation">
         <NavLink
           to="/"
           className={({ isActive }) => `mbar-item ${isActive ? "on" : ""}`}
         >
           <Globe className="ico" />
-          <span>{language === "ru" ? "Главная" : "Home"}</span>
+          <span>Home</span>
         </NavLink>
 
         <NavLink
@@ -627,7 +724,7 @@ export default function App() {
           className={({ isActive }) => `mbar-item ${isActive ? "on" : ""}`}
         >
           <LayoutDashboard className="ico" />
-          <span>{language === "ru" ? "Обзор" : "Overview"}</span>
+          <span>Overview</span>
         </NavLink>
 
         <NavLink
@@ -635,7 +732,7 @@ export default function App() {
           className={({ isActive }) => `mbar-item ${isActive ? "on" : ""}`}
         >
           <Activity className="ico" />
-          <span>{language === "ru" ? "Монитор" : "Monitor"}</span>
+          <span>Vitals</span>
         </NavLink>
 
         <NavLink
@@ -643,17 +740,17 @@ export default function App() {
           className={({ isActive }) => `mbar-item ${isActive ? "on" : ""}`}
         >
           <Bot className="ico" />
-          <span>{language === "ru" ? "ИИ" : "AI"}</span>
+          <span>AI</span>
         </NavLink>
 
         <button
           type="button"
           className={`mbar-item btn-more ${mobileMenuOpen ? "on" : ""}`}
           onClick={() => setMobileMenuOpen(true)}
-          aria-label="Открыть полное меню платформы"
+          aria-label="Open platform menu"
         >
           <Menu className="ico" />
-          <span>{language === "ru" ? "Меню" : "Menu"}</span>
+          <span>Menu</span>
         </button>
       </nav>
 
@@ -665,7 +762,7 @@ export default function App() {
       />
       <aside
         className={`mobile-drawer-panel ${mobileMenuOpen ? "open" : ""}`}
-        aria-label="Мобильное меню платформы"
+        aria-label="Mobile Platform Menu"
       >
         {/* Header */}
         <div className="mobile-drawer-header">
@@ -673,7 +770,7 @@ export default function App() {
             to="/"
             onClick={() => setMobileMenuOpen(false)}
             style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}
-            title={language === "ru" ? "На главную страницу" : "To Home Page"}
+            title="To Home Page"
           >
             <img src="/cosmo-logo.png" alt="CosmoHealth" style={{ height: "30px", width: "auto" }} />
           </Link>
@@ -681,7 +778,7 @@ export default function App() {
             type="button"
             onClick={() => setMobileMenuOpen(false)}
             style={{ background: "none", border: "none", color: "var(--t2)", cursor: "pointer", padding: "6px" }}
-            aria-label="Закрыть меню"
+            aria-label="Close Menu"
           >
             <X size={22} />
           </button>
@@ -735,7 +832,7 @@ export default function App() {
         {/* All 12 Routes */}
         <div style={{ flex: 1, overflowY: "auto", padding: "8px 0" }}>
           <div className="mobile-drawer-section-title">
-            {language === "ru" ? "Главная страница" : "Main Page"}
+            "Main Navigation"
           </div>
           <NavLink
             to="/"
@@ -744,11 +841,11 @@ export default function App() {
             style={{ color: "var(--pr)", fontWeight: 700 }}
           >
             <Globe className="ico" />
-            <span>{language === "ru" ? "Главная страница (Лендинг)" : "Home / Landing Page"}</span>
+            <span>"Home / Landing Page"</span>
           </NavLink>
 
           <div className="mobile-drawer-section-title" style={{ marginTop: "12px" }}>
-            {language === "ru" ? "Терминал экипажа" : "Crew Terminal"}
+            "Crew Operations"
           </div>
           <NavLink to="/dashboard" className={({ isActive }) => `mobile-drawer-link ${isActive ? "on" : ""}`} onClick={() => setMobileMenuOpen(false)}>
             <LayoutDashboard className="ico" />
@@ -788,7 +885,7 @@ export default function App() {
           </NavLink>
 
           <div className="mobile-drawer-section-title" style={{ marginTop: "12px" }}>
-            {language === "ru" ? "Контроль ЦУП & Командование" : "Flight Surgeon & Ops"}
+            "Flight Surgeon & Ops"
           </div>
           <NavLink to="/crew" className={({ isActive }) => `mobile-drawer-link ${isActive ? "on" : ""}`} onClick={() => setMobileMenuOpen(false)}>
             <Users className="ico" />
@@ -817,44 +914,6 @@ export default function App() {
         {/* Drawer Footer: Language & Theme & Logout */}
         <div style={{ padding: "16px 20px", borderTop: "1px solid var(--sep)", background: "var(--s2)", display: "flex", flexDirection: "column", gap: "12px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: "12px", color: "var(--t3)", fontWeight: 600 }}>{language === "ru" ? "Язык интерфейса:" : "Language:"}</span>
-            <div style={{ display: "inline-flex", background: "rgba(0,0,0,0.2)", padding: "2px", borderRadius: "8px" }}>
-              <button
-                type="button"
-                onClick={() => setLanguage("ru")}
-                style={{
-                  background: language === "ru" ? "var(--pr)" : "transparent",
-                  color: language === "ru" ? "#fff" : "var(--t2)",
-                  border: "none",
-                  borderRadius: "6px",
-                  padding: "4px 10px",
-                  fontSize: "12px",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                }}
-              >
-                RU
-              </button>
-              <button
-                type="button"
-                onClick={() => setLanguage("en")}
-                style={{
-                  background: language === "en" ? "var(--pr)" : "transparent",
-                  color: language === "en" ? "#fff" : "var(--t2)",
-                  border: "none",
-                  borderRadius: "6px",
-                  padding: "4px 10px",
-                  fontSize: "12px",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                }}
-              >
-                EN
-              </button>
-            </div>
-          </div>
-
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <button
               type="button"
               onClick={() => handleThemeChange(theme === "dark" ? "light" : "dark")}
@@ -872,7 +931,7 @@ export default function App() {
               }}
             >
               {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-              <span>{theme === "dark" ? (language === "ru" ? "Светлая тема" : "Light Mode") : (language === "ru" ? "Темная тема" : "Dark Mode")}</span>
+              <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
             </button>
 
             <button
