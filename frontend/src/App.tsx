@@ -56,6 +56,7 @@ import { TimelineView } from "./views/TimelineView";
 import { EvidenceView } from "./views/EvidenceView";
 import { Astronaut3DView } from "./views/Astronaut3DView";
 import { FloatingAIChat } from "./components/FloatingAIChat";
+import { AppFooter } from "./components/AppFooter";
 
 export default function App() {
   const queryClient = useQueryClient();
@@ -586,6 +587,7 @@ export default function App() {
             element={<Astronaut3DView astronaut={currentAstronaut} metrics={metrics} />}
           />
         </Routes>
+        <AppFooter />
       </main>
 
       {/* Mobile Bottom Navigation Bar (G-2) */}

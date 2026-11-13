@@ -1921,3 +1921,316 @@ input:checked + .slider:before{transform:translateX(20px)}
     padding: 11px 0 !important;
   }
 }
+
+/* =========================================================
+   CosmoHealthX / Sihat-Style Comprehensive Footer & PWA Styles
+   ========================================================= */
+.sihat-footer {
+  background: #050a16;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 56px 0 36px;
+  margin-top: 70px;
+  color: #94a3b8;
+  font-size: 13px;
+  position: relative;
+  z-index: 10;
+  width: 100%;
+}
+.sihat-footer-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.sihat-footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.6fr;
+  gap: 40px;
+  margin-bottom: 44px;
+}
+.sihat-col-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.sihat-brand-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sihat-brand-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+.sihat-brand-title {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #ffffff;
+}
+.sihat-brand-desc {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #94a3b8;
+  margin: 0;
+  max-width: 360px;
+}
+.sihat-brand-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+.sihat-badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  color: #38bdf8;
+}
+.sihat-col-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #ffffff;
+  margin: 0 0 16px;
+}
+.sihat-links-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.sihat-links-list a {
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 0.15s ease;
+}
+.sihat-links-list a:hover {
+  color: #38bdf8;
+}
+.sihat-link-muted {
+  color: #64748b;
+  font-size: 13px;
+}
+.sihat-col-app {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.sihat-qr-box {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  padding: 12px;
+}
+.sihat-qr-img-wrap {
+  background: #ffffff;
+  padding: 5px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sihat-qr-img {
+  width: 90px;
+  height: 90px;
+  display: block;
+}
+.sihat-qr-caption {
+  font-size: 11px;
+  line-height: 1.45;
+  color: #cbd5e1;
+}
+.sihat-pwa-tile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 10px 14px;
+}
+.sihat-pwa-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.sihat-pwa-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sihat-pwa-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: #22d3ee;
+}
+.sihat-pwa-desc {
+  font-size: 11px;
+  color: #94a3b8;
+}
+.sihat-install-btn {
+  background: #f59e0b;
+  color: #090e1a !important;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 12px;
+  padding: 12px 18px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.35);
+  transition: all 0.2s ease;
+}
+.sihat-install-btn:hover {
+  background: #fbbf24;
+  transform: translateY(-1px);
+}
+.sihat-install-btn:active {
+  transform: scale(0.98);
+}
+.sihat-subfooter {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* PWA Modal */
+.sihat-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+}
+.sihat-modal-box {
+  background: #0b1325;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 18px;
+  padding: 24px;
+  max-width: 440px;
+  width: 100%;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+.sihat-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.sihat-modal-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+}
+.sihat-modal-close:hover {
+  color: #ffffff;
+}
+.sihat-modal-body {
+  margin-bottom: 20px;
+}
+.sihat-guide-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #e2e8f0;
+  margin-bottom: 10px;
+}
+.sihat-step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.2);
+  color: #38bdf8;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.sihat-guide-tip {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 11px;
+  color: #34d399;
+  line-height: 1.45;
+  margin-top: 14px;
+}
+.sihat-modal-ok-btn {
+  width: 100%;
+  background: var(--pr);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 11px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.sihat-modal-ok-btn:hover {
+  opacity: 0.92;
+}
+
+@media (max-width: 900px) {
+  .sihat-footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+  }
+}
+
+@media (max-width: 600px) {
+  .sihat-footer {
+    padding: 36px 0 100px; /* Safe space above mobile bottom bar */
+  }
+  .sihat-footer-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .sihat-subfooter {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .sihat-qr-box {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

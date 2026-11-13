@@ -1111,13 +1111,6 @@ export function DashboardView({
           )}
         </div>
       </section>
-
-      {/* Scientific Disclaimer Footer Note with comfortable clearance above bottom nav */}
-      <footer style={{ marginTop: "32px", marginBottom: "40px", paddingBottom: "16px" }}>
-        <p className="cap" style={{ textAlign: "center", margin: 0, fontSize: "11px", lineHeight: "1.5", color: "var(--t3)" }}>
-          Демонстрационные исследовательские данные — не являются медицинским диагнозом. Концептуальный прототип CosmoHealthX для NASA Space Apps Challenge 2026.
-        </p>
-      </footer>
     </div>
   );
 }
