@@ -20,6 +20,8 @@ import {
   Stethoscope,
   Sparkles,
   Info,
+  ArrowLeft,
+  ChevronRight,
 } from "lucide-react";
 import type { Astronaut, Protocol, ProtocolExecution } from "../api";
 import { api } from "../api";
@@ -114,6 +116,7 @@ export function ProtocolsView({ astronaut }: Props) {
   const [selectedProtocolId, setSelectedProtocolId] = useState<number | null>(null);
   const [checkedSteps, setCheckedSteps] = useState<Record<number, boolean>>({});
   const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [mobileTab, setMobileTab] = useState<"list" | "active">("list");
   const [toastMsg, setToastMsg] = useState<{ text: string; type: "ok" | "err" } | null>(null);
 
   const { data: protocols = [], isLoading } = useQuery<Protocol[]>({
@@ -199,50 +202,42 @@ export function ProtocolsView({ astronaut }: Props) {
   const progressPercent = totalSteps > 0 ? Math.round((completedCount / totalSteps) * 100) : 0;
 
   return (
-    <div className="wrapc" style={{ maxWidth: "1280px", margin: "0 auto", paddingBottom: "60px" }}>
+    <div className="wrapc protocols-wrap">
       {/* Top Header */}
-      <header className="tb" style={{ marginBottom: "20px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
-          <div className="up">
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+      <header className="protocols-header-box" style={{ marginTop: "12px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "12px" }}>
+          <div style={{ flex: "1 1 300px" }}>
+            {/* Top Badges */}
+            <div className="protocols-top-badge-row">
               <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: "var(--pr)" }}>
-                Стандартные операционные процедуры (SOP) · NASA STD-3001
+                SOP · NASA STD-3001
               </span>
-              <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "12px", background: "rgba(16, 185, 129, 0.15)", color: "#10b981", fontWeight: 600 }}>
-                ● Авторизованная клиническая база
+              <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "12px", background: "rgba(16, 185, 129, 0.15)", color: "#10b981", fontWeight: 700 }}>
+                ● Авторизовано ЦУП
               </span>
             </div>
-            <h1 className="lt disp" style={{ margin: "0 0 6px" }}>Medical Emergency Protocols</h1>
-            <p className="sub" style={{ margin: 0, maxWidth: "780px", color: "var(--t2)" }}>
-              Пошаговые алгоритмы действий экипажа при острых физиологических состояниях, радиационных событиях SPE, декомпрессионной болезни и токсической контаминации.
+
+            <h1 className="protocols-title">Medical Emergency Protocols</h1>
+
+            <p className="protocols-desc">
+              Пошаговые алгоритмы действий экипажа при острой патологии, вспышках радиации SPE и аварийных сценариях.
             </p>
           </div>
 
           {/* Quick Readiness Card */}
-          <div
-            style={{
-              background: "var(--s1)",
-              border: "1px solid var(--sep)",
-              borderRadius: "14px",
-              padding: "10px 16px",
-              display: "flex",
-              alignItems: "center",
-              gap: "14px",
-              fontSize: "12px",
-            }}
-          >
+          <div className="protocols-readiness-strip">
             <div>
               <div style={{ color: "var(--t3)", fontSize: "10px", textTransform: "uppercase", fontWeight: 700 }}>
                 Аптечка CHX-01
               </div>
-              <div style={{ fontWeight: 700, color: "#10b981" }}>Готовность 100%</div>
+              <div style={{ fontWeight: 700, color: "#10b981", fontSize: "13px" }}>Готовность 100%</div>
             </div>
             <div style={{ width: "1px", height: "24px", background: "var(--sep)" }} />
             <div>
               <div style={{ color: "var(--t3)", fontSize: "10px", textTransform: "uppercase", fontWeight: 700 }}>
                 Телеконсилиум ЦУП
               </div>
-              <div style={{ fontWeight: 700, color: "var(--cy)", display: "flex", alignItems: "center", gap: "4px" }}>
+              <div style={{ fontWeight: 700, color: "var(--cy)", display: "flex", alignItems: "center", gap: "4px", fontSize: "13px" }}>
                 <Radio size={12} className="pulse" /> Ku-Band Live
               </div>
             </div>
@@ -255,8 +250,8 @@ export function ProtocolsView({ astronaut }: Props) {
         <div
           className="up"
           style={{
-            marginBottom: "20px",
-            padding: "14px 18px",
+            marginBottom: "16px",
+            padding: "12px 16px",
             borderRadius: "14px",
             background: toastMsg.type === "ok" ? "rgba(16, 185, 129, 0.15)" : "rgba(239, 68, 68, 0.15)",
             border: `1px solid ${toastMsg.type === "ok" ? "#10b981" : "#ef4444"}`,
@@ -266,6 +261,7 @@ export function ProtocolsView({ astronaut }: Props) {
             gap: "10px",
             fontWeight: 600,
             fontSize: "13px",
+            animation: "fadeIn 0.2s ease",
           }}
         >
           {toastMsg.type === "ok" ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
@@ -273,8 +269,8 @@ export function ProtocolsView({ astronaut }: Props) {
         </div>
       )}
 
-      {/* Category Tabs */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "20px" }}>
+      {/* Category Tabs: Smooth Horizontal Scrollable Bar on all screens */}
+      <div className="protocols-categories-scroll">
         {[
           { id: "all", label: "Все протоколы", count: protocols.length },
           { id: "cardio", label: "Кардиология & EVA", count: protocols.filter((p) => getProtocolMeta(p.title).category === "cardio").length },
@@ -289,29 +285,23 @@ export function ProtocolsView({ astronaut }: Props) {
             <button
               key={tab.id}
               onClick={() => setActiveCategory(tab.id)}
+              className="protocol-category-pill"
               style={{
-                padding: "8px 14px",
-                borderRadius: "20px",
-                fontSize: "13px",
                 fontWeight: isSelected ? 700 : 500,
                 background: isSelected ? "var(--pr)" : "var(--s1)",
                 color: isSelected ? "#fff" : "var(--t2)",
                 border: isSelected ? "1px solid var(--pr)" : "1px solid var(--sep)",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                transition: "all 0.15s ease",
               }}
             >
               <span>{tab.label}</span>
               <span
                 style={{
                   fontSize: "11px",
-                  padding: "2px 6px",
+                  padding: "1px 6px",
                   borderRadius: "10px",
                   background: isSelected ? "rgba(255,255,255,0.25)" : "var(--s2)",
                   color: isSelected ? "#fff" : "var(--t3)",
+                  fontWeight: 700,
                 }}
               >
                 {tab.count}
@@ -321,10 +311,33 @@ export function ProtocolsView({ astronaut }: Props) {
         })}
       </div>
 
+      {/* Mobile Segmented Control (Tabs between list and active checklist on mobile screens) */}
+      <div className="protocols-mobile-tabs">
+        <button
+          type="button"
+          className={`protocols-mob-tab ${mobileTab === "list" ? "active" : ""}`}
+          onClick={() => setMobileTab("list")}
+        >
+          <ClipboardList size={14} />
+          <span>Все протоколы ({filteredProtocols.length})</span>
+        </button>
+        <button
+          type="button"
+          className={`protocols-mob-tab ${mobileTab === "active" ? "active" : ""}`}
+          onClick={() => setMobileTab("active")}
+        >
+          <Zap size={14} />
+          <span>Чек-лист: {currentMeta?.code || "SOP"}</span>
+        </button>
+      </div>
+
       {/* Main 2-Column Interface: Protocols List (Left) & Active Checklist (Right) */}
       <div className="protocols-split">
         {/* Left Column: Protocol Cards List */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+        <div
+          className={`protocols-list-col ${mobileTab === "active" ? "protocols-hide-on-mobile" : ""}`}
+          style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+        >
           {isLoading ? (
             <div className="cd" style={{ textAlign: "center", padding: "40px 20px" }}>
               <Activity className="spin" size={24} style={{ color: "var(--pr)", margin: "0 auto 8px" }} />
@@ -338,7 +351,6 @@ export function ProtocolsView({ astronaut }: Props) {
             filteredProtocols.map((p) => {
               const meta = getProtocolMeta(p.title);
               const isSelected = p.id === activeProtocol?.id;
-              const IconComp = meta.icon;
 
               return (
                 <div
@@ -346,14 +358,15 @@ export function ProtocolsView({ astronaut }: Props) {
                   onClick={() => {
                     setSelectedProtocolId(p.id);
                     setCheckedSteps({});
+                    setMobileTab("active");
                   }}
                   style={{
                     background: isSelected ? "var(--s1)" : "var(--s1)",
                     border: isSelected ? "2px solid var(--pr)" : "1px solid var(--sep)",
                     borderRadius: "16px",
-                    padding: "18px 20px",
+                    padding: "16px 18px",
                     cursor: "pointer",
-                    boxShadow: isSelected ? "0 8px 24px rgba(59, 130, 246, 0.15)" : "0 2px 8px rgba(0,0,0,0.06)",
+                    boxShadow: isSelected ? "0 6px 20px rgba(59, 130, 246, 0.18)" : "0 2px 8px rgba(0,0,0,0.06)",
                     transition: "all 0.15s ease",
                     position: "relative",
                   }}
@@ -365,7 +378,7 @@ export function ProtocolsView({ astronaut }: Props) {
                         style={{
                           fontSize: "11px",
                           fontWeight: 800,
-                          padding: "3px 8px",
+                          padding: "2px 8px",
                           borderRadius: "6px",
                           background: meta.urgencyBg,
                           color: meta.urgencyColor,
@@ -390,30 +403,43 @@ export function ProtocolsView({ astronaut }: Props) {
                   </h3>
 
                   {/* Description preview */}
-                  <p style={{ margin: "0 0 12px", fontSize: "13px", color: "var(--t2)", lineHeight: "1.5", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                  <p style={{ margin: "0 0 10px", fontSize: "12px", color: "var(--t2)", lineHeight: "1.5", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                     {p.description}
                   </p>
 
                   {/* Required Equipment Pills */}
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "10px" }}>
                     {meta.equipment.slice(0, 3).map((eq, idx) => (
                       <span
                         key={idx}
                         style={{
-                          fontSize: "11px",
-                          padding: "2px 7px",
+                          fontSize: "10px",
+                          padding: "2px 6px",
                           borderRadius: "6px",
                           background: "var(--s2)",
                           color: "var(--t3)",
                           border: "1px solid var(--sep)",
+                          whiteSpace: "nowrap",
                         }}
                       >
                         {eq}
                       </span>
                     ))}
                     {meta.equipment.length > 3 && (
-                      <span style={{ fontSize: "11px", color: "var(--t3)", alignSelf: "center" }}>
+                      <span style={{ fontSize: "10px", color: "var(--t3)", alignSelf: "center" }}>
                         +{meta.equipment.length - 3}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Action Link Row */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px dashed var(--sep)", paddingTop: "8px", fontSize: "12px" }}>
+                    <span style={{ color: "var(--pr)", fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
+                      Открыть алгоритм SOP <ChevronRight size={14} />
+                    </span>
+                    {isSelected && (
+                      <span style={{ fontSize: "10px", color: "#10b981", fontWeight: 700 }}>
+                        ● Активен
                       </span>
                     )}
                   </div>
@@ -426,24 +452,50 @@ export function ProtocolsView({ astronaut }: Props) {
         {/* Right Column: Step-by-Step Interactive Checklist & Action Center */}
         {activeProtocol && currentMeta ? (
           <div
+            className={`protocols-active-col ${mobileTab === "list" ? "protocols-hide-on-mobile" : ""}`}
             style={{
               background: "var(--s1)",
               border: "1px solid var(--sep)",
               borderRadius: "20px",
-              padding: "28px",
+              padding: "22px 24px",
               boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
             }}
           >
+            {/* Mobile Return to List Button */}
+            <button
+              type="button"
+              onClick={() => setMobileTab("list")}
+              className="protocols-mobile-tabs"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "6px 12px",
+                borderRadius: "8px",
+                background: "var(--s2)",
+                border: "1px solid var(--sep)",
+                color: "var(--pr)",
+                fontSize: "12px",
+                fontWeight: 700,
+                marginBottom: "14px",
+                cursor: "pointer",
+                width: "fit-content",
+              }}
+            >
+              <ArrowLeft size={14} />
+              <span>← Назад ко всем протоколам</span>
+            </button>
+
             {/* Active Header */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "16px", marginBottom: "16px" }}>
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "14px", marginBottom: "16px", flexWrap: "wrap" }}>
+              <div style={{ flex: 1, minWidth: "240px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px", flexWrap: "wrap" }}>
                   <span
                     style={{
                       fontSize: "11px",
                       fontWeight: 800,
-                      padding: "4px 10px",
-                      borderRadius: "8px",
+                      padding: "3px 8px",
+                      borderRadius: "6px",
                       background: currentMeta.urgencyBg,
                       color: currentMeta.urgencyColor,
                       border: `1px solid ${currentMeta.urgencyColor}44`,
@@ -456,10 +508,10 @@ export function ProtocolsView({ astronaut }: Props) {
                   </span>
                 </div>
 
-                <h2 style={{ margin: "0 0 8px", fontSize: "20px", fontWeight: 800, color: "var(--tx)", lineHeight: "1.3" }}>
+                <h2 style={{ margin: "0 0 6px", fontSize: "18px", fontWeight: 800, color: "var(--tx)", lineHeight: "1.3" }}>
                   {activeProtocol.title}
                 </h2>
-                <p style={{ margin: 0, fontSize: "14px", color: "var(--t2)", lineHeight: "1.6" }}>
+                <p style={{ margin: 0, fontSize: "13px", color: "var(--t2)", lineHeight: "1.5" }}>
                   {activeProtocol.description}
                 </p>
               </div>
@@ -473,18 +525,18 @@ export function ProtocolsView({ astronaut }: Props) {
                     display: "flex",
                     alignItems: "center",
                     gap: "6px",
-                    padding: "8px 12px",
-                    borderRadius: "10px",
+                    padding: "6px 10px",
+                    borderRadius: "8px",
                     background: "var(--s2)",
                     border: "1px solid var(--sep)",
-                    fontSize: "12px",
+                    fontSize: "11px",
                     fontWeight: 600,
                     color: "var(--pr)",
                     textDecoration: "none",
                     flexShrink: 0,
                   }}
                 >
-                  <ExternalLink size={14} />
+                  <ExternalLink size={13} />
                   <span>NASA STD-3001</span>
                 </a>
               )}
@@ -495,23 +547,23 @@ export function ProtocolsView({ astronaut }: Props) {
               style={{
                 background: "var(--s2)",
                 border: "1px solid var(--sep)",
-                borderRadius: "14px",
-                padding: "14px 18px",
-                marginBottom: "24px",
+                borderRadius: "12px",
+                padding: "12px 14px",
+                marginBottom: "20px",
               }}
             >
-              <div style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--t3)", marginBottom: "8px" }}>
+              <div style={{ fontSize: "10px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--t3)", marginBottom: "6px" }}>
                 Необходимое клиническое оснащение и препараты:
               </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
                 {currentMeta.equipment.map((item, idx) => (
                   <span
                     key={idx}
                     style={{
-                      fontSize: "12px",
+                      fontSize: "11px",
                       fontWeight: 600,
-                      padding: "4px 10px",
-                      borderRadius: "8px",
+                      padding: "3px 8px",
+                      borderRadius: "6px",
                       background: "var(--s1)",
                       border: "1px solid var(--sep)",
                       color: "var(--tx)",
@@ -524,10 +576,10 @@ export function ProtocolsView({ astronaut }: Props) {
             </div>
 
             {/* Progress Bar & Quick Step Toggles */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--tx)" }}>
-                  Пошаговое выполнение: {completedCount} из {totalSteps} шагов
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px", flexWrap: "wrap", gap: "8px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--tx)" }}>
+                  Выполнение: {completedCount} из {totalSteps} шагов
                 </span>
                 <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--pr)" }}>
                   ({progressPercent}%)
@@ -568,7 +620,7 @@ export function ProtocolsView({ astronaut }: Props) {
             </div>
 
             {/* Progress Track */}
-            <div style={{ width: "100%", height: "6px", background: "var(--s2)", borderRadius: "6px", overflow: "hidden", marginBottom: "20px" }}>
+            <div style={{ width: "100%", height: "6px", background: "var(--s2)", borderRadius: "6px", overflow: "hidden", marginBottom: "18px" }}>
               <div
                 style={{
                   width: `${progressPercent}%`,
@@ -580,7 +632,7 @@ export function ProtocolsView({ astronaut }: Props) {
             </div>
 
             {/* Step-by-Step List */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "28px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "22px" }}>
               {activeProtocol.steps?.map((step) => {
                 const isChecked = !!checkedSteps[step.id];
 
@@ -591,9 +643,9 @@ export function ProtocolsView({ astronaut }: Props) {
                     style={{
                       display: "flex",
                       alignItems: "flex-start",
-                      gap: "14px",
-                      padding: "14px 16px",
-                      borderRadius: "14px",
+                      gap: "12px",
+                      padding: "12px 14px",
+                      borderRadius: "12px",
                       background: isChecked ? "rgba(16, 185, 129, 0.08)" : "var(--s2)",
                       border: isChecked ? "1px solid rgba(16, 185, 129, 0.4)" : "1px solid var(--sep)",
                       cursor: "pointer",
@@ -603,8 +655,8 @@ export function ProtocolsView({ astronaut }: Props) {
                     {/* Number Badge */}
                     <div
                       style={{
-                        width: "28px",
-                        height: "28px",
+                        width: "26px",
+                        height: "26px",
                         borderRadius: "8px",
                         background: isChecked ? "#10b981" : "var(--s1)",
                         color: isChecked ? "#fff" : "var(--t2)",
@@ -621,16 +673,16 @@ export function ProtocolsView({ astronaut }: Props) {
                     </div>
 
                     {/* Step Narrative */}
-                    <div style={{ flex: 1, fontSize: "14px", color: isChecked ? "var(--tx)" : "var(--t1)", lineHeight: "1.5" }}>
+                    <div style={{ flex: 1, fontSize: "13px", color: isChecked ? "var(--tx)" : "var(--t1)", lineHeight: "1.5" }}>
                       {step.text}
                     </div>
 
                     {/* Checkbox Icon */}
                     <div style={{ flexShrink: 0, marginTop: "2px" }}>
                       {isChecked ? (
-                        <CheckSquare size={20} color="#10b981" />
+                        <CheckSquare size={18} color="#10b981" />
                       ) : (
-                        <Square size={20} color="var(--t3)" />
+                        <Square size={18} color="var(--t3)" />
                       )}
                     </div>
                   </div>
@@ -639,9 +691,9 @@ export function ProtocolsView({ astronaut }: Props) {
             </div>
 
             {/* Bottom Actions */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "14px", paddingTop: "20px", borderTop: "1px solid var(--sep)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px", paddingTop: "16px", borderTop: "1px solid var(--sep)" }}>
               <div style={{ fontSize: "12px", color: "var(--t3)" }}>
-                Исполнитель: <strong style={{ color: "var(--tx)" }}>{astronaut?.name || "Д-р Майя Чен (Chief Medical Officer)"}</strong>
+                Исполнитель: <strong style={{ color: "var(--tx)" }}>{astronaut?.name || "Д-р Майя Чен (CMO)"}</strong>
               </div>
 
               <button
@@ -653,13 +705,13 @@ export function ProtocolsView({ astronaut }: Props) {
                   display: "flex",
                   alignItems: "center",
                   gap: "8px",
-                  padding: "12px 22px",
-                  borderRadius: "12px",
-                  fontSize: "14px",
+                  padding: "10px 18px",
+                  borderRadius: "10px",
+                  fontSize: "13px",
                   fontWeight: 700,
                 }}
               >
-                <FileCheck size={18} />
+                <FileCheck size={16} />
                 <span>
                   {executeMutation.isPending ? "Фиксация в ЦУП..." : "Зафиксировать выполнение в журнал"}
                 </span>
@@ -668,45 +720,45 @@ export function ProtocolsView({ astronaut }: Props) {
 
             {/* Past Executions History */}
             {executions.length > 0 && (
-              <div style={{ marginTop: "32px", borderTop: "1px solid var(--sep)", paddingTop: "20px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-                  <Clock size={16} style={{ color: "var(--pr)" }} />
-                  <span style={{ fontSize: "13px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                    Журнал выполненных активаций протокола:
+              <div style={{ marginTop: "24px", borderTop: "1px solid var(--sep)", paddingTop: "16px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
+                  <Clock size={15} style={{ color: "var(--pr)" }} />
+                  <span style={{ fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                    Журнал выполненных активаций:
                   </span>
                 </div>
 
-                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                   {executions.map((ex) => (
                     <div
                       key={ex.id}
                       style={{
                         background: "var(--s2)",
                         border: "1px solid var(--sep)",
-                        borderRadius: "12px",
-                        padding: "12px 16px",
+                        borderRadius: "10px",
+                        padding: "10px 14px",
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
-                        fontSize: "13px",
+                        fontSize: "12px",
                       }}
                     >
                       <div>
                         <div style={{ fontWeight: 700, color: "var(--tx)" }}>
                           {ex.executed_by || "Экипаж CHX-01"}
                         </div>
-                        <div style={{ fontSize: "12px", color: "var(--t3)", marginTop: "2px" }}>
+                        <div style={{ fontSize: "11px", color: "var(--t3)", marginTop: "2px" }}>
                           {ex.notes || "Все шаги алгоритма выполнены. Показатели стабилизированы."}
                         </div>
                       </div>
 
                       <div style={{ textAlign: "right" }}>
-                        <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "8px", background: "rgba(16, 185, 129, 0.15)", color: "#10b981", fontWeight: 700 }}>
+                        <span style={{ fontSize: "10px", padding: "2px 6px", borderRadius: "6px", background: "rgba(16, 185, 129, 0.15)", color: "#10b981", fontWeight: 700 }}>
                           УСПЕШНО
                         </span>
-                        <div style={{ fontSize: "11px", color: "var(--t3)", marginTop: "4px" }}>
+                        <div style={{ fontSize: "10px", color: "var(--t3)", marginTop: "2px" }}>
                           {new Date(ex.executed_at).toLocaleString("ru-RU", {
-                            dateStyle: "medium",
+                            dateStyle: "short",
                             timeStyle: "short",
                           })}
                         </div>
