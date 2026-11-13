@@ -320,6 +320,17 @@ def login(body: LoginRequest, db: Session = Depends(get_db)):
             db.add(user)
             db.commit()
             db.refresh(user)
+        elif email_clean in ["ibrahim.rahman@cosmohealth.org", "ibrahim", "astronaut", "engineer"]:
+            user = User(
+                email="ibrahim.rahman@cosmohealth.org",
+                full_name="Ibrahim Rahman",
+                callsign="ORBIT-02",
+                role="Flight Engineer / Astronaut",
+                password_hash=hash_password("cosmo123"),
+            )
+            db.add(user)
+            db.commit()
+            db.refresh(user)
         else:
             raise HTTPException(401, "Неверный логин или пароль")
 
@@ -331,33 +342,26 @@ def login(body: LoginRequest, db: Session = Depends(get_db)):
     return AuthResponse(token=token, user=UserOut.model_validate(user))
 
 
+@app.post("/api/auth/logout")
+def logout(authorization: str | None = Header(default=None)):
+    if authorization:
+        token = authorization.replace("Bearer ", "").strip()
+        SESSIONS.pop(token, None)
+    return {"status": "ok", "message": "Сессия успешно завершена"}
+
+
 @app.get("/api/auth/me", response_model=UserOut)
 def me(authorization: str | None = Header(default=None), db: Session = Depends(get_db)):
     if not authorization:
-        user = db.scalar(select(User).where(User.email == "maya.chen@cosmohealth.org"))
-        if not user:
-            user = User(
-                email="maya.chen@cosmohealth.org",
-                full_name="Dr. Maya Chen",
-                callsign="NOVA-01",
-                role="Flight Surgeon",
-                password_hash=hash_password("cosmo123"),
-            )
-            db.add(user)
-            db.commit()
-            db.refresh(user)
-        return UserOut.model_validate(user)
+        raise HTTPException(401, "Требуется авторизация (отсутствует токен)")
 
     token = authorization.replace("Bearer ", "").strip()
     user_id = SESSIONS.get(token)
     if not user_id:
-        user = db.scalar(select(User).limit(1))
-        if user:
-            return UserOut.model_validate(user)
-        raise HTTPException(401, "Unauthorized")
+        raise HTTPException(401, "Сессия недействительна или истекла")
     user = db.get(User, user_id)
     if not user:
-        raise HTTPException(404, "User not found")
+        raise HTTPException(404, "Пользователь не найден")
     return UserOut.model_validate(user)
 
 

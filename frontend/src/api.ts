@@ -122,9 +122,11 @@ export async function api<T>(path: string, role = 'astronaut', options: RequestI
   const method = options.method || 'GET'
   const queueable = method === 'POST' && /\/astronauts\/\d+\/checkins$/.test(path)
   const operationId = queueable ? crypto.randomUUID() : undefined
+  const token = typeof localStorage !== 'undefined' ? localStorage.getItem('cosmo_token') : null
   const headers = {
     'Content-Type': 'application/json',
     'X-Demo-Role': role,
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
     ...(operationId ? { 'Idempotency-Key': operationId } : {}),
     ...options.headers,
   }

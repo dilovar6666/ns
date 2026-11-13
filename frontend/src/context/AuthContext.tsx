@@ -64,6 +64,7 @@ interface AuthContextType {
   isAstronaut: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (data: { email: string; password: string; full_name: string; callsign?: string; role?: string }) => Promise<void>;
+  demoLogin: (roleType: UserRole) => Promise<void>;
   logout: () => void;
   switchRolePreset: (roleType: UserRole) => void;
   isAuthModalOpen: boolean;
@@ -101,19 +102,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return null;
       }
     }
-    // Default logged in role: Flight Surgeon
-    return {
-      id: 1,
-      email: "maya.chen@cosmohealth.org",
-      full_name: "Dr. Maya Chen",
-      callsign: "NOVA-01",
-      role: "Flight Surgeon",
-      roleType: "flight_surgeon",
-      astronautId: 1,
-    };
+    return null;
   });
 
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem("cosmo_token") || "demo_token");
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem("cosmo_token") || null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<"login" | "register">("login");
 
@@ -168,6 +160,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     closeAuthModal();
   };
 
+  const demoLogin = async (roleTypeToLogin: UserRole) => {
+    const preset = ROLE_PRESETS.find((p) => p.roleType === roleTypeToLogin) || ROLE_PRESETS[0];
+    try {
+      await login(preset.email, "cosmo123");
+    } catch {
+      // Fallback local authentication
+      const demoToken = `chx_demo_${preset.roleType}_${Date.now()}`;
+      const demoUser: User = {
+        id: preset.astronautId,
+        email: preset.email,
+        full_name: preset.full_name,
+        callsign: preset.callsign,
+        role: preset.title,
+        roleType: preset.roleType,
+        astronautId: preset.astronautId,
+      };
+      setUser(demoUser);
+      setToken(demoToken);
+      localStorage.setItem("cosmo_user", JSON.stringify(demoUser));
+      localStorage.setItem("cosmo_token", demoToken);
+      closeAuthModal();
+    }
+  };
+
   const register = async (data: { email: string; password: string; full_name: string; callsign?: string; role?: string }) => {
     const res = await fetch(`${API_BASE}/auth/register`, {
       method: "POST",
@@ -191,11 +207,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
+    const currentToken = localStorage.getItem("cosmo_token");
+    if (currentToken) {
+      fetch(`${API_BASE}/auth/logout`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${currentToken}`,
+        },
+      }).catch(() => {});
+    }
     setUser(null);
     setToken(null);
     localStorage.removeItem("cosmo_user");
     localStorage.removeItem("cosmo_token");
-    openAuthModal("login");
   };
 
   return (
@@ -203,13 +228,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         token,
-        isAuthenticated: !!user,
+        isAuthenticated: !!user && !!token,
         roleType,
         isFlightSurgeon,
         isCommander,
         isAstronaut,
         login,
         register,
+        demoLogin,
         logout,
         switchRolePreset,
         isAuthModalOpen,

@@ -7,6 +7,7 @@ import {
   useLocation,
   useNavigate,
   Link,
+  Navigate,
 } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -42,6 +43,8 @@ import { AuthModal } from "./components/AuthModal";
 
 // Views
 import { LandingPage } from "./LandingPage";
+import { LoginView } from "./views/LoginView";
+import { RegisterView } from "./views/RegisterView";
 import { DashboardView } from "./views/DashboardView";
 import { MonitoringView } from "./views/MonitoringView";
 import { AnalyticsView } from "./views/AnalyticsView";
@@ -63,7 +66,7 @@ export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { user, logout, openAuthModal, switchRolePreset, isFlightSurgeon, isCommander, isAstronaut, roleType } = useAuth();
+  const { user, isAuthenticated, logout, openAuthModal, switchRolePreset, isFlightSurgeon, isCommander, isAstronaut, roleType } = useAuth();
   const { language, setLanguage, t } = useLanguage();
 
   // Strict 2-theme system: light | dark (default dark)
@@ -111,6 +114,7 @@ export default function App() {
   const { data: crew = [], refetch: refetchCrew } = useQuery<Astronaut[]>({
     queryKey: ["crew"],
     queryFn: () => api<Astronaut[]>("/astronauts"),
+    enabled: isAuthenticated,
   });
 
   // Default to first astronaut if not set
@@ -126,13 +130,14 @@ export default function App() {
     queryKey: ["metrics", currentAstronaut?.id],
     queryFn: () =>
       currentAstronaut ? api<Metric[]>(`/astronauts/${currentAstronaut.id}/metrics?period=24h`) : [],
-    enabled: !!currentAstronaut,
+    enabled: !!currentAstronaut && isAuthenticated,
     refetchInterval: 10000,
   });
 
   const { data: notifications = [] } = useQuery<Notification[]>({
     queryKey: ["notifications"],
     queryFn: () => api<Notification[]>("/notifications"),
+    enabled: isAuthenticated,
     refetchInterval: 15000,
   });
 
@@ -146,16 +151,37 @@ export default function App() {
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  // Is Landing Page?
-  const isLanding = location.pathname === "/";
-
-  if (isLanding) {
+  // 1. Landing Page
+  if (location.pathname === "/") {
     return (
       <div className={`cx L ${theme}`}>
         <LandingPage />
         <AuthModal />
       </div>
     );
+  }
+
+  // 2. Dedicated Login Page
+  if (location.pathname === "/login") {
+    return (
+      <div className={`cx L ${theme}`}>
+        <LoginView />
+      </div>
+    );
+  }
+
+  // 3. Dedicated Register Page
+  if (location.pathname === "/register") {
+    return (
+      <div className={`cx L ${theme}`}>
+        <RegisterView />
+      </div>
+    );
+  }
+
+  // 4. Security Guard: Redirect unauthenticated requests to /login
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return (
@@ -438,7 +464,10 @@ export default function App() {
             </div>
             <button
               className="lo"
-              onClick={logout}
+              onClick={() => {
+                logout();
+                navigate("/login", { replace: true });
+              }}
               title={t.signOut}
               aria-label={t.signOut}
               style={{ background: "transparent", border: "none", cursor: "pointer", padding: "6px", color: "var(--t2)", borderRadius: "6px" }}
@@ -586,6 +615,13 @@ export default function App() {
             path="/3d"
             element={<Astronaut3DView astronaut={currentAstronaut} metrics={metrics} />}
           />
+          <Route
+            path="/3d-viewer"
+            element={<Astronaut3DView astronaut={currentAstronaut} metrics={metrics} />}
+          />
+          <Route path="/login" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/register" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
         <AppFooter />
       </main>
@@ -840,6 +876,7 @@ export default function App() {
               onClick={() => {
                 logout();
                 setMobileMenuOpen(false);
+                navigate("/login", { replace: true });
               }}
               style={{
                 display: "inline-flex",
