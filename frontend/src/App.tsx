@@ -449,7 +449,7 @@ export default function App() {
       </aside>
 
       {/* Main Content Area */}
-      <main style={{ flex: 1, minWidth: 0, minHeight: "100vh" }}>
+      <main className="main" style={{ flex: 1, minWidth: 0, minHeight: "100vh" }}>
         <Routes>
           <Route
             path="/dashboard"

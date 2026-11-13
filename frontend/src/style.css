@@ -1858,3 +1858,66 @@ input:checked + .slider:before{transform:translateX(20px)}
     gap: 8px !important;
   }
 }
+
+/* =========================================================
+   Dashboard Bottom Activity & Alerts Responsive Constraints
+   ========================================================= */
+.dashboard-bottom-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.dashboard-card-constrained {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.dashboard-item-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 0;
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.dashboard-item-row + .dashboard-item-row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 46px;
+  right: 0;
+  border-top: 0.5px solid var(--sep);
+}
+
+@media (max-width: 900px) {
+  .dashboard-bottom-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding: 0 16px 120px !important;
+  }
+  .wrapc {
+    padding-bottom: 96px !important;
+  }
+  .dashboard-card-constrained {
+    padding: 18px 16px 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-item-row {
+    gap: 10px !important;
+    padding: 11px 0 !important;
+  }
+}

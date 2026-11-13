@@ -960,89 +960,89 @@ export function DashboardView({
       </section>
 
       {/* Bottom Grid: Recent Activity & Recent Alerts */}
-      <section className="g3 rvl">
+      <section className="dashboard-bottom-grid rvl">
         {/* Recent Activity */}
         <div
-          className="cd up"
+          className="cd up dashboard-card-constrained"
           style={{ padding: "20px 22px 14px", animationDelay: "320ms" }}
           aria-label="Recent Activity"
         >
-          <div className="ch" style={{ marginBottom: "8px" }}>
-            <h2 className="h2">Recent Activity</h2>
+          <div className="ch" style={{ marginBottom: "8px", width: "100%", justifyContent: "space-between" }}>
+            <h2 className="h2" style={{ margin: 0 }}>Recent Activity</h2>
             <Link className="btn bt" to="/monitoring">
               Вся история
             </Link>
           </div>
 
-          <div className="li">
-            <span className="icb c-hr" style={{ background: "var(--s2)" }}>
+          <div className="dashboard-item-row">
+            <span className="icb c-hr" style={{ background: "var(--s2)", flexShrink: 0 }}>
               <Heart className="gly" />
             </span>
-            <span style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ display: "block", fontSize: "15px", fontWeight: 600 }}>
+            <span style={{ flex: 1, minWidth: 0, paddingRight: "8px" }}>
+              <span style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "var(--t1)" }}>
                 Heart Rate Telemetry
               </span>
-              <span className="cap" style={{ display: "block", marginTop: "1px" }}>
+              <span className="cap" style={{ display: "block", marginTop: "1px", fontSize: "12px", color: "var(--t3)" }}>
                 Синхронизировано с биосенсора
               </span>
             </span>
-            <span style={{ textAlign: "right", whiteSpace: "nowrap" }}>
-              <b className="num" style={{ display: "block", fontSize: "16px", fontWeight: 700 }}>
+            <span style={{ textAlign: "right", whiteSpace: "nowrap", flexShrink: 0 }}>
+              <b className="num" style={{ display: "block", fontSize: "15px", fontWeight: 700, color: "var(--t1)" }}>
                 {Math.round(hrLatest)} bpm
               </b>
-              <span className="cap num">Сегодня, 14:32</span>
+              <span className="cap num" style={{ fontSize: "11px", color: "var(--t3)" }}>Сегодня, 14:32</span>
             </span>
           </div>
 
-          <div className="li">
-            <span className="icb c-spo2" style={{ background: "var(--s2)" }}>
+          <div className="dashboard-item-row">
+            <span className="icb c-spo2" style={{ background: "var(--s2)", flexShrink: 0 }}>
               <Droplets className="gly" />
             </span>
-            <span style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ display: "block", fontSize: "15px", fontWeight: 600 }}>
+            <span style={{ flex: 1, minWidth: 0, paddingRight: "8px" }}>
+              <span style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "var(--t1)" }}>
                 SpO₂ Saturation
               </span>
-              <span className="cap" style={{ display: "block", marginTop: "1px" }}>
+              <span className="cap" style={{ display: "block", marginTop: "1px", fontSize: "12px", color: "var(--t3)" }}>
                 Носимый пульсоксиметр
               </span>
             </span>
-            <span style={{ textAlign: "right", whiteSpace: "nowrap" }}>
-              <b className="num" style={{ display: "block", fontSize: "16px", fontWeight: 700 }}>
+            <span style={{ textAlign: "right", whiteSpace: "nowrap", flexShrink: 0 }}>
+              <b className="num" style={{ display: "block", fontSize: "15px", fontWeight: 700, color: "var(--t1)" }}>
                 {Math.round(spo2Latest)} %
               </b>
-              <span className="cap num">Сегодня, 14:30</span>
+              <span className="cap num" style={{ fontSize: "11px", color: "var(--t3)" }}>Сегодня, 14:30</span>
             </span>
           </div>
 
-          <div className="li">
-            <span className="icb c-act" style={{ background: "var(--s2)" }}>
+          <div className="dashboard-item-row">
+            <span className="icb c-act" style={{ background: "var(--s2)", flexShrink: 0 }}>
               <Footprints className="gly" />
             </span>
-            <span style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ display: "block", fontSize: "15px", fontWeight: 600 }}>
+            <span style={{ flex: 1, minWidth: 0, paddingRight: "8px" }}>
+              <span style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "var(--t1)" }}>
                 EVA Treadmill Session
               </span>
-              <span className="cap" style={{ display: "block", marginTop: "1px" }}>
+              <span className="cap" style={{ display: "block", marginTop: "1px", fontSize: "12px", color: "var(--t3)" }}>
                 Протокол сохранения костной ткани
               </span>
             </span>
-            <span style={{ textAlign: "right", whiteSpace: "nowrap" }}>
-              <b className="num" style={{ display: "block", fontSize: "16px", fontWeight: 700 }}>
+            <span style={{ textAlign: "right", whiteSpace: "nowrap", flexShrink: 0 }}>
+              <b className="num" style={{ display: "block", fontSize: "15px", fontWeight: 700, color: "var(--t1)" }}>
                 45 мин
               </b>
-              <span className="cap num">Сегодня, 11:15</span>
+              <span className="cap num" style={{ fontSize: "11px", color: "var(--t3)" }}>Сегодня, 11:15</span>
             </span>
           </div>
         </div>
 
         {/* Recent Alerts */}
         <div
-          className="cd up"
+          className="cd up dashboard-card-constrained"
           style={{ padding: "20px 22px 14px", animationDelay: "380ms" }}
           aria-label="Recent Alerts"
         >
-          <div className="ch" style={{ marginBottom: "8px" }}>
-            <h2 className="h2">Recent Alerts</h2>
+          <div className="ch" style={{ marginBottom: "8px", width: "100%", justifyContent: "space-between" }}>
+            <h2 className="h2" style={{ margin: 0 }}>Recent Alerts</h2>
             <Link className="btn bt" to="/alerts">
               Все ({notifications.length})
             </Link>
@@ -1056,12 +1056,12 @@ export function DashboardView({
             recentAlerts.map((n) => (
               <div
                 key={n.id}
-                className="li"
+                className="dashboard-item-row"
                 style={{ opacity: n.read ? 0.65 : 1 }}
               >
                 <span
                   className={`icb ${n.level === "critical" ? "cr" : n.level === "warning" ? "wa" : "ok"}`}
-                  style={{ background: "var(--s2)" }}
+                  style={{ background: "var(--s2)", flexShrink: 0 }}
                 >
                   {n.level === "critical" ? (
                     <AlertTriangle className="gly" style={{ color: "var(--cr)" }} />
@@ -1071,11 +1071,11 @@ export function DashboardView({
                     <Info className="gly" style={{ color: "var(--pr)" }} />
                   )}
                 </span>
-                <span style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ flex: 1, minWidth: 0, paddingRight: "8px" }}>
                   <span
                     style={{
                       display: "block",
-                      fontSize: "15px",
+                      fontSize: "14px",
                       fontWeight: 600,
                       color: n.level === "critical" ? "var(--cr)" : "var(--t1)",
                     }}
@@ -1086,10 +1086,12 @@ export function DashboardView({
                     className="cap"
                     style={{
                       display: "block",
-                      marginTop: "1px",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
+                      marginTop: "2px",
+                      fontSize: "12px",
+                      lineHeight: "1.35",
+                      whiteSpace: "normal",
+                      wordBreak: "break-word",
+                      color: "var(--t3)",
                     }}
                   >
                     {n.detail}
@@ -1099,7 +1101,7 @@ export function DashboardView({
                   <button
                     className="btn bt"
                     onClick={() => onMarkNotificationRead(n.id)}
-                    style={{ fontSize: "12px", padding: "4px 8px" }}
+                    style={{ fontSize: "12px", padding: "4px 8px", flexShrink: 0 }}
                   >
                     Прочитано
                   </button>
@@ -1110,10 +1112,12 @@ export function DashboardView({
         </div>
       </section>
 
-      {/* Scientific Disclaimer Footer Note */}
-      <p className="cap" style={{ textAlign: "center", marginTop: "32px", marginBottom: "20px" }}>
-        Демонстрационные исследовательские данные — не являются медицинским диагнозом. Концептуальный прототип CosmoHealthX для NASA Space Apps Challenge 2026.
-      </p>
+      {/* Scientific Disclaimer Footer Note with comfortable clearance above bottom nav */}
+      <footer style={{ marginTop: "32px", marginBottom: "40px", paddingBottom: "16px" }}>
+        <p className="cap" style={{ textAlign: "center", margin: 0, fontSize: "11px", lineHeight: "1.5", color: "var(--t3)" }}>
+          Демонстрационные исследовательские данные — не являются медицинским диагнозом. Концептуальный прототип CosmoHealthX для NASA Space Apps Challenge 2026.
+        </p>
+      </footer>
     </div>
   );
 }
