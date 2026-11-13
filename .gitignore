@@ -7,6 +7,7 @@ __pycache__/
 *.db
 *.pyc
 *.tsbuildinfo
+*.zip
 astronaut-source/
 animated-floating-astronaut-in-space-suit-loop.zip
 
