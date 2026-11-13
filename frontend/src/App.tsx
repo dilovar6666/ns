@@ -629,6 +629,14 @@ export default function App() {
       {/* Mobile Bottom Navigation Bar (G-2) */}
       <nav className="mbar" aria-label="Мобильная навигация">
         <NavLink
+          to="/"
+          className={({ isActive }) => `mbar-item ${isActive ? "on" : ""}`}
+        >
+          <Globe className="ico" />
+          <span>{language === "ru" ? "Главная" : "Home"}</span>
+        </NavLink>
+
+        <NavLink
           to="/dashboard"
           className={({ isActive }) => `mbar-item ${isActive ? "on" : ""}`}
         >
@@ -642,14 +650,6 @@ export default function App() {
         >
           <Activity className="ico" />
           <span>{language === "ru" ? "Монитор" : "Monitor"}</span>
-        </NavLink>
-
-        <NavLink
-          to="/analytics"
-          className={({ isActive }) => `mbar-item ${isActive ? "on" : ""}`}
-        >
-          <BarChart3 className="ico" />
-          <span>{language === "ru" ? "Тренды" : "Trends"}</span>
         </NavLink>
 
         <NavLink
@@ -683,9 +683,14 @@ export default function App() {
       >
         {/* Header */}
         <div className="mobile-drawer-header">
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <Link
+            to="/"
+            onClick={() => setMobileMenuOpen(false)}
+            style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}
+            title={language === "ru" ? "На главную страницу" : "To Home Page"}
+          >
             <img src="/cosmo-logo.png" alt="CosmoHealth" style={{ height: "30px", width: "auto" }} />
-          </div>
+          </Link>
           <button
             type="button"
             onClick={() => setMobileMenuOpen(false)}
@@ -744,6 +749,19 @@ export default function App() {
         {/* All 12 Routes */}
         <div style={{ flex: 1, overflowY: "auto", padding: "8px 0" }}>
           <div className="mobile-drawer-section-title">
+            {language === "ru" ? "Главная страница" : "Main Page"}
+          </div>
+          <NavLink
+            to="/"
+            className={({ isActive }) => `mobile-drawer-link ${isActive ? "on" : ""}`}
+            onClick={() => setMobileMenuOpen(false)}
+            style={{ color: "var(--pr)", fontWeight: 700 }}
+          >
+            <Globe className="ico" />
+            <span>{language === "ru" ? "Главная страница (Лендинг)" : "Home / Landing Page"}</span>
+          </NavLink>
+
+          <div className="mobile-drawer-section-title" style={{ marginTop: "12px" }}>
             {language === "ru" ? "Терминал экипажа" : "Crew Terminal"}
           </div>
           <NavLink to="/dashboard" className={({ isActive }) => `mobile-drawer-link ${isActive ? "on" : ""}`} onClick={() => setMobileMenuOpen(false)}>

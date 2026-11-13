@@ -13,6 +13,7 @@ function CameraFlyAndOrbit() {
   const { camera } = useThree();
   const [flyComplete, setFlyComplete] = useState(false);
   const startTimeRef = useRef<number | null>(null);
+  const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
 
   useFrame((state) => {
     if (startTimeRef.current === null) {
@@ -20,14 +21,15 @@ function CameraFlyAndOrbit() {
     }
     const elapsed = state.clock.getElapsedTime() - startTimeRef.current;
 
+    const targetZ = isMobile ? 4.9 : 4.4;
+
     if (elapsed < FLY_DURATION) {
       const p = Math.min(elapsed / FLY_DURATION, 1.0);
       // Quintic ease-out for majestic deceleration as we reach Earth orbit
       const ease = 1.0 - Math.pow(1.0 - p, 3.8);
 
-      // Start far in deep space at z = 16.0, x = 0.6, y = 1.0 and fly into final position z = 4.4
+      // Start far in deep space at z = 16.0, x = 0.6, y = 1.0 and fly into final position targetZ
       const startZ = 16.0;
-      const targetZ = 4.4;
       camera.position.z = startZ + (targetZ - startZ) * ease;
 
       const startY = 1.0;
@@ -40,7 +42,7 @@ function CameraFlyAndOrbit() {
 
       camera.lookAt(0, 0, 0);
     } else if (!flyComplete) {
-      camera.position.set(0, 0, 4.4);
+      camera.position.set(0, 0, targetZ);
       camera.lookAt(0, 0, 0);
       setFlyComplete(true);
     }
@@ -236,17 +238,22 @@ function EarthGlobe({ onLoaded }: EarthProps) {
     }
   });
 
+  const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
+  const groupPos: [number, number, number] = isMobile ? [0, 0, 0] : [-0.95, 0, 0];
+  const earthRadius = isMobile ? 1.50 : 1.80;
+  const cloudRadius = isMobile ? 1.515 : 1.815;
+
   return (
-    // Large Earth with radius 1.80 placed at x = -0.95 so only the curved half is visible on the left!
-    <group ref={groupRef} position={[-0.95, 0, 0]} rotation={[0.2, 3.4, 0.12]}>
+    // Centered on mobile, shifted to left on desktop so text sits on the right
+    <group ref={groupRef} position={groupPos} rotation={[0.2, 3.4, 0.12]}>
       {/* Base Earth Sphere */}
       <mesh ref={earthRef} material={earthMaterial}>
-        <sphereGeometry args={[1.80, 64, 64]} />
+        <sphereGeometry args={[earthRadius, 64, 64]} />
       </mesh>
 
       {/* Cloud Sphere */}
       <mesh ref={cloudsRef} material={cloudMaterial}>
-        <sphereGeometry args={[1.815, 64, 64]} />
+        <sphereGeometry args={[cloudRadius, 64, 64]} />
       </mesh>
     </group>
   );
