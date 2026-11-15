@@ -41,11 +41,11 @@ def test_demo_flow():
         assert added.status_code == 200
         protocol_id = added.json()["id"]
         step_id = next(p for p in client.get("/api/protocols").json() if p["id"] == protocol_id)["steps"][0]["id"]
-        execution = client.post(f"/api/protocols/{protocol_id}/executions?astronaut_id={person_id}", json=[step_id])
+        execution = client.post(f"/api/protocols/{protocol_id}/executions", json={"astronaut_id": person_id, "completed_steps": [step_id]})
         assert execution.status_code == 200
         history = client.get(f"/api/protocols/{protocol_id}/executions?astronaut_id={person_id}").json()
         assert history[0]["completed_steps"] == [step_id]
         pdf = client.get(f"/api/reports/{person_id}/pdf?days=30")
         assert pdf.status_code == 200 and pdf.content.startswith(b"%PDF")
-        unavailable = client.post("/api/ai/analyze", json={"astronaut_id": person_id, "question": "Trend?"})
-        assert unavailable.status_code == 503
+        ai_res = client.post("/api/ai/analyze", json={"astronaut_id": person_id, "question": "Trend?"})
+        assert ai_res.status_code == 200 and "recommendation" in ai_res.json()
