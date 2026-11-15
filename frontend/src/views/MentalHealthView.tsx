@@ -47,7 +47,7 @@ const TEST_BATTERIES = [
     id: "dass" as TestType,
     title: "NASA BHP / DASS-21: Psychoemotional Screening",
     subtitle: "Depression, Anxiety & Confinement Stress Scale",
-    description: " (NASA Behavioral Health).",
+    description: "Gold standard psychological resilience assessment for crew in extended sensory deprivation and closed habitat environments (NASA Behavioral Health).",
     duration: "4–5 min",
     itemsCount: 10,
     badge: "NASA BHP STANDARD",
@@ -58,11 +58,11 @@ const TEST_BATTERIES = [
   {
     id: "tlx" as TestType,
     title: "NASA-TLX: Task Load & Cognitive Workload Index",
-    subtitle: "Task Load Index ()",
-    description: "of EVA, ).",
+    subtitle: "Multidimensional Operational Workload Scale",
+    description: "Standardized evaluation of mental, physical, and temporal demands during critical flight operations (EVA spacewalks, robotic docking, biomedical protocols).",
     duration: "3 min",
     itemsCount: 6,
-    badge: "",
+    badge: "OPERATIONAL READINESS",
     badgeColor: "#10b981",
     badgeBg: "rgba(16, 185, 129, 0.15)",
     icon: Gauge,
@@ -70,20 +70,20 @@ const TEST_BATTERIES = [
   {
     id: "sleep" as TestType,
     title: "NASA Sleep & Circadian Fatigue Scale",
-    subtitle: "",
-    description: "of  (SWS), .",
+    subtitle: "Circadian Rhythm, Sleep Architecture & Alertness",
+    description: "Evaluation of Slow-Wave Sleep (SWS) architecture, habitat ambient pump/fan noise (>50 dBA), and 90-minute orbital lighting cycle disruption.",
     duration: "3–4 min",
     itemsCount: 8,
-    badge: "",
+    badge: "CIRCADIAN MONITOR",
     badgeColor: "#8b5cf6",
     badgeBg: "rgba(139, 92, 246, 0.15)",
     icon: Moon,
   },
   {
     id: "pvt" as TestType,
-    title: "PVT-Space: ",
-    subtitle: "",
-    description: " (Reaction Time Task). .",
+    title: "PVT-Space: Psychomotor Vigilance Task",
+    subtitle: "Interactive Reaction Time & Attentional Lapse Assessment",
+    description: "Daily objective millisecond reaction latency task executed by astronauts to detect acute cognitive fatigue prior to critical maneuvers.",
     duration: "2 min",
     itemsCount: 5,
     badge: "OBJECTIVE TEST",
@@ -95,107 +95,116 @@ const TEST_BATTERIES = [
 
 // Questions for DASS-21 Space Adaptation
 const DASS_QUESTIONS = [
-  "ofyears.",
+  "I found it difficult to unwind and release muscular tension after finishing my operational work shift.",
+  "I experienced sudden heart palpitations or dryness in the mouth in the absence of physical exertion.",
+  "I struggled with shifting cognitive focus between different mission timeline procedures.",
+  "I felt unexpected apprehension, internal restlessness, or unexplained uneasiness.",
+  "I noticed diminished enthusiasm for daily tasks or weariness from station habitat monotony.",
+  "I felt irritated by minor communication latency with Mission Control or habitat constraints.",
+  "I noticed slight fine-motor tremor or finger stiffness during precision glovebox or tool operations.",
+  "I felt I was expending excessive mental energy simply to maintain baseline operational focus.",
+  "I experienced emotional dampening or reduced motivation toward the scientific mission schedule.",
+  "I felt in a state of continuous nervous vigilance and could not mentally power down during rest periods.",
 ];
 
 const DASS_OPTIONS = [
-  { score: 0, label: "Never", desc: "" },
-  { score: 1, label: "Sometimes", desc: "" },
-  { score: 2, label: "Often", desc: "" },
-  { score: 3, label: "", desc: "" },
+  { score: 0, label: "Never", desc: "Did not apply to me at all" },
+  { score: 1, label: "Sometimes", desc: "Applied to me to some mild degree" },
+  { score: 2, label: "Often", desc: "Applied to me to a considerable degree" },
+  { score: 3, label: "Almost Always", desc: "Applied to me very much or most of the time" },
 ];
 
 // Questions for NASA-TLX
 const TLX_DIMENSIONS = [
   {
     id: "mental",
-    title: " (Mental Demand)",
-    prompt: "msyears?",
-    low: "Low / ",
-    high: "",
+    title: "Mental Demand",
+    prompt: "How mentally demanding was your flight schedule over the past 24 hours (thinking, deciding, calculating, monitoring)?",
+    low: "Low / Routine Procedures",
+    high: "Extreme / Peak Cognitive Load",
   },
   {
     id: "physical",
-    title: "Physical Exertion (Physical Demand)",
-    prompt: "of ARED/T2, )?",
-    low: "",
-    high: "of",
+    title: "Physical Demand",
+    prompt: "How physically demanding was your schedule (ARED/T2 countermeasures, EVA suit operations, manual transfer)?",
+    low: "Minimal / Light Movement",
+    high: "Heavy Physical Exertion",
   },
   {
     id: "temporal",
-    title: " (Temporal Demand)",
-    prompt: "min?",
-    low: "",
-    high: "",
+    title: "Temporal Demand",
+    prompt: "How rushed or frantic was the operational timeline? Did you feel pressed for time against flight plan gates?",
+    low: "Relaxed / Paced",
+    high: "Severe Time Pressure",
   },
   {
     id: "performance",
-    title: "Subject (Performance)",
-    prompt: "years?",
-    low: "years",
-    high: "",
+    title: "Subjective Performance",
+    prompt: "How satisfied are you with your procedural accuracy and the quality of mission operations accomplished?",
+    low: "Unsatisfactory / Multiple Lapses",
+    high: "Flawless Execution",
   },
   {
     id: "effort",
-    title: " (Effort)",
-    prompt: "of?",
-    low: "Minimum ",
-    high: "of",
+    title: "Operational Effort",
+    prompt: "How hard did you have to work physically and mentally to maintain your required level of performance?",
+    low: "Low Effort",
+    high: "Maximum Mobilization",
   },
   {
     id: "frustration",
-    title: " (Frustration)",
-    prompt: "?",
-    low: "",
-    high: "",
+    title: "Frustration Level",
+    prompt: "Did you feel irritated, stressed, insecure, or discouraged during your work cycle?",
+    low: "Calm & Confident",
+    high: "High Frustration & Stress",
   },
 ];
 
 // Sleep Questionnaire
 const SLEEP_QUESTIONS = [
   {
-    q: "?",
+    q: "How long did it take you to fall asleep after scheduled crew sleep-period lights-out?",
     options: [
-      { score: 3, text: " 15 min)" },
-      { score: 2, text: "15–30 minof)" },
-      { score: 1, text: "30–60 min (Moderate )" },
-      { score: 0, text: " 60 min)" },
+      { score: 3, text: "< 15 min (Optimal Sleep Latency)" },
+      { score: 2, text: "15–30 min (Within Physiological Norm)" },
+      { score: 1, text: "30–60 min (Moderate Latency Delay)" },
+      { score: 0, text: "> 60 min (Significant Latency Impairment)" },
     ],
   },
   {
-    q: "of > 50 dBA)?",
+    q: "Did station environmental background noise (ECLSS pumps & cabin fans >50 dBA) disrupt sleep?",
     options: [
-      { score: 3, text: " ANC" },
-      { score: 2, text: "" },
-      { score: 1, text: "" },
-      { score: 0, text: " of-" },
+      { score: 3, text: "Not at all / Utilized Active Noise Cancelling (ANC)" },
+      { score: 2, text: "Audible but did not prevent continuous sleep" },
+      { score: 1, text: "Noise caused periodic micro-arousals" },
+      { score: 0, text: "Continuously awakened by module noise & vibration" },
     ],
   },
   {
-    q: "?",
+    q: "Did you observe cosmic-ray retinal light flashes (visual phosphenes) after closing eyes?",
     options: [
-      { score: 3, text: "" },
-      { score: 2, text: " (1–2 )" },
-      { score: 1, text: "Moderate  (3–5 " },
-      { score: 0, text: "" },
+      { score: 3, text: "None observed" },
+      { score: 2, text: "Rare, faint flashes (1–2 during onset)" },
+      { score: 1, text: "Moderate frequency (3–5 flashes), mild irritation" },
+      { score: 0, text: "Frequent bright flashes disrupting sleep onset" },
     ],
   },
   {
-    q: "ms?",
+    q: "How refreshed and alert do you feel following the post-wake alarm?",
     options: [
-      { score: 3, text: " 100%" },
-      { score: 2, text: "Moderate " },
-      { score: 1, text: " 30 min" },
-      { score: 0, text: "" },
+      { score: 3, text: "Fully rested and 100% alert" },
+      { score: 2, text: "Moderately refreshed, ready for duty" },
+      { score: 1, text: "Grogginess and heaviness for first 30 minutes" },
+      { score: 0, text: "Chronic fatigue and severe sleep deficit" },
     ],
   },
   {
-    q: "?",
+    q: "Did you experience spontaneous nocturnal awakenings or spatial disorientation in sleeping berth?",
     options: [
-      { score: 3, text: "" },
-      { score: 2, text: "1 " },
-      { score: 1, text: "2–3 of»" },
-      { score: 0, text: "" },
+      { score: 3, text: "Slept continuously without disruption" },
+      { score: 2, text: "1 awakening with rapid return to sleep" },
+      { score: 1, text: "2–3 awakenings with loss of up/down orientation" },
+      { score: 0, text: "Frequent awakenings and fragmented insomnia" },
     ],
   },
 ];
@@ -576,12 +585,12 @@ export function MentalHealthView({
                 NASA Behavioral Health and Performance (BHP) Protocol
               </span>
               <span className="mental-tag-badge">
-                ● of
+                ● Active Assessment Cycle · Day 42 of 180
               </span>
             </div>
             <h1 className="lt disp" style={{ margin: "0 0 6px" }}>Mental Health & Cognitive Testing</h1>
             <p className="sub" style={{ margin: 0, maxWidth: "780px", color: "var(--t2)" }}>
-               NASA-TLX  DASS-21, .
+              Validated neurobehavioral screening protocols based on NASA-TLX, DASS-21, and PVT-Space operational readiness standards.
             </p>
           </div>
 
@@ -594,9 +603,18 @@ export function MentalHealthView({
                 fontWeight: activeTab === "overview" ? 700 : 500,
                 background: activeTab === "overview" ? "var(--pr)" : "transparent",
                 color: activeTab === "overview" ? "#fff" : "var(--t2)",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "8px 16px",
+                borderRadius: "10px",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "13px",
               }}
             >
-              <span></span>
+              <Activity size={14} style={{ flexShrink: 0 }} />
+              <span>Overview</span>
             </button>
             <button
               onClick={() => { setActiveTab("test"); setTestStage("select"); }}
@@ -605,11 +623,19 @@ export function MentalHealthView({
                 fontWeight: activeTab === "test" ? 700 : 500,
                 background: activeTab === "test" ? "var(--pr)" : "transparent",
                 color: activeTab === "test" ? "#fff" : "var(--t2)",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "8px 16px",
+                borderRadius: "10px",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "13px",
               }}
             >
               <Sparkles size={14} style={{ flexShrink: 0 }} />
-              <span className="mental-btn-text-full">)</span>
-              <span className="mental-btn-text-mobile"> (4)</span>
+              <span className="mental-btn-text-full">Assessment Battery (4)</span>
+              <span className="mental-btn-text-mobile">Tests (4)</span>
             </button>
           </div>
         </div>
@@ -645,43 +671,43 @@ export function MentalHealthView({
           <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px", marginBottom: "24px" }}>
             <div style={{ background: "var(--s1)", border: "1px solid var(--sep)", padding: "20px 22px", borderRadius: "18px" }}>
               <div style={{ fontSize: "12px", color: "var(--t3)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.5px" }}>
-                
+                Psychoemotional Balance
               </div>
               <div style={{ fontSize: "28px", fontWeight: 800, color: "var(--tx)", marginTop: "6px" }}>
                 {avgMood} <span style={{ fontSize: "15px", color: "var(--t3)", fontWeight: 500 }}>/ 5.0</span>
               </div>
               <div style={{ fontSize: "12px", color: "#10b981", marginTop: "4px", fontWeight: 600 }}>
-                ● 
+                ● Stable & Nominal Resilience
               </div>
             </div>
 
             <div style={{ background: "var(--s1)", border: "1px solid var(--sep)", padding: "20px 22px", borderRadius: "18px" }}>
               <div style={{ fontSize: "12px", color: "var(--t3)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.5px" }}>
-                
+                Stress Burden Index
               </div>
               <div style={{ fontSize: "28px", fontWeight: 800, color: "#3b82f6", marginTop: "6px" }}>
                 {avgStress} <span style={{ fontSize: "15px", color: "var(--t3)", fontWeight: 500 }}>/ 5.0</span>
               </div>
               <div style={{ fontSize: "12px", color: "var(--t3)", marginTop: "4px" }}>
-                 ALARA 
+                ALARA Threshold Maintained
               </div>
             </div>
 
             <div style={{ background: "var(--s1)", border: "1px solid var(--sep)", padding: "20px 22px", borderRadius: "18px" }}>
               <div style={{ fontSize: "12px", color: "var(--t3)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.5px" }}>
-                
+                Cognitive Focus & Agility
               </div>
               <div style={{ fontSize: "28px", fontWeight: 800, color: "var(--cy)", marginTop: "6px" }}>
                 {latestCheckin ? latestCheckin.focus : 4.0} <span style={{ fontSize: "15px", color: "var(--t3)", fontWeight: 500 }}>/ 5.0</span>
               </div>
               <div style={{ fontSize: "12px", color: "#10b981", marginTop: "4px", fontWeight: 600 }}>
-                ● 
+                ● Optimal Operational Focus
               </div>
             </div>
 
             <div style={{ background: "var(--s1)", border: "1px solid var(--sep)", padding: "20px 22px", borderRadius: "18px" }}>
               <div style={{ fontSize: "12px", color: "var(--t3)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.5px" }}>
-                
+                Crew Cohesion & Synergy
               </div>
               <div style={{ fontSize: "28px", fontWeight: 800, color: "#10b981", marginTop: "6px" }}>
                 94 <span style={{ fontSize: "15px", color: "var(--t3)", fontWeight: 500 }}>%</span>
@@ -715,7 +741,7 @@ export function MentalHealthView({
                 Launch Comprehensive NASA Behavioral Health Battery
               </h2>
               <p style={{ margin: 0, fontSize: "14px", color: "var(--t2)", maxWidth: "680px" }}>
-                Select one of 4 scientifically validated protocols: DASS-21 stress screening, NASA-TLX task load, PVT alertness, or circadian assessment. NASA-TLX,  PVT.
+                Select one of 4 scientifically validated protocols: DASS-21 stress screening, NASA-TLX task load, PVT alertness, or circadian assessment.
               </p>
             </div>
 
@@ -785,7 +811,7 @@ export function MentalHealthView({
                           </span>
                         </div>
                         <span style={{ fontSize: "11px", color: "var(--t3)" }}>
-                          {new Date(entry.created_at).toLocaleDateString("ru-RU", {
+                          {new Date(entry.created_at).toLocaleDateString("en-US", {
                             day: "numeric",
                             month: "short",
                             hour: "2-digit",
@@ -819,7 +845,7 @@ export function MentalHealthView({
                   <div>
                     <div style={{ fontWeight: 700, fontSize: "14px" }}>Targeted Blue-Enriched Phototherapy (480 nm)</div>
                     <div style={{ fontSize: "12px", color: "var(--t2)", marginTop: "4px", lineHeight: "1.5" }}>
-                      30 minutes of light stimulation post-wake to synchronize suprachiasmatic nucleus and suppress melatonin. .
+                      30 minutes of light stimulation post-wake to synchronize suprachiasmatic nucleus and suppress melatonin.
                     </div>
                   </div>
                 </div>
@@ -831,7 +857,7 @@ export function MentalHealthView({
                   <div>
                     <div style={{ fontWeight: 700, fontSize: "14px" }}>VR Habitat Relaxation with Earth Biomes</div>
                     <div style={{ fontSize: "12px", color: "var(--t2)", marginTop: "4px", lineHeight: "1.5" }}>
-                      Immersive sensory audio-visual biomes reduce cortisol levels and alleviate isolation monotony. .
+                      Immersive sensory audio-visual biomes reduce cortisol levels and alleviate isolation monotony.
                     </div>
                   </div>
                 </div>
@@ -867,7 +893,7 @@ export function MentalHealthView({
                   Select Diagnostic Assessment Battery
                 </h2>
                 <p style={{ fontSize: "14px", color: "var(--t2)", lineHeight: "1.6", margin: 0 }}>
-                  Each battery is engineered per space medicine standards validated by NASA Human Research Program. .
+                  Each battery is engineered per space medicine standards validated by NASA Human Research Program.
                 </p>
               </div>
 
@@ -986,7 +1012,7 @@ export function MentalHealthView({
                   {selectedTest === "dass" && `Question ${dassCurrentStep + 1} of ${DASS_QUESTIONS.length}`}
                   {selectedTest === "tlx" && `NASA-TLX Operational Workload Scale`}
                   {selectedTest === "sleep" && `Question ${sleepCurrentStep + 1} of ${SLEEP_QUESTIONS.length}`}
-                  {selectedTest === "pvt" && ` ${pvtRound + 1} of 5 · PVT Reaction Test`}
+                  {selectedTest === "pvt" && `Round ${pvtRound + 1} of 5 · PVT Reaction Test`}
                 </div>
               </div>
 
@@ -1010,7 +1036,7 @@ export function MentalHealthView({
                       Evaluate your state over the past 48 hours:
                     </span>
                     <h3 style={{ fontSize: "20px", fontWeight: 700, color: "var(--tx)", lineHeight: "1.5", marginTop: "8px" }}>
-                      «{DASS_QUESTIONS[dassCurrentStep]}»
+                      "{DASS_QUESTIONS[dassCurrentStep]}"
                     </h3>
                   </div>
 
@@ -1252,10 +1278,10 @@ export function MentalHealthView({
                 <div style={{ maxWidth: "640px", margin: "0 auto", textAlign: "center" }}>
                   <div style={{ marginBottom: "20px" }}>
                     <h3 style={{ fontSize: "20px", fontWeight: 800, margin: "0 0 6px" }}>
-                      PVT-Space: Psychomotor Vigilance & Attention ( {pvtRound + 1} of 5)
+                      PVT-Space: Psychomotor Vigilance & Attention (Round {pvtRound + 1} of 5)
                     </h3>
                     <p style={{ fontSize: "13px", color: "var(--t2)", margin: 0 }}>
-                      Instructions: Click "GET READY". When the screen turns GREEN and the millisecond counter starts, click immediately!!
+                      Instructions: Click "GET READY". When the screen turns GREEN and the millisecond counter starts, click immediately!
                     </p>
                   </div>
 
