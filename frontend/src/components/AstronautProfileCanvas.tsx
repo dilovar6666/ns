@@ -1,8 +1,50 @@
 import React, { Suspense, useRef, useMemo, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, useGLTF, useAnimations } from "@react-three/drei";
+import { OrbitControls, useGLTF, useAnimations, Html } from "@react-three/drei";
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils.js";
 import type { Group } from "three";
+
+function CanvasLoader({ label = "LOADING 3D HELMET..." }: { label?: string }) {
+  return (
+    <Html center>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "10px",
+          pointerEvents: "none",
+          userSelect: "none",
+        }}
+      >
+        <div
+          style={{
+            width: "36px",
+            height: "36px",
+            border: "2px solid rgba(56, 189, 248, 0.2)",
+            borderTopColor: "#38bdf8",
+            borderRadius: "50%",
+            animation: "spin 1s linear infinite",
+          }}
+        />
+        <div
+          style={{
+            fontSize: "11px",
+            fontWeight: 700,
+            letterSpacing: "1.2px",
+            color: "#38bdf8",
+            textTransform: "uppercase",
+            fontFamily: "monospace",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {label}
+        </div>
+      </div>
+    </Html>
+  );
+}
 
 function HelmetOnlyModel() {
   const group = useRef<Group>(null);
@@ -71,7 +113,7 @@ export function AstronautProfileCanvas() {
         <pointLight position={[0, -1.0, 1.0]} intensity={1.4} color="#38bdf8" />
         <pointLight position={[0, 2.0, -1.5]} intensity={2.0} color="#818cf8" />
 
-        <Suspense fallback={null}>
+        <Suspense fallback={<CanvasLoader label="INITIALIZING 3D DOSSIER..." />}>
           <HelmetOnlyModel />
         </Suspense>
 

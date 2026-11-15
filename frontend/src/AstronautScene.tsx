@@ -528,7 +528,47 @@ export default function AstronautScene({
         <pointLight position={[0, 1.5, 2]} intensity={2.2} color={viewMode === 'thermal' ? '#f97316' : '#22d3ee'} />
         <pointLight position={[0, -1, 1]} intensity={1.2} color="#38bdf8" />
 
-        <Suspense fallback={null}>
+        <Suspense
+          fallback={
+            <Html center>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '12px',
+                  pointerEvents: 'none',
+                  userSelect: 'none',
+                }}
+              >
+                <div
+                  style={{
+                    width: '42px',
+                    height: '42px',
+                    border: '3px solid rgba(34, 211, 238, 0.2)',
+                    borderTopColor: '#22d3ee',
+                    borderRadius: '50%',
+                    animation: 'spin 0.9s linear infinite',
+                  }}
+                />
+                <div
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    letterSpacing: '1.4px',
+                    color: '#22d3ee',
+                    textTransform: 'uppercase',
+                    fontFamily: 'monospace',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  INITIALIZING EVA SUIT 3D...
+                </div>
+              </div>
+            </Html>
+          }
+        >
           <Model
             viewMode={viewMode}
             activeZone={activeZone}
