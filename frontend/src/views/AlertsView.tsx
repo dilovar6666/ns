@@ -134,37 +134,78 @@ export function AlertsView({
             filtered.map((item) => (
               <div
                 key={item.id}
-                className={`it ${!item.read ? "unr" : ""} ${item.level === "critical" ? "cr" : item.level === "warning" ? "wa" : "in"}`}
+                className={`alert-card ${!item.read ? "unr" : ""} ${item.level === "critical" ? "cr" : item.level === "warning" ? "wa" : "in"}`}
                 onClick={() => setSelectedAlertId(item.id)}
                 style={{
-                  outline: selectedAlert?.id === item.id ? "2px solid var(--pr)" : "none",
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "16px",
+                  padding: "18px 22px",
+                  borderRadius: "16px",
+                  background: item.read ? "rgba(255, 255, 255, 0.03)" : "rgba(255, 255, 255, 0.06)",
+                  border: selectedAlert?.id === item.id ? "1px solid var(--pr)" : "1px solid rgba(255, 255, 255, 0.08)",
+                  borderLeft: `4px solid ${
+                    item.level === "critical"
+                      ? "var(--cr, #ef4444)"
+                      : item.level === "warning"
+                      ? "var(--wa, #f59e0b)"
+                      : "var(--pr, #3b82f6)"
+                  }`,
+                  boxShadow:
+                    selectedAlert?.id === item.id
+                      ? "0 4px 20px rgba(59, 130, 246, 0.2)"
+                      : "none",
+                  cursor: "pointer",
+                  width: "100%",
+                  boxSizing: "border-box",
+                  transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                 }}
               >
                 <span
-                  className={`icb ${item.level === "critical" ? "cr" : item.level === "warning" ? "wa" : "in"}`}
-                  style={{ background: "var(--s2)", marginTop: "2px" }}
+                  style={{
+                    width: "40px",
+                    height: "40px",
+                    minWidth: "40px",
+                    borderRadius: "12px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background:
+                      item.level === "critical"
+                        ? "rgba(239, 68, 68, 0.16)"
+                        : item.level === "warning"
+                        ? "rgba(245, 158, 11, 0.16)"
+                        : "rgba(59, 130, 246, 0.16)",
+                    color:
+                      item.level === "critical"
+                        ? "var(--cr, #ef4444)"
+                        : item.level === "warning"
+                        ? "var(--wa, #f59e0b)"
+                        : "var(--pr, #3b82f6)",
+                    flexShrink: 0,
+                  }}
                 >
                   {item.level === "critical" ? (
-                    <AlertTriangle className="gly" style={{ color: "var(--cr)" }} />
+                    <AlertTriangle style={{ width: "20px", height: "20px" }} />
                   ) : item.level === "warning" ? (
-                    <AlertTriangle className="gly" style={{ color: "var(--wa)" }} />
+                    <AlertTriangle style={{ width: "20px", height: "20px" }} />
                   ) : (
-                    <Info className="gly" style={{ color: "var(--pr)" }} />
+                    <Info style={{ width: "20px", height: "20px" }} />
                   )}
                 </span>
 
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "8px" }}>
                     <span
                       style={{
                         fontWeight: 700,
                         fontSize: "15px",
-                        color: item.level === "critical" ? "var(--cr)" : "var(--t1)",
+                        color: item.level === "critical" ? "var(--cr, #ef4444)" : "var(--t1, #ffffff)",
                       }}
                     >
                       {item.title}
                     </span>
-                    <span className="cap num" style={{ fontSize: "12px" }}>
+                    <span className="cap num" style={{ fontSize: "12px", opacity: 0.6, flexShrink: 0 }}>
                       {new Date(item.created_at).toLocaleTimeString("ru-RU", {
                         hour: "2-digit",
                         minute: "2-digit",
@@ -177,24 +218,51 @@ export function AlertsView({
                       margin: "6px 0 0",
                       fontSize: "14px",
                       lineHeight: "1.5",
-                      color: "var(--t2)",
+                      color: "var(--t2, rgba(255, 255, 255, 0.7))",
                     }}
                   >
                     {item.detail}
                   </p>
                 </div>
 
-                {!item.read && (
+                {!item.read ? (
                   <button
-                    className="btn bt"
                     onClick={(e) => {
                       e.stopPropagation();
                       onMarkNotificationRead(item.id);
                     }}
-                    style={{ fontSize: "12px", padding: "6px 12px", alignSelf: "center" }}
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      padding: "6px 14px",
+                      borderRadius: "8px",
+                      border: "1px solid rgba(59, 130, 246, 0.4)",
+                      background: "rgba(59, 130, 246, 0.12)",
+                      color: "var(--pr, #60a5fa)",
+                      cursor: "pointer",
+                      alignSelf: "center",
+                      whiteSpace: "nowrap",
+                      transition: "all 0.15s ease",
+                    }}
                   >
-                    Read
+                    Mark Read
                   </button>
+                ) : (
+                  <span
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: 500,
+                      color: "var(--ok, #10b981)",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      alignSelf: "center",
+                      padding: "4px 8px",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    <Check style={{ width: "14px", height: "14px" }} /> Read
+                  </span>
                 )}
               </div>
             ))
